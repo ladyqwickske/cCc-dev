@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bank Transactions</title>
+  <style>
+    body { background: #232526; color: #e0e0e0; font-family: Arial, sans-serif; }
+    .container { max-width: 480px; margin: 40px auto; background: #2a2b2c; padding: 24px; border-radius: 8px; }
+    h2 { margin-bottom: 16px; }
+    label { display: block; margin-top: 12px; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #444; background: #232526; color: #e0e0e0; }
+    button { margin-top: 20px; padding: 10px 24px; border-radius: 4px; border: none; background: #4caf50; color: #fff; font-weight: bold; cursor: pointer; }
+    .success { color: #4caf50; margin-top: 16px; }
+    .error { color: #f44336; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Bank Transaction Entry</h2>
+    <form id="bankForm">
+      <label for="memberName">Member Name</label>
+      <input type="text" id="memberName" name="memberName" required>
+
+      <label for="transactionType">Transaction Type</label>
+      <select id="transactionType" name="transactionType" required>
+        <option value="deposit">Deposit</option>
+        <option value="withdrawal">Withdrawal</option>
+      </select>
+
+      <label for="fee">Percentage Fee (%)</label>
+      <input type="number" id="fee" name="fee" min="0" max="100" step="0.01" required>
+
+      <label for="balance">Balance</label>
+      <input type="number" id="balance" name="balance" step="0.01" required>
+
+      <button type="submit">Submit Transaction</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script>
+    document.getElementById('bankForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const memberName = document.getElementById('memberName').value.trim();
+      const transactionType = document.getElementById('transactionType').value;
+      const fee = parseFloat(document.getElementById('fee').value);
+      const balance = parseFloat(document.getElementById('balance').value);
+      const timestamp = new Date().toISOString();
+      google.script.run.withSuccessHandler(function(msg) {
+        document.getElementById('result').innerHTML = '<div class="success">' + msg + '</div>';
+        document.getElementById('bankForm').reset();
+      }).withFailureHandler(function(err) {
+        document.getElementById('result').innerHTML = '<div class="error">' + err.message + '</div>';
+      }).addBankTransaction({
+        memberName,
+        timestamp,
+        transactionType,
+        fee,
+        balance
+      });
+    });
+  </script>
+</body>
+</html>
