@@ -654,6 +654,10 @@
           <img src="compensation.png" alt="Compensation" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Compensation</span>
         </a>
+        <a href="competition.html" class="tab-btn" title="Competition">
+          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Competition</span>
+        </a>
         <a href="points.html" class="tab-btn" title="Points Reference">
           <img src="chest_points.png" alt="Points Reference" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Points Reference</span>
@@ -1229,6 +1233,12 @@
 
       function calculateChestParticipation() {
         if (!selectedEvent) return;
+        console.log('[EventsTab] calculateChestParticipation request:', {
+          eventName: selectedEvent.eventName,
+          eventType: selectedEvent.eventType,
+          startDate: selectedEvent.startDate,
+          endDate: selectedEvent.endDate
+        });
         const status = document.getElementById('chestCalcStatus');
         status.textContent = 'Calculating...';
         status.className = 'status';
@@ -1243,6 +1253,11 @@
             eventType: selectedEvent.eventType
           })
         }).then(res => res.json()).then(result => {
+          if (result && result.debug) {
+            console.groupCollapsed('[Event Debug] calculateChestParticipation:', selectedEvent.eventName);
+            console.log(result.debug);
+            console.groupEnd();
+          }
           if (result && result.success) {
             status.textContent = result.message;
             status.classList.add('ok');
@@ -1251,7 +1266,11 @@
             status.textContent = result?.message || 'Failed.';
             status.classList.add('err');
           }
-        }).catch(error => { status.textContent = 'Error: ' + error.message; status.classList.add('err'); });
+        }).catch(error => {
+          console.error('[Event Debug] calculateChestParticipation error:', error);
+          status.textContent = 'Error: ' + error.message;
+          status.classList.add('err');
+        });
       }
 
       function calculateManualNonParticipants() {
