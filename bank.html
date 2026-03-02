@@ -143,6 +143,53 @@
     .success { color: #81c784; margin-top: 12px; }
     .error { color: #ef5350; margin-top: 12px; }
 
+    .transactions-wrap {
+      margin-top: 18px;
+      border-top: 1px solid #444;
+      padding-top: 14px;
+    }
+    .transactions-title {
+      font-size: 15px;
+      color: #ffb300;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .transactions-table-wrap {
+      border: 1px solid #444;
+      border-radius: 8px;
+      overflow: auto;
+      background: #1a1b1c;
+      max-height: 320px;
+    }
+    .transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+    .transactions-table th,
+    .transactions-table td {
+      padding: 10px 8px;
+      font-size: 12px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+      color: #e0e0e0;
+    }
+    .transactions-table th {
+      position: sticky;
+      top: 0;
+      background: #232526;
+      color: #ffb300;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      font-size: 11px;
+      z-index: 1;
+    }
+    .transactions-empty {
+      color: #bdbdbd;
+      font-size: 12px;
+      padding: 10px 4px;
+    }
+
     .read-only-mode input,
     .read-only-mode select,
     .read-only-mode textarea,
@@ -443,6 +490,95 @@
 
       const form = document.getElementById('bankForm');
       const result = document.getElementById('result');
+
+      function runGASFunction(functionName, ...args) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)[functionName](...args);
+        });
+      }
+
+      function escapeHtml(text) {
+        return String(text || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function formatTimestamp(value) {
+        if (!value) return '-';
+        const parsed = new Date(value);
+        if (isNaN(parsed.getTime())) return String(value);
+        return parsed.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+      }
+
+      async function loadMemberOptions() {
+        const memberSelect = document.getElementById('memberName');
+        if (!memberSelect) return;
+
+        memberSelect.innerHTML = '<option value="">Loading members...</option>';
+        memberSelect.disabled = true;
+
+        try {
+          const members = await runGASFunction('getMembersList');
+          const memberNames = (Array.isArray(members) ? members : [])
+            .map(m => (m && m.name) ? String(m.name).trim() : '')
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+          if (!memberNames.length) {
+            memberSelect.innerHTML = '<option value="">No members found</option>';
+            memberSelect.disabled = true;
+            return;
+          }
+
+          memberSelect.innerHTML = '<option value="">Select member...</option>' + memberNames
+            .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+            .join('');
+          memberSelect.disabled = false;
+        } catch (error) {
+          memberSelect.innerHTML = '<option value="">Failed to load members</option>';
+          memberSelect.disabled = true;
+          console.error('Failed to load members:', error);
+        }
+      }
+
+      async function loadTransactions() {
+        const transactionsBody = document.getElementById('transactionsBody');
+        const emptyEl = document.getElementById('transactionsEmpty');
+        if (!transactionsBody || !emptyEl) return;
+
+        transactionsBody.innerHTML = '';
+        emptyEl.textContent = 'Loading transactions...';
+
+        try {
+          const transactions = await runGASFunction('getBankTransactions', 100);
+          const items = Array.isArray(transactions) ? transactions : [];
+
+          if (!items.length) {
+            emptyEl.textContent = 'No bank transactions available yet.';
+            return;
+          }
+
+          emptyEl.textContent = '';
+          transactionsBody.innerHTML = items.map(tx => `
+            <tr>
+              <td>${escapeHtml(tx.memberName || '-')}</td>
+              <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+              <td>${escapeHtml(tx.transactionType || '-')}</td>
+              <td>${Number(tx.fee || 0).toFixed(2)}%</td>
+              <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+          `).join('');
+        } catch (error) {
+          console.error('Failed to load transactions:', error);
+          emptyEl.textContent = 'Failed to load bank transactions.';
+        }
+      }
+
       if (form) {
         form.addEventListener('submit', function(e) {
           e.preventDefault();
@@ -452,7 +588,7 @@
             return;
           }
 
-          const memberName = document.getElementById('memberName').value.trim();
+          const memberName = document.getElementById('memberName').value;
           const transactionType = document.getElementById('transactionType').value;
           const fee = parseFloat(document.getElementById('fee').value);
           const balance = parseFloat(document.getElementById('balance').value);
@@ -462,6 +598,7 @@
             .withSuccessHandler(function(msg) {
               if (result) result.innerHTML = '<div class="success">' + msg + '</div>';
               form.reset();
+              loadTransactions();
             })
             .withFailureHandler(function(err) {
               if (result) result.innerHTML = '<div class="error">' + (err && err.message ? err.message : 'Failed to save transaction') + '</div>';
@@ -475,6 +612,9 @@
             });
         });
       }
+
+      loadMemberOptions();
+      loadTransactions();
     });
   </script>
 </head>
@@ -584,7 +724,9 @@
       <form id="bankForm">
         <div class="form-row">
           <label for="memberName">Member Name</label>
-          <input type="text" id="memberName" name="memberName" required>
+          <select id="memberName" name="memberName" required>
+            <option value="">Loading members...</option>
+          </select>
         </div>
 
         <div class="form-row">
@@ -608,6 +750,25 @@
         <button type="submit" class="btn">Submit Transaction</button>
       </form>
       <div id="result"></div>
+
+      <div class="transactions-wrap">
+        <div class="transactions-title">Recent Transactions</div>
+        <div class="transactions-table-wrap">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Timestamp (UTC)</th>
+                <th>Type</th>
+                <th>Fee</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+        </div>
+        <div id="transactionsEmpty" class="transactions-empty">No bank transactions available yet.</div>
+      </div>
     </div>
   </div>
 </body>
