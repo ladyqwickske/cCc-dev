@@ -148,6 +148,30 @@
       border-top: 1px solid #444;
       padding-top: 14px;
     }
+    .bank-subtabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      padding: 8px 12px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background: #1a1b1c;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .subtab-btn.active {
+      background: #ffb300;
+      color: #232526;
+      border-color: #ffb300;
+    }
+    .subtab-panel { display: none; }
+    .subtab-panel.active { display: block; }
     .transactions-title {
       font-size: 15px;
       color: #ffb300;
@@ -569,6 +593,7 @@
               <td>${escapeHtml(tx.memberName || '-')}</td>
               <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
               <td>${escapeHtml(tx.transactionType || '-')}</td>
+              <td>${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${Number(tx.fee || 0).toFixed(2)}%</td>
               <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
@@ -576,6 +601,60 @@
         } catch (error) {
           console.error('Failed to load transactions:', error);
           emptyEl.textContent = 'Failed to load bank transactions.';
+        }
+      }
+
+      async function loadMemberBalances() {
+        const balancesBody = document.getElementById('balancesBody');
+        const emptyEl = document.getElementById('balancesEmpty');
+        if (!balancesBody || !emptyEl) return;
+
+        balancesBody.innerHTML = '';
+        emptyEl.textContent = 'Loading member balances...';
+
+        try {
+          const balances = await runGASFunction('getBankMemberBalances');
+          const items = Array.isArray(balances) ? balances : [];
+
+          if (!items.length) {
+            emptyEl.textContent = 'No member balances available yet.';
+            return;
+          }
+
+          emptyEl.textContent = '';
+          balancesBody.innerHTML = items.map(item => `
+            <tr>
+              <td>${escapeHtml(item.memberName || '-')}</td>
+              <td>${Number(item.totalBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td>${Number(item.depositsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td>${Number(item.withdrawalsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td>${Number(item.transactionCount || 0)}</td>
+              <td>${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
+            </tr>
+          `).join('');
+        } catch (error) {
+          console.error('Failed to load member balances:', error);
+          emptyEl.textContent = 'Failed to load member balances.';
+        }
+      }
+
+      function switchBankSubtab(tabName) {
+        const balancesBtn = document.getElementById('subtabBalancesBtn');
+        const transactionsBtn = document.getElementById('subtabTransactionsBtn');
+        const balancesPanel = document.getElementById('bankBalancesPanel');
+        const transactionsPanel = document.getElementById('bankTransactionsPanel');
+        if (!balancesBtn || !transactionsBtn || !balancesPanel || !transactionsPanel) return;
+
+        if (tabName === 'transactions') {
+          transactionsBtn.classList.add('active');
+          balancesBtn.classList.remove('active');
+          transactionsPanel.classList.add('active');
+          balancesPanel.classList.remove('active');
+        } else {
+          balancesBtn.classList.add('active');
+          transactionsBtn.classList.remove('active');
+          balancesPanel.classList.add('active');
+          transactionsPanel.classList.remove('active');
         }
       }
 
@@ -590,15 +669,24 @@
 
           const memberName = document.getElementById('memberName').value;
           const transactionType = document.getElementById('transactionType').value;
+          const amount = parseFloat(document.getElementById('amount').value);
           const fee = parseFloat(document.getElementById('fee').value);
-          const balance = parseFloat(document.getElementById('balance').value);
           const timestamp = new Date().toISOString();
+
+          if (!(amount > 0)) {
+            if (result) result.innerHTML = '<div class="error">Amount must be greater than 0.</div>';
+            return;
+          }
+
+          const feeAmount = amount * ((fee || 0) / 100);
+          const calculatedBalance = transactionType === 'deposit' ? (amount - feeAmount) : amount;
 
           google.script.run
             .withSuccessHandler(function(msg) {
               if (result) result.innerHTML = '<div class="success">' + msg + '</div>';
               form.reset();
               loadTransactions();
+              loadMemberBalances();
             })
             .withFailureHandler(function(err) {
               if (result) result.innerHTML = '<div class="error">' + (err && err.message ? err.message : 'Failed to save transaction') + '</div>';
@@ -607,14 +695,22 @@
               memberName,
               timestamp,
               transactionType,
+              amount,
               fee,
-              balance
+              balance: calculatedBalance
             });
         });
       }
 
+      const balancesBtn = document.getElementById('subtabBalancesBtn');
+      const transactionsBtn = document.getElementById('subtabTransactionsBtn');
+      if (balancesBtn) balancesBtn.addEventListener('click', () => switchBankSubtab('balances'));
+      if (transactionsBtn) transactionsBtn.addEventListener('click', () => switchBankSubtab('transactions'));
+      switchBankSubtab('balances');
+
       loadMemberOptions();
       loadTransactions();
+      loadMemberBalances();
     });
   </script>
 </head>
@@ -743,8 +839,8 @@
         </div>
 
         <div class="form-row">
-          <label for="balance">Balance</label>
-          <input type="number" id="balance" name="balance" step="0.01" required>
+          <label for="amount">Amount</label>
+          <input type="number" id="amount" name="amount" min="0" step="0.01" required>
         </div>
 
         <button type="submit" class="btn">Submit Transaction</button>
@@ -752,22 +848,49 @@
       <div id="result"></div>
 
       <div class="transactions-wrap">
-        <div class="transactions-title">Recent Transactions</div>
-        <div class="transactions-table-wrap">
-          <table class="transactions-table">
-            <thead>
-              <tr>
-                <th>Member</th>
-                <th>Timestamp (UTC)</th>
-                <th>Type</th>
-                <th>Fee</th>
-                <th>Balance</th>
-              </tr>
-            </thead>
-            <tbody id="transactionsBody"></tbody>
-          </table>
+        <div class="transactions-title">Bank Overview</div>
+        <div class="bank-subtabs">
+          <button type="button" id="subtabBalancesBtn" class="subtab-btn active">Members' Balances</button>
+          <button type="button" id="subtabTransactionsBtn" class="subtab-btn">Transaction History</button>
         </div>
-        <div id="transactionsEmpty" class="transactions-empty">No bank transactions available yet.</div>
+
+        <div id="bankBalancesPanel" class="subtab-panel active">
+          <div class="transactions-table-wrap">
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Total Balance</th>
+                  <th>Total Deposits</th>
+                  <th>Total Withdrawals</th>
+                  <th>Transactions</th>
+                  <th>Last Transaction</th>
+                </tr>
+              </thead>
+              <tbody id="balancesBody"></tbody>
+            </table>
+          </div>
+          <div id="balancesEmpty" class="transactions-empty">No member balances available yet.</div>
+        </div>
+
+        <div id="bankTransactionsPanel" class="subtab-panel">
+          <div class="transactions-table-wrap">
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Timestamp (UTC)</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Fee</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody"></tbody>
+            </table>
+          </div>
+          <div id="transactionsEmpty" class="transactions-empty">No bank transactions available yet.</div>
+        </div>
       </div>
     </div>
   </div>
