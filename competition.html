@@ -241,9 +241,10 @@
 		async function loadCompetitionLeaderboard() {
 			const tbody = document.getElementById('leaderboardBody');
 			tbody.innerHTML = '<tr><td colspan="5" class="empty">Loading competition leaderboard...</td></tr>';
+			const apiUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
 
 			try {
-				const response = await fetch(BACKEND_API_URL, {
+				const response = await fetch(apiUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ action: 'getCompetitionLeaderboard' })
