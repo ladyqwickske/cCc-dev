@@ -741,14 +741,28 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
+      const setRestrictedTabsVisibility = (isVisible) => {
+        const displayValue = isVisible ? '' : 'none';
+        ['events.html', 'members.html', 'troops.html', 'compensation.html'].forEach((href) => {
+          document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach((link) => {
+            link.style.display = displayValue;
+          });
+        });
+      };
       const token = (() => { try { return localStorage.getItem(AUTH_KEY); } catch (e) { return null; } })();
       const email = (() => { try { return localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) { return null; } })();
+      if (!token || !email) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
       if (token && email) {
         setReadOnlyMode(false);
         updateSignedInBadge(email);
+        setRestrictedTabsVisibility(true);
       } else {
         setReadOnlyMode(true);
         updateSignedInBadge(null);
+        setRestrictedTabsVisibility(false);
         let nav = document.querySelector('.tab-nav-container');
         if (nav && !document.getElementById('signInManageBtn')) {
           const btn = document.createElement('button');

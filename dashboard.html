@@ -569,8 +569,17 @@
     try { authedEmail = localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) {}
     // Auto-enter guest mode on page load
     setReadOnlyMode(true);
+    function setRestrictedTabsVisibility(isVisible) {
+      const displayValue = isVisible ? '' : 'none';
+      ['events.html', 'members.html', 'troops.html', 'compensation.html'].forEach((href) => {
+        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach((link) => {
+          link.style.display = displayValue;
+        });
+      });
+    }
     window.addEventListener('DOMContentLoaded', function() {
       updateSignedInBadge(null);
+      setRestrictedTabsVisibility(false);
       let nav = document.querySelector('.tab-nav-container');
       if (nav && !document.getElementById('signInManageBtn')) {
         const btn = document.createElement('button');
@@ -584,8 +593,10 @@
       if (isAuthed && authedEmail) {
         setReadOnlyMode(false);
         updateSignedInBadge(authedEmail);
+        setRestrictedTabsVisibility(true);
         document.getElementById('bankTabBtn').style.display = 'flex';
       } else {
+        setRestrictedTabsVisibility(false);
         document.getElementById('bankTabBtn').style.display = 'none';
       }
     });
