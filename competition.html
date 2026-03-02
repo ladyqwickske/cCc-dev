@@ -169,9 +169,216 @@
 	</style>
 </head>
 <body>
+	<!-- Google Translate Widget -->
+	<div id="google_translate_element" style="position:fixed;top:72px;right:8px;z-index:7000;"></div>
+	<button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;top:72px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+	<style>
+		@media (max-width: 800px) {
+			#google_translate_element {
+				max-width: 0;
+				overflow: hidden;
+				opacity: 0;
+				pointer-events: none;
+				transition: max-width 0.2s ease, opacity 0.2s ease;
+			}
+			body.translate-open #google_translate_element {
+				max-width: 260px;
+				opacity: 1;
+				pointer-events: auto;
+			}
+			#translateToggleBtn { display: inline-flex !important; }
+		}
+		@media (min-width: 801px) {
+			#translateToggleBtn { display: none !important; }
+		}
+	</style>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const translateToggleBtn = document.getElementById('translateToggleBtn');
+			const translateWidget = document.getElementById('google_translate_element');
+			if (!translateToggleBtn || !translateWidget) return;
+			translateToggleBtn.addEventListener('click', function (e) {
+				e.stopPropagation();
+				document.body.classList.toggle('translate-open');
+			});
+			document.addEventListener('click', function (e) {
+				if (!document.body.classList.contains('translate-open')) return;
+				if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
+				document.body.classList.remove('translate-open');
+			});
+		});
+	</script>
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
+		}
+	</script>
+	<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<script>
+		const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
+		const AUTH_KEY = 'ccc_portal_google_auth';
+		const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+
+		function setReadOnlyMode(enabled) {
+			if (enabled) {
+				document.documentElement.classList.add('read-only-mode');
+				if (document.body) document.body.classList.add('read-only-mode');
+			} else {
+				document.documentElement.classList.remove('read-only-mode');
+				if (document.body) document.body.classList.remove('read-only-mode');
+			}
+		}
+
+		function updateSignedInBadge(email) {
+			const badge = document.getElementById('signedInUserBadge');
+			const logoutBtn = document.getElementById('logoutBtn');
+			const signInBtn = document.getElementById('signInManageBtn');
+			if (!badge) return;
+			if (email) {
+				badge.innerHTML = email;
+				badge.style.display = 'inline-block';
+				if (logoutBtn) logoutBtn.style.display = 'inline-block';
+				if (signInBtn) signInBtn.style.display = 'none';
+			} else {
+				badge.textContent = '';
+				badge.style.display = 'none';
+				if (logoutBtn) logoutBtn.style.display = 'none';
+				if (signInBtn) signInBtn.style.display = 'inline-block';
+			}
+		}
+
+		function handleLogout() {
+			try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+			try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+			setReadOnlyMode(true);
+			updateSignedInBadge(null);
+			setTimeout(() => { window.location.reload(); }, 200);
+		}
+
+		function showGoogleLogin() {
+			const loginDiv = document.createElement('div');
+			loginDiv.id = 'login-overlay';
+			loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+			loginDiv.innerHTML = `
+				<div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
+					<h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
+					<p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
+					<div id="g_id_signin"></div>
+					<div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
+					<button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">Continue as Guest (Read-Only)</button>
+					<div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
+				</div>
+			`;
+			document.body.appendChild(loginDiv);
+
+			setTimeout(() => {
+				const guestBtn = document.getElementById('guest-btn');
+				if (guestBtn) {
+					guestBtn.onclick = function () {
+						document.getElementById('login-overlay').remove();
+						setReadOnlyMode(true);
+						try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+						try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+						updateSignedInBadge(null);
+					};
+				}
+
+				if (window.google && google.accounts && google.accounts.id) {
+					try {
+						google.accounts.id.initialize({
+							client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
+							callback: onGoogleSignIn,
+							auto_select: false,
+							ux_mode: 'popup'
+						});
+						google.accounts.id.renderButton(
+							document.getElementById('g_id_signin'),
+							{ type: 'standard', size: 'large', theme: 'outline', text: 'signin', shape: 'rectangular', logo_alignment: 'left' }
+						);
+					} catch (e) {
+						console.error('Error rendering Google Sign-In button:', e);
+					}
+				}
+			}, 100);
+		}
+
+		window.onGoogleSignIn = async function (response) {
+			const idToken = response.credential;
+			try {
+				const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+				let tokenRes = await fetch(cfWorkerUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ idToken })
+				});
+				let tokenData = await tokenRes.json();
+
+				if (!tokenData.success || !tokenData.token_verified) {
+					throw new Error(tokenData.error || 'Token verification failed');
+				}
+
+				const email = tokenData.email;
+				const res = await fetch(BACKEND_VERIFY_URL, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email })
+				});
+				const data = await res.json();
+
+				if (data.success && data.allowed) {
+					localStorage.setItem(AUTH_KEY, '1');
+					localStorage.setItem(AUTH_EMAIL_KEY, email);
+					updateSignedInBadge(email);
+					document.getElementById('login-overlay').remove();
+					setReadOnlyMode(false);
+					setTimeout(() => { window.location.reload(); }, 200);
+				} else {
+					setReadOnlyMode(true);
+					updateSignedInBadge(null);
+					document.getElementById('login-error').textContent = data.error || 'Access denied: not an authorized user.';
+					document.getElementById('login-error').style.display = 'block';
+				}
+			} catch (err) {
+				setReadOnlyMode(true);
+				updateSignedInBadge(null);
+				document.getElementById('login-error').textContent = 'Login failed: ' + err.message;
+				document.getElementById('login-error').style.display = 'block';
+			}
+		};
+
+		let isAuthed = false;
+		try { isAuthed = localStorage.getItem(AUTH_KEY) === '1'; } catch (e) {}
+		let authedEmail = null;
+		try { authedEmail = localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) {}
+
+		setReadOnlyMode(true);
+		window.addEventListener('DOMContentLoaded', function () {
+			updateSignedInBadge(null);
+			let nav = document.querySelector('.tab-nav-container');
+			if (nav && !document.getElementById('signInManageBtn')) {
+				const btn = document.createElement('button');
+				btn.id = 'signInManageBtn';
+				btn.textContent = '🔑 Sign in to Manage';
+				btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
+				btn.onclick = showGoogleLogin;
+				nav.appendChild(btn);
+			}
+
+			const bankTab = document.getElementById('bankTabBtn');
+			if (isAuthed && authedEmail) {
+				setReadOnlyMode(false);
+				updateSignedInBadge(authedEmail);
+				if (bankTab) bankTab.style.display = 'flex';
+			} else {
+				if (bankTab) bankTab.style.display = 'none';
+			}
+		});
+	</script>
+
 	<nav class="tab-nav">
 		<div class="tab-nav-container">
-			<div class="nav-brand"><img src="favicon.png" alt=""> cCc Champions</div>
+			<div class="nav-brand" id="navBrand"><img src="favicon.png" alt=""> cCc Champions</div>
 			<div class="tab-buttons">
 				<a href="dashboard.html" class="tab-btn" title="Dashboard"><img src="chests.png" alt="Dashboard" class="tab-icon"></a>
 				<a href="events.html" class="tab-btn" title="Events"><img src="events.png" alt="Events" class="tab-icon"></a>
@@ -181,7 +388,11 @@
 				<a href="compensation.html" class="tab-btn" title="Compensation"><img src="compensation.png" alt="Compensation" class="tab-icon"></a>
 				<a href="competition.html" class="tab-btn active" title="Competition"><img src="competition.png" alt="Competition" class="tab-icon"></a>
 				<a href="points.html" class="tab-btn" title="Points Reference"><img src="chest_points.png" alt="Points" class="tab-icon"></a>
+				<a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;"><img src="bank.png" alt="Bank" class="tab-icon"></a>
 			</div>
+			<div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
+			<div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
+			<button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
 		</div>
 	</nav>
 
@@ -199,7 +410,7 @@
 			<div class="card"><div id="leaderName" class="card-value">-</div><div class="card-label">Current Leader</div></div>
 			<div class="card"><div id="leaderPoints" class="card-value">-</div><div class="card-label">Leader Points</div></div>
 			<div class="card"><div id="qualifiedCount" class="card-value">-</div><div class="card-label">Qualified Members</div></div>
-			<div class="card"><div id="updatedAt" class="card-value" style="font-size:14px;">-</div><div class="card-label">Last Updated</div></div>
+			<div class="card"><div id="updatedAt" class="card-value" style="font-size:14px;">-</div><div class="card-label">Last Calc (UTC)</div></div>
 		</div>
 
 		<div class="table-wrap">
@@ -256,13 +467,13 @@
 
 				const data = await response.json();
 				const leaderboard = data && data.success ? (data.leaderboard || []) : [];
+				document.getElementById('updatedAt').textContent = (data && data.lastCalculatedUtc) ? data.lastCalculatedUtc : 'Never';
 
 				if (!leaderboard.length) {
 					tbody.innerHTML = '<tr><td colspan="5" class="empty">No leaderboard data available yet.</td></tr>';
 					document.getElementById('leaderName').textContent = '-';
 					document.getElementById('leaderPoints').textContent = '-';
 					document.getElementById('qualifiedCount').textContent = '0';
-					document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString();
 					return;
 				}
 
@@ -280,7 +491,6 @@
 				document.getElementById('leaderName').textContent = leader.player || '-';
 				document.getElementById('leaderPoints').textContent = Number(leader.totalPoints || 0).toLocaleString();
 				document.getElementById('qualifiedCount').textContent = leaderboard.length.toString();
-				document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString();
 			} catch (error) {
 				console.error('Failed to load competition leaderboard:', error);
 				tbody.innerHTML = `<tr><td colspan="5" class="empty">Failed to load data: ${escapeHtml(error.message)}</td></tr>`;
