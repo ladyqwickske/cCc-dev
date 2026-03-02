@@ -19,6 +19,10 @@
 			background-attachment: fixed;
 		}
 
+		body { top: 0 !important; }
+		.goog-te-banner-frame.skiptranslate { display: none !important; }
+		iframe.goog-te-banner-frame { display: none !important; }
+
 		.tab-nav {
 			background: rgba(30, 34, 40, 0.95);
 			border-bottom: 1px solid #444;
@@ -79,6 +83,27 @@
 			width: auto;
 			filter: drop-shadow(0 2px 8px #000a);
 		}
+
+		.hamburger {
+			display: none;
+			flex-direction: column;
+			gap: 4px;
+			background: none;
+			border: none;
+			cursor: pointer;
+			padding: 8px;
+		}
+		.hamburger span {
+			display: block;
+			width: 24px;
+			height: 3px;
+			background: #ffb300;
+			border-radius: 2px;
+			transition: all 0.2s;
+		}
+
+		.tab-label.mobile-only { display: none; }
+		.tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
 
 		.page-container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 		.header {
@@ -163,8 +188,104 @@
 		.empty { padding: 22px; color: #bbb; }
 
 		@media (max-width: 800px) {
-			.tab-btn .tab-icon { height: 28px; }
+			.tab-nav {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				width: 100%;
+				z-index: 9999;
+			}
+			.tab-nav-container {
+				flex-wrap: wrap;
+				padding: 8px;
+			}
+			.nav-brand {
+				flex: 1;
+				margin-right: 8px;
+				font-size: 16px;
+				padding: 8px 0;
+			}
+			.nav-brand img {
+				height: 24px;
+				width: 24px;
+			}
+			.hamburger {
+				display: flex;
+				order: 2;
+			}
+			.tab-buttons {
+				flex-direction: column;
+				align-items: stretch;
+				max-height: 60vh;
+				overflow-y: auto;
+				background: #232526;
+				position: absolute;
+				top: 60px;
+				left: 0;
+				right: 0;
+				width: 100%;
+				z-index: 10000;
+				border-bottom-left-radius: 12px;
+				border-bottom-right-radius: 12px;
+				box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+				display: none;
+				order: 10;
+				height: auto;
+			}
+			.tab-buttons.open {
+				display: flex;
+			}
+			.tab-btn {
+				font-size: 18px;
+				padding: 18px 24px;
+				border-bottom: 1px solid #444;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				background: none;
+				height: auto;
+			}
+			.tab-btn:last-child { border-bottom: none; }
+			.tab-label.mobile-only { display: inline; }
+			.tab-icon.desktop-only { display: none; }
+			#readOnlyBadge,
+			#signedInUserBadge,
+			#logoutBtn,
+			#signInManageBtn {
+				order: 3;
+				margin: 4px 0 4px auto !important;
+				font-size: 11px !important;
+				padding: 6px 8px !important;
+			}
+			body {
+				padding-top: 100px;
+			}
 			.header h1 { font-size: 24px; }
+		}
+
+		@media (min-width: 801px) {
+			.tab-label.mobile-only { display: none; }
+			.tab-icon.desktop-only { display: block; }
+			.tab-buttons {
+				flex-direction: row;
+				align-items: center;
+				position: static;
+				max-height: none;
+				overflow-y: visible;
+				background: none;
+				box-shadow: none;
+				border-radius: 0;
+				display: flex !important;
+			}
+			.tab-btn {
+				font-size: 28px;
+				padding: 12px 16px;
+				border-bottom: 3px solid transparent;
+				display: block;
+				justify-content: center;
+			}
+			.hamburger { display: none; }
 		}
 	</style>
 </head>
@@ -379,16 +500,21 @@
 	<nav class="tab-nav">
 		<div class="tab-nav-container">
 			<div class="nav-brand" id="navBrand"><img src="favicon.png" alt=""> cCc Champions</div>
-			<div class="tab-buttons">
-				<a href="dashboard.html" class="tab-btn" title="Dashboard"><img src="chests.png" alt="Dashboard" class="tab-icon"></a>
-				<a href="events.html" class="tab-btn" title="Events"><img src="events.png" alt="Events" class="tab-icon"></a>
-				<a href="members.html" class="tab-btn" title="Members"><img src="members.png" alt="Members" class="tab-icon"></a>
-				<a href="troops.html" class="tab-btn" title="Troops"><img src="troops.png" alt="Troops" class="tab-icon"></a>
-				<a href="progress.html" class="tab-btn" title="Progress"><img src="progress.png" alt="Progress" class="tab-icon"></a>
-				<a href="compensation.html" class="tab-btn" title="Compensation"><img src="compensation.png" alt="Compensation" class="tab-icon"></a>
-				<a href="competition.html" class="tab-btn active" title="Competition"><img src="competition.png" alt="Competition" class="tab-icon"></a>
-				<a href="points.html" class="tab-btn" title="Points Reference"><img src="chest_points.png" alt="Points" class="tab-icon"></a>
-				<a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;"><img src="bank.png" alt="Bank" class="tab-icon"></a>
+			<button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
+			<div class="tab-buttons" id="navTabs">
+				<a href="dashboard.html" class="tab-btn" title="Dashboard"><img src="chests.png" alt="Dashboard" class="tab-icon desktop-only"><span class="tab-label mobile-only">Dashboard</span></a>
+				<a href="events.html" class="tab-btn" title="Events"><img src="events.png" alt="Events" class="tab-icon desktop-only"><span class="tab-label mobile-only">Events</span></a>
+				<a href="members.html" class="tab-btn" title="Members"><img src="members.png" alt="Members" class="tab-icon desktop-only"><span class="tab-label mobile-only">Members</span></a>
+				<a href="troops.html" class="tab-btn" title="Troops"><img src="troops.png" alt="Troops" class="tab-icon desktop-only"><span class="tab-label mobile-only">Troops</span></a>
+				<a href="progress.html" class="tab-btn" title="Progress"><img src="progress.png" alt="Progress" class="tab-icon desktop-only"><span class="tab-label mobile-only">Progress</span></a>
+				<a href="compensation.html" class="tab-btn" title="Compensation"><img src="compensation.png" alt="Compensation" class="tab-icon desktop-only"><span class="tab-label mobile-only">Compensation</span></a>
+				<a href="competition.html" class="tab-btn active" title="Competition"><img src="competition.png" alt="Competition" class="tab-icon desktop-only"><span class="tab-label mobile-only">Competition</span></a>
+				<a href="points.html" class="tab-btn" title="Points Reference"><img src="chest_points.png" alt="Points" class="tab-icon desktop-only"><span class="tab-label mobile-only">Points Reference</span></a>
+				<a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;"><img src="bank.png" alt="Bank" class="tab-icon desktop-only"><span class="tab-label mobile-only">Bank</span></a>
 			</div>
 			<div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
 			<div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
@@ -499,6 +625,26 @@
 
 		document.addEventListener('DOMContentLoaded', () => {
 			loadCompetitionLeaderboard();
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const hamburger = document.getElementById('navHamburger');
+			const navTabs = document.getElementById('navTabs');
+			if (hamburger && navTabs) {
+				hamburger.addEventListener('click', function() {
+					navTabs.classList.toggle('open');
+				});
+				navTabs.querySelectorAll('.tab-btn').forEach(btn => {
+					btn.addEventListener('click', () => navTabs.classList.remove('open'));
+				});
+			}
+			document.addEventListener('click', function(e) {
+				if (!navTabs || !hamburger) return;
+				if (!navTabs.classList.contains('open')) return;
+				if (navTabs.contains(e.target) || hamburger.contains(e.target)) return;
+				navTabs.classList.remove('open');
+			});
 		});
 	</script>
 </body>
