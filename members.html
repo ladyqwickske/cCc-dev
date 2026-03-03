@@ -909,11 +909,14 @@
         if (!date) { status.textContent = 'Please choose a date.'; status.classList.add('err'); return; }
         const might = parseInt(mightRaw, 10);
         if (isNaN(might) || might <= 0) { status.textContent = 'Enter a valid might value (>0).'; status.classList.add('err'); return; }
+        // Find the member data to get previous might for recent growth calculation
+        const memberData = membersData.find(m => m.name === member);
+        const previousMight = memberData && memberData.latestMight ? memberData.latestMight : (memberData ? memberData.startMight : null);
         status.textContent = 'Saving...';
         fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'recordMemberMight', member, date, might })
+          body: JSON.stringify({ action: 'recordMemberMight', member, date, might, previousMight })
         })
           .then(res => res.json())
           .then(result => {
