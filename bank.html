@@ -103,7 +103,8 @@
     h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
 
     .bank-form-wrap {
-      max-width: 640px;
+      max-width: 1120px;
+      width: 100%;
       margin: 0 auto;
       background: #232526;
       border: 1px solid #444;
@@ -147,6 +148,24 @@
       margin-top: 18px;
       border-top: 1px solid #444;
       padding-top: 14px;
+    }
+    .bank-total-balance {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #1a1b1c;
+      margin-bottom: 12px;
+      color: #e0e0e0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .bank-total-balance .value {
+      color: #8bc34a;
+      font-size: 18px;
+      font-weight: 700;
     }
     .bank-subtabs {
       display: flex;
@@ -207,6 +226,11 @@
       letter-spacing: .4px;
       font-size: 11px;
       z-index: 1;
+    }
+    .last-transaction-col {
+      min-width: 220px;
+      width: 220px;
+      white-space: nowrap;
     }
     .transactions-empty {
       color: #bdbdbd;
@@ -596,6 +620,8 @@
               <td>${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${Number(tx.fee || 0).toFixed(2)}%</td>
               <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td>${escapeHtml(tx.depositedBy || '-')}</td>
+              <td>${escapeHtml(tx.recipient || '-')}</td>
             </tr>
           `).join('');
         } catch (error) {
@@ -607,14 +633,20 @@
       async function loadMemberBalances() {
         const balancesBody = document.getElementById('balancesBody');
         const emptyEl = document.getElementById('balancesEmpty');
+        const totalBalanceEl = document.getElementById('bankTotalBalanceValue');
         if (!balancesBody || !emptyEl) return;
 
         balancesBody.innerHTML = '';
         emptyEl.textContent = 'Loading member balances...';
+        if (totalBalanceEl) totalBalanceEl.textContent = 'Loading...';
 
         try {
           const balances = await runGASFunction('getBankMemberBalances');
           const items = Array.isArray(balances) ? balances : [];
+          const overallTotal = items.reduce((sum, item) => sum + (Number(item.totalBalance) || 0), 0);
+          if (totalBalanceEl) {
+            totalBalanceEl.textContent = overallTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          }
 
           if (!items.length) {
             emptyEl.textContent = 'No member balances available yet.';
@@ -629,12 +661,13 @@
               <td>${Number(item.depositsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${Number(item.withdrawalsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${Number(item.transactionCount || 0)}</td>
-              <td>${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
+              <td class="last-transaction-col">${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
             </tr>
           `).join('');
         } catch (error) {
           console.error('Failed to load member balances:', error);
           emptyEl.textContent = 'Failed to load member balances.';
+          if (totalBalanceEl) totalBalanceEl.textContent = '-';
         }
       }
 
@@ -658,6 +691,29 @@
         }
       }
 
+      // Toggle deposited by / recipient fields based on transaction type
+      const transactionTypeSelect = document.getElementById('transactionType');
+      const depositedByRow = document.getElementById('depositedByRow');
+      const recipientRow = document.getElementById('recipientRow');
+      
+      function updateTransactionFields() {
+        const transactionType = transactionTypeSelect.value;
+        if (transactionType === 'deposit') {
+          depositedByRow.style.display = 'block';
+          recipientRow.style.display = 'none';
+          document.getElementById('recipient').value = '';
+        } else if (transactionType === 'withdrawal') {
+          depositedByRow.style.display = 'none';
+          recipientRow.style.display = 'block';
+          document.getElementById('depositedBy').value = '';
+        }
+      }
+      
+      if (transactionTypeSelect) {
+        transactionTypeSelect.addEventListener('change', updateTransactionFields);
+        updateTransactionFields(); // Initialize on load
+      }
+
       if (form) {
         form.addEventListener('submit', function(e) {
           e.preventDefault();
@@ -671,6 +727,8 @@
           const transactionType = document.getElementById('transactionType').value;
           const amount = parseFloat(document.getElementById('amount').value);
           const fee = parseFloat(document.getElementById('fee').value);
+          const depositedBy = document.getElementById('depositedBy').value.trim();
+          const recipient = document.getElementById('recipient').value.trim();
           const timestamp = new Date().toISOString();
 
           if (!(amount > 0)) {
@@ -697,7 +755,9 @@
               transactionType,
               amount,
               fee,
-              balance: calculatedBalance
+              balance: calculatedBalance,
+              depositedBy: depositedBy || '',
+              recipient: recipient || ''
             });
         });
       }
@@ -833,6 +893,16 @@
           </select>
         </div>
 
+        <div class="form-row" id="depositedByRow" style="display: none;">
+          <label for="depositedBy">Deposited By (optional)</label>
+          <input type="text" id="depositedBy" name="depositedBy" placeholder="Who actually deposited (if different)">
+        </div>
+
+        <div class="form-row" id="recipientRow" style="display: none;">
+          <label for="recipient">Recipient (optional)</label>
+          <input type="text" id="recipient" name="recipient" placeholder="Who received the funds (if different)">
+        </div>
+
         <div class="form-row">
           <label for="fee">Percentage Fee (%)</label>
           <input type="number" id="fee" name="fee" min="0" max="100" step="0.01" required>
@@ -849,6 +919,10 @@
 
       <div class="transactions-wrap">
         <div class="transactions-title">Bank Overview</div>
+        <div class="bank-total-balance">
+          <span>Total Bank Balance</span>
+          <span id="bankTotalBalanceValue" class="value">-</span>
+        </div>
         <div class="bank-subtabs">
           <button type="button" id="subtabBalancesBtn" class="subtab-btn active">Members' Balances</button>
           <button type="button" id="subtabTransactionsBtn" class="subtab-btn">Transaction History</button>
@@ -864,7 +938,7 @@
                   <th>Total Deposits</th>
                   <th>Total Withdrawals</th>
                   <th>Transactions</th>
-                  <th>Last Transaction</th>
+                  <th class="last-transaction-col">Last Transaction</th>
                 </tr>
               </thead>
               <tbody id="balancesBody"></tbody>
@@ -884,6 +958,8 @@
                   <th>Amount</th>
                   <th>Fee</th>
                   <th>Balance</th>
+                  <th>Deposited By</th>
+                  <th>Recipient</th>
                 </tr>
               </thead>
               <tbody id="transactionsBody"></tbody>
