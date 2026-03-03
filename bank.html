@@ -238,6 +238,47 @@
       padding: 10px 4px;
     }
 
+    .filter-row {
+      background: #1a1b1c !important;
+    }
+
+    .header-filter,
+    .header-filter-clear {
+      width: 100%;
+      padding: 6px 4px;
+      background: #0a0b0c;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 11px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .header-filter::placeholder {
+      color: #666;
+    }
+
+    .header-filter:focus {
+      outline: none;
+      border-color: #ffb300;
+      box-shadow: 0 0 0 2px rgba(255, 179, 0, 0.15);
+    }
+
+    .header-filter-clear {
+      cursor: pointer;
+      padding: 6px 8px;
+      background: #c62828;
+      color: #fff;
+      border: 1px solid #a01818;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .header-filter-clear:hover {
+      background: #d32f2f;
+    }
+
     .read-only-mode input,
     .read-only-mode select,
     .read-only-mode textarea,
@@ -346,14 +387,6 @@
         max-width: 100%;
       }
       .form-row { margin-bottom: 10px; }
-      .filter-controls {
-        flex-direction: column;
-      }
-      .filter-input,
-      .filter-select {
-        width: 100%;
-        min-width: 100%;
-      }
       .btn { width: 100%; }
       body { padding-top: 100px; }
     }
@@ -1066,12 +1099,13 @@
         </div>
 
         <div id="bankBalancesPanel" class="subtab-panel active">
-          <div class="filter-controls">
-            <input type="text" id="balancesFilterMember" placeholder="🔍 Filter by member name..." class="filter-input">
-          </div>
           <div class="transactions-table-wrap">
             <table class="transactions-table">
               <thead>
+                <tr>
+                  <th><input type="text" id="balancesFilterMember" placeholder="Filter by member..." class="header-filter"></th>
+                  <th colspan="5" style="text-align: center; padding: 0;"></th>
+                </tr>
                 <tr>
                   <th>Member</th>
                   <th>Total Balance</th>
@@ -1088,20 +1122,23 @@
         </div>
 
         <div id="bankTransactionsPanel" class="subtab-panel">
-          <div class="filter-controls">
-            <input type="text" id="transactionsFilterMember" placeholder="🔍 Filter by member..." class="filter-input">
-            <select id="transactionsFilterType" class="filter-select">
-              <option value="">All Types</option>
-              <option value="deposit">Deposits</option>
-              <option value="withdrawal">Withdrawals</option>
-            </select>
-            <input type="date" id="transactionsFilterDateFrom" class="filter-input" placeholder="From date">
-            <input type="date" id="transactionsFilterDateTo" class="filter-input" placeholder="To date">
-            <button type="button" id="transactionsClearFilters" class="filter-clear-btn">Clear Filters</button>
-          </div>
           <div class="transactions-table-wrap">
             <table class="transactions-table">
               <thead>
+                <tr class="filter-row">
+                  <th><input type="text" id="transactionsFilterMember" placeholder="Filter by member..." class="header-filter"></th>
+                  <th></th>
+                  <th><select id="transactionsFilterType" class="header-filter">
+                    <option value="">All Types</option>
+                    <option value="deposit">Deposits</option>
+                    <option value="withdrawal">Withdrawals</option>
+                  </select></th>
+                  <th></th>
+                  <th></th>
+                  <th><input type="date" id="transactionsFilterDateFrom" class="header-filter" title="From date"> – <input type="date" id="transactionsFilterDateTo" class="header-filter" title="To date"></th>
+                  <th></th>
+                  <th><button type="button" id="transactionsClearFilters" class="header-filter-clear">✕</button></th>
+                </tr>
                 <tr>
                   <th>Member</th>
                   <th>Timestamp (UTC)</th>
