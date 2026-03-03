@@ -684,8 +684,6 @@
       function filterTransactions() {
         const filterMember = (document.getElementById('transactionsFilterMember')?.value || '').toLowerCase().trim();
         const filterType = (document.getElementById('transactionsFilterType')?.value || '').toLowerCase().trim();
-        const filterDateFrom = document.getElementById('transactionsFilterDateFrom')?.value || '';
-        const filterDateTo = document.getElementById('transactionsFilterDateTo')?.value || '';
 
         let filtered = allTransactionsData;
 
@@ -707,41 +705,7 @@
           });
         }
 
-        if (filterDateFrom) {
-          const fromDate = new Date(filterDateFrom);
-          fromDate.setHours(0, 0, 0, 0);
-          filtered = filtered.filter(tx => {
-            if (!tx.timestamp) return false;
-            const txDate = new Date(tx.timestamp);
-            return txDate >= fromDate;
-          });
-        }
-
-        if (filterDateTo) {
-          const toDate = new Date(filterDateTo);
-          toDate.setHours(23, 59, 59, 999);
-          filtered = filtered.filter(tx => {
-            if (!tx.timestamp) return false;
-            const txDate = new Date(tx.timestamp);
-            return txDate <= toDate;
-          });
-        }
-
         renderTransactions(filtered);
-      }
-
-      function clearTransactionFilters() {
-        const filterMember = document.getElementById('transactionsFilterMember');
-        const filterType = document.getElementById('transactionsFilterType');
-        const filterDateFrom = document.getElementById('transactionsFilterDateFrom');
-        const filterDateTo = document.getElementById('transactionsFilterDateTo');
-        
-        if (filterMember) filterMember.value = '';
-        if (filterType) filterType.value = '';
-        if (filterDateFrom) filterDateFrom.value = '';
-        if (filterDateTo) filterDateTo.value = '';
-        
-        renderTransactions(allTransactionsData);
       }
 
       let allBalancesData = [];
@@ -918,24 +882,12 @@
       // Filter event listeners for transactions
       const transactionsFilterMember = document.getElementById('transactionsFilterMember');
       const transactionsFilterType = document.getElementById('transactionsFilterType');
-      const transactionsFilterDateFrom = document.getElementById('transactionsFilterDateFrom');
-      const transactionsFilterDateTo = document.getElementById('transactionsFilterDateTo');
-      const transactionsClearFilters = document.getElementById('transactionsClearFilters');
       
       if (transactionsFilterMember) {
         transactionsFilterMember.addEventListener('input', filterTransactions);
       }
       if (transactionsFilterType) {
         transactionsFilterType.addEventListener('change', filterTransactions);
-      }
-      if (transactionsFilterDateFrom) {
-        transactionsFilterDateFrom.addEventListener('change', filterTransactions);
-      }
-      if (transactionsFilterDateTo) {
-        transactionsFilterDateTo.addEventListener('change', filterTransactions);
-      }
-      if (transactionsClearFilters) {
-        transactionsClearFilters.addEventListener('click', clearTransactionFilters);
       }
 
       loadMemberOptions();
@@ -1133,11 +1085,7 @@
                     <option value="deposit">Deposits</option>
                     <option value="withdrawal">Withdrawals</option>
                   </select></th>
-                  <th></th>
-                  <th></th>
-                  <th><input type="date" id="transactionsFilterDateFrom" class="header-filter" title="From date"> – <input type="date" id="transactionsFilterDateTo" class="header-filter" title="To date"></th>
-                  <th></th>
-                  <th><button type="button" id="transactionsClearFilters" class="header-filter-clear">✕</button></th>
+                  <th colspan="5" style="text-align: center; padding: 0;"></th>
                 </tr>
                 <tr>
                   <th>Member</th>
