@@ -882,7 +882,7 @@
         const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
         const membersRaw = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
 
-        meta.textContent = `Target: ${Number(chestPointsData?.targetPoints || 3000)} points (green), within 10% (orange), below (red).`;
+        meta.textContent = `Target: ${Number(chestPointsData?.targetPoints || 3000)} points (green), within 10% (orange), below (red). '-' = not a member in that period, '*' = joined during that period.`;
 
         if (periods.length === 0 || membersRaw.length === 0) {
           table.style.display = 'none';
@@ -975,15 +975,18 @@
           periods.forEach((period, idx) => {
             const data = periodResults[idx] || { points: 0, status: 'red' };
             const td = document.createElement('td');
+            const periodStart = toYmd(period?.startDate);
             const periodEnd = toYmd(period?.endDate);
             const isMemberDuringPeriod = !joinDate || !periodEnd || joinDate <= periodEnd;
+            const joinedDuringPeriod = !!joinDate && !!periodStart && !!periodEnd && joinDate >= periodStart && joinDate <= periodEnd;
 
             if (!isMemberDuringPeriod) {
               td.className = 'points-cell points-na';
               td.textContent = '-';
             } else {
               td.className = `points-cell points-${data.status || 'red'}`;
-              td.textContent = Number(data.points || 0).toLocaleString();
+              const pointsText = Number(data.points || 0).toLocaleString();
+              td.textContent = joinedDuringPeriod ? `${pointsText}*` : pointsText;
             }
             row.appendChild(td);
           });
