@@ -251,6 +251,12 @@
     .might-value { text-align: right; }
     .date-value { text-align: center; }
 
+    .points-meta { margin: 10px 0; font-size: 12px; color: #b0b0b0; text-align: left; }
+    .points-cell { text-align: center; font-weight: 700; border-radius: 4px; padding: 6px 8px; }
+    .points-green { background: rgba(76, 175, 80, 0.22); color: #9be7a1; }
+    .points-orange { background: rgba(255, 152, 0, 0.22); color: #ffca7a; }
+    .points-red { background: rgba(244, 67, 54, 0.22); color: #ff9a92; }
+
     /* Active Period History (Management) */
     .history-section {
       margin: 16px 0;
@@ -393,13 +399,6 @@
         height: auto;
       }
       .tab-btn:last-child { border-bottom: none; }
-      .history-controls {
-        width: 100%;
-      }
-      .history-controls select,
-      .history-controls button {
-        width: 100%;
-      }
       .tab-label.mobile-only { display: inline; }
       .tab-icon.desktop-only { display: none; }
       /* Auth buttons and badges on mobile */
@@ -720,60 +719,13 @@
     </div>
     <div class="controls"><div class="search-box"><input type="text" id="memberSearchInput" placeholder="🔍 Search by member name..."></div><button class="btn" onclick="MembersTab.loadMembers()">🔄 Refresh</button></div>
 
-    <div class="history-section">
-      <div class="history-header">
-        <h3 style="margin:0;">Active Period Chest History (Management)</h3>
-        <div class="history-controls">
-          <button class="btn" onclick="MembersTab.loadActivePeriodHistory()">📚 Load History</button>
-          <button class="btn" onclick="MembersTab.recalculateActivePeriodChestEvents()">🧮 Recalculate Active Period Events</button>
-          <select id="memberHistoryPeriodSelect" onchange="MembersTab.selectHistoryPeriod(this.value)">
-            <option value="">Select period...</option>
-          </select>
-        </div>
-      </div>
-      <div id="memberHistoryStatus" class="history-status">Use this section to review all active periods and repeat norm misses.</div>
-
-      <div class="history-subtitle">Selected Period Results</div>
-      <div class="table-container" style="max-height:36vh;">
-        <table id="memberHistoryPeriodTable" style="display:none;">
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Chests</th>
-              <th>Norm Events</th>
-              <th>Met</th>
-              <th>Missed</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="memberHistoryPeriodBody"></tbody>
-        </table>
-        <div id="memberHistoryPeriodEmpty" class="loading" style="display:block;">No period selected</div>
-      </div>
-
-      <div class="history-subtitle">Repeated Norm Misses (Across Periods)</div>
-      <div class="table-container" style="max-height:28vh;">
-        <table id="memberHistoryStreakTable" style="display:none;">
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Current Miss Streak</th>
-              <th>Max Miss Streak</th>
-              <th>Last Missed Period</th>
-            </tr>
-          </thead>
-          <tbody id="memberHistoryStreakBody"></tbody>
-        </table>
-        <div id="memberHistoryStreakEmpty" class="loading" style="display:block;">No repeated misses loaded</div>
-      </div>
-    </div>
-
     <div class="tabs-container">
       <div class="tabs">
         <button class="tab active" onclick="MembersTab.switchTab('mightTab', event)">📊 Track Might</button>
         <button class="tab" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
         <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
         <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
+        <button class="tab" onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
       </div>
       <div id="mightTab" class="tab-content active">
         <h3 style="margin:0 0 12px 0;">Track Member Might</h3>
@@ -809,6 +761,26 @@
         <h3 style="margin:0 0 12px 0;">Remove Member</h3>
         <div class="form-grid"><div><label for="removeMemberSelect">Member to Remove</label><select id="removeMemberSelect"></select></div><div><label for="endDate">End Date</label><input type="date" id="endDate"><div class="note">Date member left</div></div></div>
         <button class="btn" onclick="MembersTab.submitRemoveMember()">🚪 Remove Member</button><div id="removeMemberStatus" class="status"></div>
+      </div>
+      <div id="chestPointsTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Chest Points - Last Active Periods</h3>
+        <div class="controls" style="margin-bottom:10px;">
+          <button class="btn" onclick="MembersTab.loadChestPointsTabData()">🔄 Refresh Chest Points</button>
+        </div>
+        <div id="chestPointsMeta" class="points-meta">Target: 3000 points (green), within 10% (orange), below (red).</div>
+        <div class="table-container" style="max-height:52vh;">
+          <div id="chestPointsLoading" class="loading" style="display:none;"><div class="spinner"></div>Loading chest points...</div>
+          <div id="chestPointsError" class="error" style="display:none;"></div>
+          <table id="chestPointsTable" style="display:none;">
+            <thead>
+              <tr id="chestPointsHeader">
+                <th>Member</th>
+              </tr>
+            </thead>
+            <tbody id="chestPointsBody"></tbody>
+          </table>
+          <div id="chestPointsEmpty" style="display:none; text-align:center; padding:30px; color:#b0b0b0;">No active periods found</div>
+        </div>
       </div>
     </div>
     <div class="table-container">
@@ -852,12 +824,10 @@
       let membersData = [];
       let filteredData = [];
       let currentSort = { column: null, direction: 'asc' };
-      let historyPeriods = [];
-      let historyStreaks = [];
+      let chestPointsData = null;
 
       function init() {
         loadMembers();
-        loadActivePeriodHistory();
         setTodayDefault();
         document.getElementById('memberSearchInput').addEventListener('input', (e) => filterMembers(e.target.value));
         document.querySelectorAll('#members th.sortable').forEach(th => {
@@ -865,163 +835,89 @@
         });
       }
 
-      function setHistoryStatus(message, isError = false) {
-        const status = document.getElementById('memberHistoryStatus');
-        if (!status) return;
-        status.textContent = message || '';
-        status.style.color = isError ? '#ff5252' : '#b0b0b0';
+      async function loadChestPointsTabData() {
+        const loading = document.getElementById('chestPointsLoading');
+        const error = document.getElementById('chestPointsError');
+        const table = document.getElementById('chestPointsTable');
+        const empty = document.getElementById('chestPointsEmpty');
+        if (!loading || !error || !table || !empty) return;
+
+        loading.style.display = 'block';
+        error.style.display = 'none';
+        table.style.display = 'none';
+        empty.style.display = 'none';
+
+        try {
+          const res = await fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getRecentActivePeriodChestPoints', limitPeriods: 5, targetPoints: 3000 })
+          });
+          const result = await res.json();
+
+          if (!result || !result.success) {
+            throw new Error(result?.message || 'Failed to load chest points');
+          }
+
+          chestPointsData = result;
+          renderChestPointsTable();
+        } catch (e) {
+          error.textContent = `Error: ${e.message || e}`;
+          error.style.display = 'block';
+        } finally {
+          loading.style.display = 'none';
+        }
       }
 
-      function renderHistoryPeriodOptions() {
-        const select = document.getElementById('memberHistoryPeriodSelect');
-        if (!select) return;
+      function renderChestPointsTable() {
+        const header = document.getElementById('chestPointsHeader');
+        const body = document.getElementById('chestPointsBody');
+        const table = document.getElementById('chestPointsTable');
+        const empty = document.getElementById('chestPointsEmpty');
+        const meta = document.getElementById('chestPointsMeta');
+        if (!header || !body || !table || !empty || !meta) return;
 
-        select.innerHTML = '<option value="">Select period...</option>';
-        historyPeriods.forEach((period, idx) => {
-          const option = document.createElement('option');
-          option.value = String(idx);
-          option.textContent = `${period.periodName || 'Period'}: ${period.startDate} → ${period.endDate}`;
-          select.appendChild(option);
+        const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
+        const members = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
+
+        meta.textContent = `Target: ${Number(chestPointsData?.targetPoints || 3000)} points (green), within 10% (orange), below (red).`;
+
+        if (periods.length === 0 || members.length === 0) {
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          empty.textContent = 'No active period data available';
+          return;
+        }
+
+        header.innerHTML = '<th>Member</th>';
+        periods.forEach(period => {
+          const th = document.createElement('th');
+          th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate})`;
+          header.appendChild(th);
         });
 
-        if (historyPeriods.length > 0) {
-          select.value = '0';
-          selectHistoryPeriod('0');
-        } else {
-          selectHistoryPeriod('');
-        }
-      }
-
-      function renderHistoryStreaks() {
-        const table = document.getElementById('memberHistoryStreakTable');
-        const body = document.getElementById('memberHistoryStreakBody');
-        const empty = document.getElementById('memberHistoryStreakEmpty');
-        if (!table || !body || !empty) return;
-
         body.innerHTML = '';
-        if (!historyStreaks || historyStreaks.length === 0) {
-          table.style.display = 'none';
-          empty.style.display = 'block';
-          empty.textContent = 'No repeated misses found';
-          return;
-        }
-
-        const rows = historyStreaks.filter(s => (s.maxMissStreak || 0) > 1);
-        if (rows.length === 0) {
-          table.style.display = 'none';
-          empty.style.display = 'block';
-          empty.textContent = 'No members with repeated misses in a row';
-          return;
-        }
-
-        rows.forEach(s => {
+        members.forEach(memberRow => {
           const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${escapeHtml(s.member || '')}</td>
-            <td class="might-value">${Number(s.currentMissStreak || 0)}</td>
-            <td class="might-value">${Number(s.maxMissStreak || 0)}</td>
-            <td>${escapeHtml(s.lastMissedPeriod || '-')}</td>
-          `;
+          const firstCell = document.createElement('td');
+          firstCell.className = 'member-name';
+          firstCell.textContent = memberRow.member || '';
+          row.appendChild(firstCell);
+
+          const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
+          periods.forEach((period, idx) => {
+            const data = periodResults[idx] || { points: 0, status: 'red' };
+            const td = document.createElement('td');
+            td.className = `points-cell points-${data.status || 'red'}`;
+            td.textContent = Number(data.points || 0).toLocaleString();
+            row.appendChild(td);
+          });
+
           body.appendChild(row);
         });
 
         empty.style.display = 'none';
         table.style.display = 'table';
-      }
-
-      function selectHistoryPeriod(periodIndex) {
-        const table = document.getElementById('memberHistoryPeriodTable');
-        const body = document.getElementById('memberHistoryPeriodBody');
-        const empty = document.getElementById('memberHistoryPeriodEmpty');
-        if (!table || !body || !empty) return;
-
-        body.innerHTML = '';
-
-        if (periodIndex === '' || periodIndex == null) {
-          table.style.display = 'none';
-          empty.style.display = 'block';
-          empty.textContent = 'No period selected';
-          return;
-        }
-
-        const idx = parseInt(periodIndex, 10);
-        const period = historyPeriods[idx];
-        if (!period || !Array.isArray(period.memberResults)) {
-          table.style.display = 'none';
-          empty.style.display = 'block';
-          empty.textContent = 'No data for selected period';
-          return;
-        }
-
-        const rows = [...period.memberResults].sort((a, b) => {
-          if ((a.missedEvents || 0) !== (b.missedEvents || 0)) return (b.missedEvents || 0) - (a.missedEvents || 0);
-          return (b.chestCount || 0) - (a.chestCount || 0);
-        });
-
-        rows.forEach(r => {
-          const status = r.metAllNorms ? '<span style="color:#4caf50;">✓ Met</span>' : '<span style="color:#f44336;">✕ Missed</span>';
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${escapeHtml(r.member || '')}</td>
-            <td class="might-value">${Number(r.chestCount || 0)}</td>
-            <td class="might-value">${Number(r.totalNormEvents || 0)}</td>
-            <td class="might-value">${Number(r.metNormEvents || 0)}</td>
-            <td class="might-value">${Number(r.missedEvents || 0)}</td>
-            <td>${status}</td>
-          `;
-          body.appendChild(row);
-        });
-
-        empty.style.display = 'none';
-        table.style.display = 'table';
-      }
-
-      async function loadActivePeriodHistory() {
-        setHistoryStatus('Loading active period history...');
-        try {
-          const res = await fetch(window.GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getAllActivePeriodChestResults' })
-          });
-          const result = await res.json();
-
-          if (!result || !result.success) {
-            setHistoryStatus(result?.message || 'Failed to load period history', true);
-            return;
-          }
-
-          historyPeriods = Array.isArray(result.periods) ? [...result.periods].reverse() : [];
-          historyStreaks = Array.isArray(result.streaks) ? result.streaks : [];
-
-          renderHistoryPeriodOptions();
-          renderHistoryStreaks();
-          setHistoryStatus(`Loaded ${historyPeriods.length} periods. Members with misses: ${historyStreaks.length}.`);
-        } catch (error) {
-          setHistoryStatus(`Failed to load period history: ${error}`, true);
-        }
-      }
-
-      async function recalculateActivePeriodChestEvents() {
-        setHistoryStatus('Recalculating chest-based events for active period...');
-        try {
-          const res = await fetch(window.GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'recalculateActivePeriodChestEvents' })
-          });
-          const result = await res.json();
-
-          if (!result || !result.success) {
-            setHistoryStatus(result?.message || 'Recalculation failed', true);
-            return;
-          }
-
-          setHistoryStatus(result.message || 'Recalculation complete');
-          await loadActivePeriodHistory();
-        } catch (error) {
-          setHistoryStatus(`Recalculation failed: ${error}`, true);
-        }
       }
 
       function loadMembers() {
@@ -1295,6 +1191,9 @@
         document.querySelectorAll('#members .tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId)?.classList.add('active');
         if (evt && evt.target) evt.target.classList.add('active');
+        if (tabId === 'chestPointsTab') {
+          loadChestPointsTabData();
+        }
       }
 
       function formatMight(might) {
@@ -1344,7 +1243,7 @@
         document.getElementById('memberEmpty').style.display = 'block';
       }
 
-      return { init, loadMembers, switchTab, submitMightEntry, submitAddMember, submitNameChange, submitRemoveMember, loadActivePeriodHistory, selectHistoryPeriod, recalculateActivePeriodChestEvents };
+      return { init, loadMembers, switchTab, submitMightEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData };
     })();
   </script>
 </body>
