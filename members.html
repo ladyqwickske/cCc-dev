@@ -248,6 +248,7 @@
     tr:hover { background: #2a2b2c; }
     tr:hover td:first-child { background: #2a2b2c; }
     .member-name { font-weight: 500; }
+    .member-name.missed-all-goals { color: #ff9a92; font-weight: 700; }
     .might-value { text-align: right; }
     .date-value { text-align: center; }
 
@@ -783,7 +784,7 @@
         </div>
       </div>
     </div>
-    <div class="table-container">
+    <div id="memberTableSection" class="table-container">
       <div id="memberLoading" class="loading" style="display:none;"><div class="spinner"></div>Loading members...</div>
       <div id="memberError" class="error" style="display:none;"></div>
       <table id="membersTable" style="display:none;">
@@ -878,16 +879,32 @@
         if (!header || !body || !table || !empty || !meta) return;
 
         const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
-        const members = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
+        const membersRaw = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
 
         meta.textContent = `Target: ${Number(chestPointsData?.targetPoints || 3000)} points (green), within 10% (orange), below (red).`;
 
-        if (periods.length === 0 || members.length === 0) {
+        if (periods.length === 0 || membersRaw.length === 0) {
           table.style.display = 'none';
           empty.style.display = 'block';
           empty.textContent = 'No active period data available';
           return;
         }
+
+        const members = [...membersRaw].sort((a, b) => {
+          const aResults = Array.isArray(a.periodResults) ? a.periodResults : [];
+          const bResults = Array.isArray(b.periodResults) ? b.periodResults : [];
+
+          const aMissedCount = aResults.reduce((count, r) => count + (Number(r?.points || 0) < Number(chestPointsData?.targetPoints || 3000) ? 1 : 0), 0);
+          const bMissedCount = bResults.reduce((count, r) => count + (Number(r?.points || 0) < Number(chestPointsData?.targetPoints || 3000) ? 1 : 0), 0);
+
+          if (aMissedCount !== bMissedCount) return bMissedCount - aMissedCount;
+
+          const aTotal = aResults.reduce((sum, r) => sum + Number(r?.points || 0), 0);
+          const bTotal = bResults.reduce((sum, r) => sum + Number(r?.points || 0), 0);
+          if (aTotal !== bTotal) return aTotal - bTotal;
+
+          return String(a.member || '').localeCompare(String(b.member || ''));
+        });
 
         header.innerHTML = '<th>Member</th>';
         periods.forEach(period => {
@@ -900,11 +917,19 @@
         members.forEach(memberRow => {
           const row = document.createElement('tr');
           const firstCell = document.createElement('td');
-          firstCell.className = 'member-name';
-          firstCell.textContent = memberRow.member || '';
+          const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
+          const targetPoints = Number(chestPointsData?.targetPoints || 3000);
+          const missedAllGoals = periodResults.length > 0 && periodResults.every(result => Number(result?.points || 0) < targetPoints);
+
+          const joinDate = (memberRow.joinDate ? String(memberRow.joinDate) : '').slice(0, 10);
+          const joinedAfterPeriodStart = !!joinDate && periods.some(period => String(period?.startDate || '') && joinDate > String(period.startDate));
+
+          firstCell.className = `member-name${missedAllGoals ? ' missed-all-goals' : ''}`;
+          firstCell.textContent = joinedAfterPeriodStart
+            ? `${memberRow.member || ''} (Joined ${joinDate})`
+            : (memberRow.member || '');
           row.appendChild(firstCell);
 
-          const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
           periods.forEach((period, idx) => {
             const data = periodResults[idx] || { points: 0, status: 'red' };
             const td = document.createElement('td');
@@ -1191,6 +1216,12 @@
         document.querySelectorAll('#members .tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId)?.classList.add('active');
         if (evt && evt.target) evt.target.classList.add('active');
+
+        const memberTableSection = document.getElementById('memberTableSection');
+        if (memberTableSection) {
+          memberTableSection.style.display = (tabId === 'chestPointsTab') ? 'none' : '';
+        }
+
         if (tabId === 'chestPointsTab') {
           loadChestPointsTabData();
         }
