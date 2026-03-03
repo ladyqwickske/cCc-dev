@@ -895,7 +895,38 @@
           if (!value) return '';
           const str = String(value).trim();
           if (!str) return '';
-          if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+          const normalizeYmd = (rawYmd) => {
+            const match = String(rawYmd || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!match) return '';
+
+            const year = parseInt(match[1], 10);
+            const first = parseInt(match[2], 10);
+            const second = parseInt(match[3], 10);
+
+            const isValidDate = (y, m, d) => {
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return dt.getUTCFullYear() === y && dt.getUTCMonth() === (m - 1) && dt.getUTCDate() === d;
+            };
+
+            if (isValidDate(year, first, second)) {
+              return `${year}-${String(first).padStart(2, '0')}-${String(second).padStart(2, '0')}`;
+            }
+            if (isValidDate(year, second, first)) {
+              return `${year}-${String(second).padStart(2, '0')}-${String(first).padStart(2, '0')}`;
+            }
+            return '';
+          };
+
+          const ymdDirect = normalizeYmd(str);
+          if (ymdDirect) return ymdDirect;
+
+          const isoMatch = str.match(/^(\d{4}-\d{2}-\d{2})/);
+          if (isoMatch) {
+            const normalizedIso = normalizeYmd(isoMatch[1]);
+            if (normalizedIso) return normalizedIso;
+          }
+
           const date = parseDateUTC(str);
           if (!date || Number.isNaN(date.getTime())) return '';
           const y = date.getUTCFullYear();
@@ -904,11 +935,30 @@
           return `${y}-${m}-${d}`;
         };
 
+        const toYmdMemberJoinDate = (value) => {
+          if (!value) return '';
+          const str = String(value).trim();
+          if (!str) return '';
+
+          const ydmMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (ydmMatch) {
+            const year = parseInt(ydmMatch[1], 10);
+            const day = parseInt(ydmMatch[2], 10);
+            const month = parseInt(ydmMatch[3], 10);
+            const dt = new Date(Date.UTC(year, month - 1, day));
+            if (dt.getUTCFullYear() === year && dt.getUTCMonth() === (month - 1) && dt.getUTCDate() === day) {
+              return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            }
+          }
+
+          return toYmd(str);
+        };
+
         const members = [...membersRaw].sort((a, b) => {
           const aResults = Array.isArray(a.periodResults) ? a.periodResults : [];
           const bResults = Array.isArray(b.periodResults) ? b.periodResults : [];
-          const aJoinDate = toYmd(a.joinDate);
-          const bJoinDate = toYmd(b.joinDate);
+          const aJoinDate = toYmdMemberJoinDate(a.joinDate);
+          const bJoinDate = toYmdMemberJoinDate(b.joinDate);
 
           const aMissedCount = aResults.reduce((count, r, idx) => {
             const period = periods[idx] || {};
@@ -957,7 +1007,7 @@
           const firstCell = document.createElement('td');
           const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
           const targetPoints = Number(chestPointsData?.targetPoints || 3000);
-          const joinDate = toYmd(memberRow.joinDate);
+          const joinDate = toYmdMemberJoinDate(memberRow.joinDate);
           const firstPeriodStart = toYmd(periods[0]?.startDate);
           const joinedAfterPeriodStart = !!joinDate && !!firstPeriodStart && joinDate > firstPeriodStart;
           const eligibleResults = periodResults.filter((result, idx) => {
