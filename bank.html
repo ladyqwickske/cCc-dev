@@ -346,6 +346,14 @@
         max-width: 100%;
       }
       .form-row { margin-bottom: 10px; }
+      .filter-controls {
+        flex-direction: column;
+      }
+      .filter-input,
+      .filter-select {
+        width: 100%;
+        min-width: 100%;
+      }
       .btn { width: 100%; }
       body { padding-top: 100px; }
     }
@@ -594,6 +602,8 @@
         }
       }
 
+      let allTransactionsData = [];
+
       async function loadTransactions() {
         const transactionsBody = document.getElementById('transactionsBody');
         const emptyEl = document.getElementById('transactionsEmpty');
@@ -603,32 +613,105 @@
         emptyEl.textContent = 'Loading transactions...';
 
         try {
-          const transactions = await runGASFunction('getBankTransactions', 100);
-          const items = Array.isArray(transactions) ? transactions : [];
-
-          if (!items.length) {
-            emptyEl.textContent = 'No bank transactions available yet.';
-            return;
-          }
-
-          emptyEl.textContent = '';
-          transactionsBody.innerHTML = items.map(tx => `
-            <tr>
-              <td>${escapeHtml(tx.memberName || '-')}</td>
-              <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
-              <td>${escapeHtml(tx.transactionType || '-')}</td>
-              <td>${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              <td>${Number(tx.fee || 0).toFixed(2)}%</td>
-              <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              <td>${escapeHtml(tx.depositedBy || '-')}</td>
-              <td>${escapeHtml(tx.recipient || '-')}</td>
-            </tr>
-          `).join('');
+          const transactions = await runGASFunction('getBankTransactions', 500);
+          allTransactionsData = Array.isArray(transactions) ? transactions : [];
+          renderTransactions(allTransactionsData);
         } catch (error) {
           console.error('Failed to load transactions:', error);
           emptyEl.textContent = 'Failed to load bank transactions.';
         }
       }
+
+      function renderTransactions(items) {
+        const transactionsBody = document.getElementById('transactionsBody');
+        const emptyEl = document.getElementById('transactionsEmpty');
+        if (!transactionsBody || !emptyEl) return;
+
+        if (!items.length) {
+          transactionsBody.innerHTML = '';
+          emptyEl.textContent = 'No transactions found.';
+          return;
+        }
+
+        emptyEl.textContent = '';
+        transactionsBody.innerHTML = items.map(tx => `
+          <tr>
+            <td>${escapeHtml(tx.memberName || '-')}</td>
+            <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+            <td>${escapeHtml(tx.transactionType || '-')}</td>
+            <td>${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${Number(tx.fee || 0).toFixed(2)}%</td>
+            <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${escapeHtml(tx.depositedBy || '-')}</td>
+            <td>${escapeHtml(tx.recipient || '-')}</td>
+          </tr>
+        `).join('');
+      }
+
+      function filterTransactions() {
+        const filterMember = (document.getElementById('transactionsFilterMember')?.value || '').toLowerCase().trim();
+        const filterType = (document.getElementById('transactionsFilterType')?.value || '').toLowerCase().trim();
+        const filterDateFrom = document.getElementById('transactionsFilterDateFrom')?.value || '';
+        const filterDateTo = document.getElementById('transactionsFilterDateTo')?.value || '';
+
+        let filtered = allTransactionsData;
+
+        if (filterMember) {
+          filtered = filtered.filter(tx => {
+            const memberName = (tx.memberName || '').toLowerCase();
+            const depositedBy = (tx.depositedBy || '').toLowerCase();
+            const recipient = (tx.recipient || '').toLowerCase();
+            return memberName.includes(filterMember) || 
+                   depositedBy.includes(filterMember) || 
+                   recipient.includes(filterMember);
+          });
+        }
+
+        if (filterType) {
+          filtered = filtered.filter(tx => {
+            const txType = (tx.transactionType || '').toLowerCase();
+            return txType === filterType;
+          });
+        }
+
+        if (filterDateFrom) {
+          const fromDate = new Date(filterDateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          filtered = filtered.filter(tx => {
+            if (!tx.timestamp) return false;
+            const txDate = new Date(tx.timestamp);
+            return txDate >= fromDate;
+          });
+        }
+
+        if (filterDateTo) {
+          const toDate = new Date(filterDateTo);
+          toDate.setHours(23, 59, 59, 999);
+          filtered = filtered.filter(tx => {
+            if (!tx.timestamp) return false;
+            const txDate = new Date(tx.timestamp);
+            return txDate <= toDate;
+          });
+        }
+
+        renderTransactions(filtered);
+      }
+
+      function clearTransactionFilters() {
+        const filterMember = document.getElementById('transactionsFilterMember');
+        const filterType = document.getElementById('transactionsFilterType');
+        const filterDateFrom = document.getElementById('transactionsFilterDateFrom');
+        const filterDateTo = document.getElementById('transactionsFilterDateTo');
+        
+        if (filterMember) filterMember.value = '';
+        if (filterType) filterType.value = '';
+        if (filterDateFrom) filterDateFrom.value = '';
+        if (filterDateTo) filterDateTo.value = '';
+        
+        renderTransactions(allTransactionsData);
+      }
+
+      let allBalancesData = [];
 
       async function loadMemberBalances() {
         const balancesBody = document.getElementById('balancesBody');
@@ -642,33 +725,58 @@
 
         try {
           const balances = await runGASFunction('getBankMemberBalances');
-          const items = Array.isArray(balances) ? balances : [];
-          const overallTotal = items.reduce((sum, item) => sum + (Number(item.totalBalance) || 0), 0);
-          if (totalBalanceEl) {
-            totalBalanceEl.textContent = overallTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          }
-
-          if (!items.length) {
-            emptyEl.textContent = 'No member balances available yet.';
-            return;
-          }
-
-          emptyEl.textContent = '';
-          balancesBody.innerHTML = items.map(item => `
-            <tr>
-              <td>${escapeHtml(item.memberName || '-')}</td>
-              <td>${Number(item.totalBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              <td>${Number(item.depositsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              <td>${Number(item.withdrawalsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              <td>${Number(item.transactionCount || 0)}</td>
-              <td class="last-transaction-col">${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
-            </tr>
-          `).join('');
+          allBalancesData = Array.isArray(balances) ? balances : [];
+          renderBalances(allBalancesData);
         } catch (error) {
           console.error('Failed to load member balances:', error);
           emptyEl.textContent = 'Failed to load member balances.';
-          if (totalBalanceEl) totalBalanceEl.textContent = '-';
         }
+      }
+
+      function renderBalances(items) {
+        const balancesBody = document.getElementById('balancesBody');
+        const emptyEl = document.getElementById('balancesEmpty');
+        const totalBalanceEl = document.getElementById('bankTotalBalanceValue');
+        if (!balancesBody || !emptyEl) return;
+
+        const overallTotal = items.reduce((sum, item) => sum + (Number(item.totalBalance) || 0), 0);
+        if (totalBalanceEl) {
+          totalBalanceEl.textContent = overallTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        if (!items.length) {
+          balancesBody.innerHTML = '';
+          emptyEl.textContent = 'No member balances found.';
+          return;
+        }
+
+        emptyEl.textContent = '';
+        balancesBody.innerHTML = items.map(item => `
+          <tr>
+            <td>${escapeHtml(item.memberName || '-')}</td>
+            <td>${Number(item.totalBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${Number(item.depositsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${Number(item.withdrawalsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${Number(item.transactionCount || 0)}</td>
+            <td class="last-transaction-col">${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
+          </tr>
+        `).join('');
+      }
+
+      function filterBalances() {
+        const filterText = (document.getElementById('balancesFilterMember')?.value || '').toLowerCase().trim();
+        
+        if (!filterText) {
+          renderBalances(allBalancesData);
+          return;
+        }
+
+        const filtered = allBalancesData.filter(item => {
+          const memberName = (item.memberName || '').toLowerCase();
+          return memberName.includes(filterText);
+        });
+
+        renderBalances(filtered);
       }
 
       function switchBankSubtab(tabName) {
@@ -767,6 +875,35 @@
       if (balancesBtn) balancesBtn.addEventListener('click', () => switchBankSubtab('balances'));
       if (transactionsBtn) transactionsBtn.addEventListener('click', () => switchBankSubtab('transactions'));
       switchBankSubtab('balances');
+
+      // Filter event listeners for balances
+      const balancesFilterMember = document.getElementById('balancesFilterMember');
+      if (balancesFilterMember) {
+        balancesFilterMember.addEventListener('input', filterBalances);
+      }
+
+      // Filter event listeners for transactions
+      const transactionsFilterMember = document.getElementById('transactionsFilterMember');
+      const transactionsFilterType = document.getElementById('transactionsFilterType');
+      const transactionsFilterDateFrom = document.getElementById('transactionsFilterDateFrom');
+      const transactionsFilterDateTo = document.getElementById('transactionsFilterDateTo');
+      const transactionsClearFilters = document.getElementById('transactionsClearFilters');
+      
+      if (transactionsFilterMember) {
+        transactionsFilterMember.addEventListener('input', filterTransactions);
+      }
+      if (transactionsFilterType) {
+        transactionsFilterType.addEventListener('change', filterTransactions);
+      }
+      if (transactionsFilterDateFrom) {
+        transactionsFilterDateFrom.addEventListener('change', filterTransactions);
+      }
+      if (transactionsFilterDateTo) {
+        transactionsFilterDateTo.addEventListener('change', filterTransactions);
+      }
+      if (transactionsClearFilters) {
+        transactionsClearFilters.addEventListener('click', clearTransactionFilters);
+      }
 
       loadMemberOptions();
       loadTransactions();
@@ -929,6 +1066,9 @@
         </div>
 
         <div id="bankBalancesPanel" class="subtab-panel active">
+          <div class="filter-controls">
+            <input type="text" id="balancesFilterMember" placeholder="🔍 Filter by member name..." class="filter-input">
+          </div>
           <div class="transactions-table-wrap">
             <table class="transactions-table">
               <thead>
@@ -948,6 +1088,17 @@
         </div>
 
         <div id="bankTransactionsPanel" class="subtab-panel">
+          <div class="filter-controls">
+            <input type="text" id="transactionsFilterMember" placeholder="🔍 Filter by member..." class="filter-input">
+            <select id="transactionsFilterType" class="filter-select">
+              <option value="">All Types</option>
+              <option value="deposit">Deposits</option>
+              <option value="withdrawal">Withdrawals</option>
+            </select>
+            <input type="date" id="transactionsFilterDateFrom" class="filter-input" placeholder="From date">
+            <input type="date" id="transactionsFilterDateTo" class="filter-input" placeholder="To date">
+            <button type="button" id="transactionsClearFilters" class="filter-clear-btn">Clear Filters</button>
+          </div>
           <div class="transactions-table-wrap">
             <table class="transactions-table">
               <thead>
