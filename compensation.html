@@ -23,6 +23,9 @@
       min-height: 100vh;
       background-attachment: fixed;
     }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
 
     .page-container {
       max-width: 1200px;
@@ -1077,10 +1080,14 @@
         setReadOnlyMode(false);
         updateSignedInBadge(email);
         setRestrictedTabsVisibility(true);
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'flex';
       } else {
         setReadOnlyMode(true);
         updateSignedInBadge(null);
         setRestrictedTabsVisibility(false);
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'none';
         let nav = document.querySelector('.tab-nav-container');
         if (nav && !document.getElementById('signInManageBtn')) {
           const btn = document.createElement('button');

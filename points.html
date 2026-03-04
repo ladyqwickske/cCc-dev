@@ -17,6 +17,9 @@
     body {
       font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
       background: linear-gradient(135deg, #232526 0%, #414345 100%);
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
       color: #f3f3f3;
       text-align: center;
       padding: 32px 16px 60px 16px;
@@ -628,27 +631,6 @@
       }
     };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const token = (() => { try { return localStorage.getItem(AUTH_KEY); } catch (e) { return null; } })();
-      const email = (() => { try { return localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) { return null; } })();
-      if (token && email) {
-        setReadOnlyMode(false);
-        updateSignedInBadge(email);
-      } else {
-        setReadOnlyMode(true);
-        updateSignedInBadge(null);
-        let nav = document.querySelector('.tab-nav-container');
-        if (nav && !document.getElementById('signInManageBtn')) {
-          const btn = document.createElement('button');
-          btn.id = 'signInManageBtn';
-          btn.textContent = '🔑 Sign in to Manage';
-          btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
-          btn.onclick = showGoogleLogin;
-          nav.appendChild(btn);
-        }
-      }
-    });
-
     window.addEventListener('DOMContentLoaded', function() {
       const setRestrictedTabsVisibility = (isVisible) => {
         const displayValue = isVisible ? '' : 'none';
@@ -658,25 +640,29 @@
           });
         });
       };
-      updateSignedInBadge && updateSignedInBadge(null);
-      let nav = document.querySelector('.tab-nav-container');
-      if (nav && !document.getElementById('signInManageBtn')) {
-        const btn = document.createElement('button');
-        btn.id = 'signInManageBtn';
-        btn.textContent = '🔑 Sign in to Manage';
-        btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
-        btn.onclick = showGoogleLogin;
-        nav.appendChild(btn);
-      }
-      // If user is authenticated, upgrade from guest mode
-      if (typeof isAuthed !== 'undefined' && isAuthed && authedEmail) {
-        setReadOnlyMode && setReadOnlyMode(false);
-        updateSignedInBadge && updateSignedInBadge(authedEmail);
+      const token = (() => { try { return localStorage.getItem(AUTH_KEY); } catch (e) { return null; } })();
+      const email = (() => { try { return localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) { return null; } })();
+      if (token && email) {
+        setReadOnlyMode(false);
+        updateSignedInBadge(email);
         setRestrictedTabsVisibility(true);
-        document.getElementById('bankTabBtn').style.display = 'flex';
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'flex';
       } else {
+        setReadOnlyMode(true);
+        updateSignedInBadge(null);
         setRestrictedTabsVisibility(false);
-        document.getElementById('bankTabBtn').style.display = 'none';
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'none';
+        let nav = document.querySelector('.tab-nav-container');
+        if (nav && !document.getElementById('signInManageBtn')) {
+          const btn = document.createElement('button');
+          btn.id = 'signInManageBtn';
+          btn.textContent = '🔑 Sign in to Manage';
+          btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
+          btn.onclick = showGoogleLogin;
+          nav.appendChild(btn);
+        }
       }
     });
   </script>
