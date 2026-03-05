@@ -863,7 +863,10 @@
         const today = getTodayUTC();
         const formatDisplayDate = (date) => {
           if (!date) return '';
-          return `${date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })} (UTC)`;
+          const year = date.getUTCFullYear();
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(date.getUTCDate()).padStart(2, '0');
+          return `${year}-${month}-${day} (UTC)`;
         };
         let periodLabel = '';
         let startDate = null;
