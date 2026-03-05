@@ -806,10 +806,10 @@
             <th class="sortable" data-column="name">Name</th>
             <th class="sortable" data-column="startMight">Starting Might</th>
             <th class="sortable" data-column="joinDate">Join Date</th>
-            <th class="sortable" data-column="growth">Growth %</th>
+            <th class="sortable" data-column="growth" title="Total growth from start to latest (all-time)">Growth %</th>
             <th class="sortable" data-column="latestMight">Latest Might</th>
             <th class="sortable" data-column="latestMightDate">Latest Date</th>
-            <th class="sortable" data-column="recentGrowth">Recent Growth %</th>
+            <th class="sortable" data-column="recentGrowth" title="Growth between last 2 might records only">Recent Growth %</th>
           </tr>
         </thead>
         <tbody id="membersTableBody"></tbody>
@@ -1150,11 +1150,13 @@
         const tbody = document.getElementById('membersTableBody');
         tbody.innerHTML = '';
         filteredData.forEach(member => {
+          // Growth % = Total growth from start to latest (all-time)
           let growthPercent = '-';
           if (member.startMight && member.latestMight && member.startMight > 0) {
             const g = ((member.latestMight - member.startMight) / member.startMight) * 100;
             growthPercent = g.toFixed(1) + '%';
           }
+          // Recent Growth % = Growth between last two might records only
           let recentGrowthPercent = '-';
           if (member.recentGrowthPercent !== undefined && member.recentGrowthPercent !== null) {
             recentGrowthPercent = (member.recentGrowthPercent).toFixed(1) + '%';
