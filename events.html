@@ -39,7 +39,7 @@
     return isNaN(d.getTime()) ? null : d;
   }
 
-  // Format a date string as UTC (YYYY-MM-DD (UTC))
+  // Format a date string as UTC (YYYY-MM-DD HH:mm:ss UTC)
   function formatDateUTC(dateStr, isEndDate = false) {
     if (!dateStr) return '';
     const d = parseDateUTC(dateStr);
@@ -47,7 +47,17 @@
     const yyyy = d.getUTCFullYear();
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} (UTC)`;
+    let hh, min, sec;
+    if (isEndDate) {
+      hh = '23';
+      min = '59';
+      sec = '59';
+    } else {
+      hh = String(d.getUTCHours()).padStart(2, '0');
+      min = String(d.getUTCMinutes()).padStart(2, '0');
+      sec = String(d.getUTCSeconds()).padStart(2, '0');
+    }
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} UTC`;
   }
   </script>
   <style>
