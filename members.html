@@ -174,8 +174,8 @@
     .form-group { margin-bottom: 16px; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-grid > div { min-width: 0; overflow: hidden; }
-    .might-form-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .add-member-form-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .might-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .add-member-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
     label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     input, select, textarea { 
       width: 100%; 
@@ -197,6 +197,27 @@
     /* Date inputs - narrower for compact layout */
     input[type="date"] {
       max-width: 140px;
+    }
+
+    @media (max-width: 980px) {
+      .might-form-grid,
+      .add-member-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .form-grid,
+      .might-form-grid,
+      .add-member-form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      /* Prevent narrow date fields from squeezing neighboring controls on phones */
+      input[type="date"] {
+        max-width: none;
+      }
     }
     
     /* Buttons */

@@ -982,7 +982,6 @@
         <div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
           <h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
           <p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
-          <div id="g_id_onload" data-client_id="47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com" data-callback="onGoogleSignIn" data-auto_prompt="false" data-ux_mode="popup"></div>
           <div id="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin" data-shape="rectangular" data-logo_alignment="left"></div>
           <div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
           <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;">Continue as Guest (Read-Only)</button>
@@ -1007,7 +1006,8 @@
               client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
               callback: onGoogleSignIn,
               auto_select: false,
-              ux_mode: 'popup'
+              ux_mode: 'popup',
+              cancel_on_tap_outside: true
             });
             google.accounts.id.renderButton(document.getElementById('g_id_signin'), 
               { type: 'standard', size: 'large', theme: 'outline', text: 'signin', shape: 'rectangular', logo_alignment: 'left' });
@@ -1036,7 +1036,8 @@
           body: JSON.stringify({ action: 'verifyUserPermission', email })
         });
         const data = await res.json();
-        if (data.isAllowedEditor) {
+        const isAllowed = Boolean(data && (data.isAllowedEditor === true || data.allowed === true));
+        if (isAllowed) {
           try { localStorage.setItem(AUTH_KEY, idToken); } catch (e) {}
           try { localStorage.setItem(AUTH_EMAIL_KEY, email); } catch (e) {}
           setReadOnlyMode(false);
