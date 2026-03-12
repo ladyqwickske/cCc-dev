@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Masters Of Oops - Dashboard</title>
+  <title>cCc Champions - Dashboard</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -619,7 +619,7 @@
   
   <nav class="tab-nav">
     <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> Masters Of Oops</div>
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
       <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -687,7 +687,7 @@
         <button class="preset-btn" data-preset="lastmonth" onclick="setDateRange('lastmonth')">Last Month</button>
       </div>
       <div class="date-range-display" id="dateRangeDisplay">Viewing: All Time</div>
-      <div class="date-range-display" id="lastImportedDisplay" style="font-size: 12px; color: #ffb300; margin-top: 8px;">Last Imported: <span class="no-date">Loading...</span> | Required Points: 4500</div>
+      <div class="date-range-display" id="lastImportedDisplay" style="font-size: 12px; color: #ffb300; margin-top: 8px;">Last Imported: <span class="no-date">Loading...</span> | Required Points: 3000</div>
       <input type="date" id="startDate" style="display:none;">
       <input type="date" id="endDate" style="display:none;">
     </div>
@@ -923,12 +923,12 @@ function filterPlayerTable() {
     function updateReadOnlyUI() {
       if (document.documentElement.classList.contains('read-only-mode')) {
         const navBrand = document.getElementById('navBrand');
-        if (navBrand) navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> Masters Of Oops';
+        if (navBrand) navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions';
         const badge = document.getElementById('readOnlyBadge');
         if (badge) badge.style.display = 'block';
       } else {
         const navBrand = document.getElementById('navBrand');
-        if (navBrand) navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> Masters Of Oops';
+        if (navBrand) navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions';
         const badge = document.getElementById('readOnlyBadge');
         if (badge) badge.style.display = 'none';
       }
@@ -1317,9 +1317,9 @@ function filterPlayerTable() {
       if (display && data.lastImportTimestamp) {
         let timestampText = data.lastImportTimestamp;
         if (timestampText === 'Never' || timestampText === 'No imports yet') {
-          display.innerHTML = 'Last Imported: <span class="no-date">No date</span> | Required Points: 4500';
+          display.innerHTML = 'Last Imported: <span class="no-date">No date</span> | Required Points: 3000';
         } else {
-          display.innerHTML = `Last Imported: ${timestampText} | Required Points: 4500`;
+          display.innerHTML = `Last Imported: ${timestampText} | Required Points: 3000`;
         }
       }
     }
@@ -1384,7 +1384,7 @@ function filterPlayerTable() {
       playerArray.forEach((player,idx)=>{
         const commonCryptInfo = player.chestsByTypeGrouped?.['Common Crypt'];
         const totalPointsVal = player.totalPoints || 0;
-        const pointsClass = totalPointsVal >= 4500 ? 'player-green' : (totalPointsVal >= 4050 ? 'player-orange' : 'player-red');
+        const pointsClass = totalPointsVal >= 3000 ? 'player-green' : (totalPointsVal >= 2700 ? 'player-orange' : 'player-red');
         
         // Check if member joined after the current viewing start date
         let isNewMember = false;
