@@ -6,6 +6,14 @@ const SITE_CONFIG = {
   // Clan Identity
   clanName: 'cCc Champions',
   clanAbbr: 'ccc',
+
+  // Progress ranking weights (must sum to 100)
+  rankingWeights: {
+    chestPoints: 35,
+    growth: 30,
+    events: 25,
+    troopUpgrades: 10
+  },
   
   // Branding
   primaryColor: '#ffb300',

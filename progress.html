@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cCc Champions - Progress</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <script src="site-config.js"></script>
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
   <script>
@@ -281,6 +282,7 @@
     tr:hover { background: #2a2b2c; }
     tr:hover td:first-child { background: #2a2b2c; }
     td.member-name { font-weight: 500; }
+    td.member-name.joined-in-period { color: #42a5f5; }
     td.stat-cell { text-align: right; }
     td.event-cell { text-align: center; font-weight: 600; }
 
@@ -1202,8 +1204,43 @@
         return 'success';
       }
 
+      function getRankingWeights() {
+        const fallback = {
+          chestPoints: 35,
+          growth: 30,
+          events: 25,
+          troopUpgrades: 10
+        };
+
+        if (typeof SITE_CONFIG === 'undefined' || !SITE_CONFIG || !SITE_CONFIG.rankingWeights) {
+          return fallback;
+        }
+
+        const raw = SITE_CONFIG.rankingWeights;
+        const chestPoints = Number(raw.chestPoints);
+        const growth = Number(raw.growth);
+        const events = Number(raw.events);
+        const troopUpgrades = Number(raw.troopUpgrades);
+
+        if ([chestPoints, growth, events, troopUpgrades].some(v => Number.isNaN(v) || v < 0)) {
+          return fallback;
+        }
+
+        const total = chestPoints + growth + events + troopUpgrades;
+        if (total <= 0) return fallback;
+
+        return {
+          chestPoints,
+          growth,
+          events,
+          troopUpgrades
+        };
+      }
+
       function calculateMemberRankings() {
         if (!Array.isArray(progressData) || progressData.length === 0) return;
+
+        const weights = getRankingWeights();
 
         const maxChestPoints = Math.max(...progressData.map(m => Number(m.chestPoints || 0)), 1);
         const maxRecentGrowthPct = Math.max(...progressData.map(m => Math.max(0, Number(m.recentGrowthPercent || 0))), 1);
@@ -1238,14 +1275,18 @@
           else if (upgradeCount === 2) troopScore = 0.8;
           else if (upgradeCount === 1) troopScore = 0.6;
 
-          const rankScore = (35 * chestScore) + (30 * growthScore) + (25 * eventScore) + (10 * troopScore);
+          const rankScore =
+            (weights.chestPoints * chestScore) +
+            (weights.growth * growthScore) +
+            (weights.events * eventScore) +
+            (weights.troopUpgrades * troopScore);
 
           member.rankScore = Number(rankScore.toFixed(1));
           member.rankBreakdown = {
-            chest: Number((35 * chestScore).toFixed(1)),
-            growth: Number((30 * growthScore).toFixed(1)),
-            events: Number((25 * eventScore).toFixed(1)),
-            troops: Number((10 * troopScore).toFixed(1))
+            chest: Number((weights.chestPoints * chestScore).toFixed(1)),
+            growth: Number((weights.growth * growthScore).toFixed(1)),
+            events: Number((weights.events * eventScore).toFixed(1)),
+            troops: Number((weights.troopUpgrades * troopScore).toFixed(1))
           };
         });
 
@@ -1315,7 +1356,16 @@
           const scoreTooltip = member.rankBreakdown
             ? `C:${member.rankBreakdown.chest} G:${member.rankBreakdown.growth} E:${member.rankBreakdown.events} T:${member.rankBreakdown.troops}`
             : '';
-          let html = `<td class="stat-cell">#${member.rankPosition || '-'}</td><td class="member-name">${escapeHtml(member.name)}</td><td class="stat-cell" title="${escapeHtml(scoreTooltip)}">${Number(member.rankScore || 0).toFixed(1)}</td><td class="stat-cell">${member.chestCount || 0}</td><td class="stat-cell">${Number(member.chestPoints || 0).toLocaleString()}</td><td class="stat-cell">${formatMight(member.latestMight)}</td><td class="stat-cell">${(member.growthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${(member.recentGrowthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${escapeHtml(upgradesText)}</td>`;
+          let joinDateLabel = '';
+          if (member.joinedAfterPeriodStart && member.joinDate) {
+            const joinDate = new Date(member.joinDate);
+            const today = new Date();
+            const daysAgo = Math.floor((today - joinDate) / (1000 * 60 * 60 * 24));
+            const daysLabel = daysAgo === 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
+            joinDateLabel = ` <span style="font-size:10px;opacity:0.8;">(Joined: ${daysLabel})</span>`;
+          }
+          const memberNameClass = member.joinedAfterPeriodStart ? 'member-name joined-in-period' : 'member-name';
+          let html = `<td class="stat-cell">#${member.rankPosition || '-'}</td><td class="${memberNameClass}">${escapeHtml(member.name)}${joinDateLabel}</td><td class="stat-cell" title="${escapeHtml(scoreTooltip)}">${Number(member.rankScore || 0).toFixed(1)}</td><td class="stat-cell">${member.chestCount || 0}</td><td class="stat-cell">${Number(member.chestPoints || 0).toLocaleString()}</td><td class="stat-cell">${formatMight(member.latestMight)}</td><td class="stat-cell">${(member.growthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${(member.recentGrowthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${escapeHtml(upgradesText)}</td>`;
 
           currentEvents.forEach(event => {
             const key = `${normalizeName(member.name)}__${event.name}`;
