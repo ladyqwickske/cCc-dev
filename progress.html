@@ -738,6 +738,7 @@
           <tr id="progressTableHeader">
             <th data-column="name">Member Name</th>
             <th data-column="chestCount">Chests</th>
+            <th data-column="chestPoints" title="Total chest points earned in selected period">Points</th>
             <th data-column="latestMight">Latest Might</th>
             <th data-column="growthPercent" title="All-time growth from start might to current might">Growth %</th>
             <th data-column="recentGrowthPercent" title="Growth from last record before period to newest record in period">Recent %</th>
@@ -1182,7 +1183,7 @@
 
       function renderTable() {
         const headerRow = document.getElementById('progressTableHeader');
-        headerRow.innerHTML = `<th data-column="name">Member Name</th><th data-column="chestCount">Chests</th><th data-column="latestMight">Latest Might</th><th data-column="growthPercent">Growth %</th><th data-column="recentGrowthPercent">Recent %</th><th data-column="troopUpgrades">Upgrades</th>`;
+        headerRow.innerHTML = `<th data-column="name">Member Name</th><th data-column="chestCount">Chests</th><th data-column="chestPoints">Points</th><th data-column="latestMight">Latest Might</th><th data-column="growthPercent">Growth %</th><th data-column="recentGrowthPercent">Recent %</th><th data-column="troopUpgrades">Upgrades</th>`;
 
         currentEvents.forEach((event) => {
           const th = document.createElement('th');
@@ -1212,7 +1213,7 @@
             }
           }
           
-          let html = `<td class="member-name">${escapeHtml(member.name)}</td><td class="stat-cell">${member.chestCount || 0}</td><td class="stat-cell">${formatMight(member.latestMight)}</td><td class="stat-cell">${(member.growthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${(member.recentGrowthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${escapeHtml(upgradesText)}</td>`;
+          let html = `<td class="member-name">${escapeHtml(member.name)}</td><td class="stat-cell">${member.chestCount || 0}</td><td class="stat-cell">${Number(member.chestPoints || 0).toLocaleString()}</td><td class="stat-cell">${formatMight(member.latestMight)}</td><td class="stat-cell">${(member.growthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${(member.recentGrowthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${escapeHtml(upgradesText)}</td>`;
 
           currentEvents.forEach(event => {
             const key = `${normalizeName(member.name)}__${event.name}`;
