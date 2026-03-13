@@ -23,6 +23,13 @@ const SITE_CONFIG = {
   // Authentication
   googleClientId: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
   
+  // Members hidden from progress stats when not logged in (e.g. leaders with special privileges)
+  // Names must match exactly as they appear in the Members sheet (case-insensitive match applied at runtime)
+  maskedMembers: [
+    // 'ExampleLeader',
+    // 'AnotherSpecialMember'
+  ],
+
   // Navigation Pages
   pages: [
     { name: 'Dashboard', file: 'dashboard.html', icon: 'chests.png' },

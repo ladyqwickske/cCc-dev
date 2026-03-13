@@ -937,6 +937,18 @@ function filterPlayerTable() {
 
     // ============ RESPONSE NORMALIZATION ============
     // Normalizes API responses to consistent format {success: bool, data: ?, error: ?}
+    function isUserLoggedIn() {
+      try { return localStorage.getItem('ccc_portal_google_auth') === '1'; } catch (e) { return false; }
+    }
+
+    function applyMemberMask(playerList) {
+      if (isUserLoggedIn()) return playerList;
+      const masked = (typeof SITE_CONFIG !== 'undefined' && Array.isArray(SITE_CONFIG.maskedMembers)) ? SITE_CONFIG.maskedMembers : [];
+      if (masked.length === 0) return playerList;
+      const maskedNorm = masked.map(n => n.trim().toLowerCase());
+      return playerList.filter(p => !maskedNorm.includes((p.player || '').trim().toLowerCase()));
+    }
+
     function normalizeResponse(result) {
       if (!result) return { success: false, error: 'No result' };
       if (result.success !== undefined) return result; // Already normalized
@@ -1340,7 +1352,10 @@ function filterPlayerTable() {
       
       // Ensure we have an array
       if (!Array.isArray(playerArray)) playerArray = [];
-      
+
+      // Hide masked members from guests
+      playerArray = applyMemberMask(playerArray);
+
       if (playerArray.length === 0) { container.innerHTML = '<div class="loading">No data found</div>'; return; }
       
       // Merge chest splits data into player stats (if available)

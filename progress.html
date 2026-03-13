@@ -300,10 +300,10 @@
     .error { color: #ff5252; padding: 12px; background: #1a0000; border-radius: 6px; }
 
     /* Read-only Mode */
-    .read-only-mode input,
+    .read-only-mode input:not(#progSearchInput),
     .read-only-mode select,
     .read-only-mode textarea,
-    .read-only-mode button:not(.tab-btn):not(.tab):not(.hamburger) {
+    .read-only-mode button:not(.tab-btn):not(.tab):not(.hamburger):not(.period-btn) {
       pointer-events: none !important;
       background: #f5f5f5 !important;
       color: #666 !important;
@@ -792,6 +792,30 @@
         return parseDateUTC(value);
       }
 
+      function isUserLoggedIn() {
+        try {
+          return !!(localStorage.getItem('ccc_portal_google_auth') && localStorage.getItem('ccc_portal_google_email'));
+        } catch (e) { return false; }
+      }
+
+      function applyMemberMask(memberList) {
+        if (isUserLoggedIn()) return memberList;
+        const masked = (SITE_CONFIG && Array.isArray(SITE_CONFIG.maskedMembers)) ? SITE_CONFIG.maskedMembers : [];
+        if (masked.length === 0) return memberList;
+        const maskedNorm = masked.map(n => n.trim().toLowerCase());
+        return memberList.filter(m => !maskedNorm.includes((m.name || '').trim().toLowerCase()));
+      }
+
+      function getMemberJoinedAfterPeriodStart(member) {
+        if (typeof member?.joinedAfterPeriodStart === 'boolean') {
+          return member.joinedAfterPeriodStart;
+        }
+        const joinDate = parseDateUTC(member?.joinDate);
+        const periodStart = parseDateUTC(currentPeriodStart);
+        if (!joinDate || !periodStart) return false;
+        return joinDate > periodStart;
+      }
+
       function ensureTroopSummaryLoaded() {
         if (troopSummaryMap && Object.keys(troopSummaryMap).length > 0) return Promise.resolve();
         return fetch(window.GAS_WEB_APP_URL, {
@@ -1039,7 +1063,7 @@
         }
 
         progressData = result.members || [];
-        filteredData = [...progressData];
+        filteredData = applyMemberMask([...progressData]);
         filteredData.sort((a, b) => (b.recentGrowthPercent || 0) - (a.recentGrowthPercent || 0));
 
         if (progressData.length === 0) {
@@ -1298,7 +1322,7 @@
 
       function filterMembers(searchTerm) {
         const term = searchTerm.toLowerCase().trim();
-        filteredData = term ? progressData.filter(m => m.name.toLowerCase().includes(term)) : [...progressData];
+        filteredData = applyMemberMask(term ? progressData.filter(m => m.name.toLowerCase().includes(term)) : [...progressData]);
         renderTable();
         if (filteredData.length === 0) showEmpty();
         else showTable();
@@ -1356,15 +1380,16 @@
           const scoreTooltip = member.rankBreakdown
             ? `C:${member.rankBreakdown.chest} G:${member.rankBreakdown.growth} E:${member.rankBreakdown.events} T:${member.rankBreakdown.troops}`
             : '';
+          const isJoinedAfterPeriodStart = getMemberJoinedAfterPeriodStart(member);
           let joinDateLabel = '';
-          if (member.joinedAfterPeriodStart && member.joinDate) {
+          if (isJoinedAfterPeriodStart && member.joinDate) {
             const joinDate = new Date(member.joinDate);
             const today = new Date();
             const daysAgo = Math.floor((today - joinDate) / (1000 * 60 * 60 * 24));
             const daysLabel = daysAgo === 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
             joinDateLabel = ` <span style="font-size:10px;opacity:0.8;">(Joined: ${daysLabel})</span>`;
           }
-          const memberNameClass = member.joinedAfterPeriodStart ? 'member-name joined-in-period' : 'member-name';
+          const memberNameClass = isJoinedAfterPeriodStart ? 'member-name joined-in-period' : 'member-name';
           let html = `<td class="stat-cell">#${member.rankPosition || '-'}</td><td class="${memberNameClass}">${escapeHtml(member.name)}${joinDateLabel}</td><td class="stat-cell" title="${escapeHtml(scoreTooltip)}">${Number(member.rankScore || 0).toFixed(1)}</td><td class="stat-cell">${member.chestCount || 0}</td><td class="stat-cell">${Number(member.chestPoints || 0).toLocaleString()}</td><td class="stat-cell">${formatMight(member.latestMight)}</td><td class="stat-cell">${(member.growthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${(member.recentGrowthPercent || 0).toFixed(1)}%</td><td class="stat-cell">${escapeHtml(upgradesText)}</td>`;
 
           currentEvents.forEach(event => {
