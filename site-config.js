@@ -31,7 +31,8 @@ const SITE_CONFIG = {
     'LION',
     'Red Kit',
     'Avciss',
-    'ZaZa 276'
+    'ZaZa 276',
+    'Otto'
     // 'AnotherSpecialMember'
   ],
 
