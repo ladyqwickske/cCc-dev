@@ -841,7 +841,7 @@
   <div id="troops" class="tab-content active">
     <div class="header">
       <h1><img src="troops.png" alt="Troops" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Troop Level Tracker</h1>
-      <p>Track and manage troop levels (G, M, S, E) and crypt levels for each member</p>
+      <p>Track and manage troop levels (G, M, S, E), crypt level, and derived troop tier (T) for each member</p>
     </div>
 
     <div class="tabs-container">
@@ -987,6 +987,7 @@
               <th class="center" colspan="2">S</th>
               <th class="center" colspan="2">E</th>
               <th class="center crypt-col" colspan="2">C</th>
+              <th class="center" colspan="2">Tier</th>
             </tr>
             <tr>
               <th class="center sortable" data-column="G_currentLevel">Level</th>
@@ -999,6 +1000,8 @@
               <th class="center sortable" data-column="E_currentDate">Date</th>
               <th class="center crypt-col sortable" data-column="C_currentLevel">Level</th>
               <th class="center crypt-col sortable" data-column="C_currentDate">Date</th>
+              <th class="center sortable" data-column="T_currentLevel">T Level</th>
+              <th class="center sortable" data-column="GT_levelGap">G-T</th>
             </tr>
           </thead>
           <tbody id="troopMembersTableBody"></tbody>
@@ -1160,6 +1163,34 @@
             }
             row.appendChild(dateCell);
           });
+
+          const tLevelCell = document.createElement('td');
+          tLevelCell.className = 'center';
+          tLevelCell.style.fontWeight = '600';
+          const tLevel = member.T_currentLevel;
+          if (tLevel !== null && tLevel !== undefined) {
+            tLevelCell.textContent = tLevel;
+            tLevelCell.style.color = '#ffb300';
+          } else {
+            tLevelCell.textContent = '−';
+            tLevelCell.style.color = '#b0b0b0';
+            tLevelCell.style.fontWeight = '400';
+          }
+          row.appendChild(tLevelCell);
+
+          const gapCell = document.createElement('td');
+          gapCell.className = 'center';
+          gapCell.style.fontWeight = '600';
+          const gtGap = member.GT_levelGap;
+          if (gtGap !== null && gtGap !== undefined) {
+            gapCell.textContent = gtGap;
+            gapCell.style.color = gtGap > 0 ? '#ffc933' : '#e0e0e0';
+          } else {
+            gapCell.textContent = '−';
+            gapCell.style.color = '#b0b0b0';
+            gapCell.style.fontWeight = '400';
+          }
+          row.appendChild(gapCell);
 
           tbody.appendChild(row);
         });

@@ -790,12 +790,12 @@
       <!-- TROOP EVENTS TAB -->
       <div id="troopEventsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Troop Events</h3>
-        <p style="margin-bottom:12px; color:#e0e0e0;">Track troop G-level participation for events with troop-based targets.</p>
+        <p style="margin-bottom:12px; color:#e0e0e0;">Track troop participation using G level, T tier, and G-T gap for troop-based targets.</p>
         <div class="form-grid" style="margin-bottom:12px;">
           <div><label for="troopEventSelect">Event</label><select id="troopEventSelect" onchange="EventsTab.onTroopEventSelected()"><option value="">-- Select Troop Event --</option></select></div>
         </div>
         <div id="troopEventActions" style="display:none; margin-bottom:12px;">
-          <p style="color:#e0e0e0; font-size:13px; margin-bottom:12px;">Event configured with G-level targets. Enter points for each member below or troop levels will be automatically calculated from the Troops tracker.</p>
+          <p style="color:#e0e0e0; font-size:13px; margin-bottom:12px;">Event targets are computed from effective level = G - (G-T), so T members are differentiated automatically.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div><label for="troopMember">Member</label><select id="troopMember"><option value="">-- Select Member --</option></select></div>
             <div><label for="troopPoints">Points Achieved</label><input type="number" id="troopPoints" placeholder="Enter points" onkeypress="if(event.key==='Enter'){EventsTab.submitTroopEntry();}"></div>
@@ -1198,6 +1198,63 @@
         } catch (e) {
           return null;
         }
+      }
+
+      function getMemberTroopLevelContext(memberName) {
+        const nameKey = normalizeName(memberName);
+        const troopSummary = troopSummaryMap[nameKey] || {};
+
+        const gLevelRaw = troopSummary.G_currentLevel ?? troopSummary.G ?? null;
+        const tLevelRaw = troopSummary.T_currentLevel ?? troopSummary.T ?? null;
+        const gapRaw = troopSummary.GT_levelGap ?? null;
+
+        const gLevel = gLevelRaw !== null && gLevelRaw !== undefined && !isNaN(Number(gLevelRaw)) ? Number(gLevelRaw) : null;
+        const tLevel = tLevelRaw !== null && tLevelRaw !== undefined && !isNaN(Number(tLevelRaw)) ? Number(tLevelRaw) : null;
+
+        let gap = gapRaw !== null && gapRaw !== undefined && !isNaN(Number(gapRaw)) ? Number(gapRaw) : null;
+        if (gap === null && gLevel !== null && tLevel !== null) {
+          gap = Math.max(0, gLevel - tLevel);
+        }
+
+        let effectiveLevel = null;
+        if (gLevel !== null) {
+          if (gap !== null) {
+            effectiveLevel = Math.max(0, gLevel - gap);
+          } else {
+            effectiveLevel = gLevel;
+          }
+        }
+
+        if (effectiveLevel === null && tLevel !== null) {
+          effectiveLevel = tLevel;
+        }
+
+        return {
+          gLevel,
+          tLevel,
+          gtGap: gap,
+          effectiveLevel
+        };
+      }
+
+      function getTargetPointsForTroopContext(eventTypeName, troopContext) {
+        if (!troopContext) return null;
+        const targets = getEventTroopTargets(eventTypeName);
+        if (!targets) return null;
+
+        const effectiveLevel = troopContext.effectiveLevel;
+        if (effectiveLevel === null || effectiveLevel === undefined) return null;
+
+        const direct = Number(targets[String(effectiveLevel)]);
+        if (!isNaN(direct)) return direct;
+
+        const fallbackG = troopContext.gLevel;
+        if (fallbackG !== null && fallbackG !== undefined) {
+          const gTarget = Number(targets[String(fallbackG)]);
+          if (!isNaN(gTarget)) return gTarget;
+        }
+
+        return null;
       }
 
       function submitCreateEvent() {
@@ -1615,6 +1672,8 @@
         const columns = [
           { key: 'memberName', label: 'Member Name' },
           { key: 'gLevel', label: 'G Level' },
+          { key: 'tLevel', label: 'T Level' },
+          { key: 'gtGap', label: 'G-T' },
           { key: 'target', label: 'Target' },
           { key: 'achieved', label: 'Achieved' },
           { key: 'status', label: 'Status' }
@@ -1623,17 +1682,11 @@
         // Build data rows with computed fields
         let rows = participationRawData.map(p => {
           const pts = Number(p.value1 ?? 0);
-          const nameKey = normalizeName(p.memberName);
-          const troopSummary = troopSummaryMap[nameKey] || {};
-          const gLevelRaw = troopSummary.G_currentLevel ?? troopSummary.G ?? null;
-          const gLevel = gLevelRaw !== null && gLevelRaw !== undefined ? Number(gLevelRaw) : null;
+          const troopContext = getMemberTroopLevelContext(p.memberName);
           const eventTypeName = selectedEvent?.eventType || '';
-          const targets = getEventTroopTargets(eventTypeName);
-          const targetPoints = (targets && gLevel !== null && gLevel !== undefined)
-            ? Number(targets[String(gLevel)])
-            : null;
+          const targetPoints = getTargetPointsForTroopContext(eventTypeName, troopContext);
           const eventEndDate = parseDateSafe(selectedEvent?.endDate);
-          const joinDate = memberJoinDatesMap[nameKey] || null;
+          const joinDate = memberJoinDatesMap[normalizeName(p.memberName)] || null;
           const notInClan = joinDate && eventEndDate && joinDate > eventEndDate;
           let statusIcon = '<span class="status-icon na">—</span>';
           let statusSort = 0;
@@ -1651,7 +1704,9 @@
           }
           return {
             memberName: p.memberName,
-            gLevel: gLevel !== null && !isNaN(gLevel) ? gLevel : '—',
+            gLevel: troopContext.gLevel !== null && !isNaN(troopContext.gLevel) ? troopContext.gLevel : '—',
+            tLevel: troopContext.tLevel !== null && !isNaN(troopContext.tLevel) ? troopContext.tLevel : '—',
+            gtGap: troopContext.gtGap !== null && !isNaN(troopContext.gtGap) ? troopContext.gtGap : '—',
             target: targetPoints !== null && !isNaN(targetPoints) ? targetPoints : '—',
             achieved: pts,
             status: statusIcon,
@@ -1665,7 +1720,7 @@
             if (manualSortColumn === 'memberName') {
               vA = (vA || '').toLowerCase();
               vB = (vB || '').toLowerCase();
-            } else if (manualSortColumn === 'gLevel' || manualSortColumn === 'target' || manualSortColumn === 'achieved') {
+            } else if (manualSortColumn === 'gLevel' || manualSortColumn === 'tLevel' || manualSortColumn === 'gtGap' || manualSortColumn === 'target' || manualSortColumn === 'achieved') {
               vA = Number(vA) || 0;
               vB = Number(vB) || 0;
             } else if (manualSortColumn === 'status') {
@@ -1679,7 +1734,7 @@
         }
         tbody.innerHTML = '';
         rows.forEach(row => {
-          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
+          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.tLevel}</td><td>${row.gtGap}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
         });
         // Add sort indicators
         thead.querySelectorAll('th.sortable').forEach(th => {
@@ -1698,6 +1753,8 @@
         const columns = [
           { key: 'memberName', label: 'Member Name' },
           { key: 'gLevel', label: 'G Level' },
+          { key: 'tLevel', label: 'T Level' },
+          { key: 'gtGap', label: 'G-T' },
           { key: 'target', label: 'Target' },
           { key: 'achieved', label: 'Achieved' },
           { key: 'status', label: 'Status' }
@@ -1706,17 +1763,11 @@
         // Build data rows with computed fields
         let rows = participationRawData.map(p => {
           const pts = Number(p.value1 ?? 0);
-          const nameKey = normalizeName(p.memberName);
-          const troopSummary = troopSummaryMap[nameKey] || {};
-          const gLevelRaw = troopSummary.G_currentLevel ?? troopSummary.G ?? null;
-          const gLevel = gLevelRaw !== null && gLevelRaw !== undefined ? Number(gLevelRaw) : null;
+          const troopContext = getMemberTroopLevelContext(p.memberName);
           const eventTypeName = selectedEvent?.eventType || '';
-          const targets = getEventTroopTargets(eventTypeName);
-          const targetPoints = (targets && gLevel !== null && gLevel !== undefined)
-            ? Number(targets[String(gLevel)])
-            : null;
+          const targetPoints = getTargetPointsForTroopContext(eventTypeName, troopContext);
           const eventEndDate = parseDateSafe(selectedEvent?.endDate);
-          const joinDate = memberJoinDatesMap[nameKey] || null;
+          const joinDate = memberJoinDatesMap[normalizeName(p.memberName)] || null;
           const notInClan = joinDate && eventEndDate && joinDate > eventEndDate;
           let statusIcon = '<span class="status-icon na">—</span>';
           let statusSort = 0;
@@ -1734,7 +1785,9 @@
           }
           return {
             memberName: p.memberName,
-            gLevel: gLevel !== null && !isNaN(gLevel) ? gLevel : '—',
+            gLevel: troopContext.gLevel !== null && !isNaN(troopContext.gLevel) ? troopContext.gLevel : '—',
+            tLevel: troopContext.tLevel !== null && !isNaN(troopContext.tLevel) ? troopContext.tLevel : '—',
+            gtGap: troopContext.gtGap !== null && !isNaN(troopContext.gtGap) ? troopContext.gtGap : '—',
             target: targetPoints !== null && !isNaN(targetPoints) ? targetPoints : '—',
             achieved: pts,
             status: statusIcon,
@@ -1748,7 +1801,7 @@
             if (troopSortColumn === 'memberName') {
               vA = (vA || '').toLowerCase();
               vB = (vB || '').toLowerCase();
-            } else if (troopSortColumn === 'gLevel' || troopSortColumn === 'target' || troopSortColumn === 'achieved') {
+            } else if (troopSortColumn === 'gLevel' || troopSortColumn === 'tLevel' || troopSortColumn === 'gtGap' || troopSortColumn === 'target' || troopSortColumn === 'achieved') {
               vA = Number(vA) || 0;
               vB = Number(vB) || 0;
             } else if (troopSortColumn === 'status') {
@@ -1762,7 +1815,7 @@
         }
         tbody.innerHTML = '';
         rows.forEach(row => {
-          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
+          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.tLevel}</td><td>${row.gtGap}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
         });
         // Add sort indicators
         thead.querySelectorAll('th.sortable').forEach(th => {
