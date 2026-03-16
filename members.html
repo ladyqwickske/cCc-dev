@@ -803,7 +803,7 @@
       <div id="chestPointsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Chest Points - Last Active Periods</h3>
         <div class="controls" style="margin-bottom:10px;">
-          <button class="btn" onclick="MembersTab.loadChestPointsTabData()">🔄 Refresh Chest Points</button>
+          <button class="btn" onclick="MembersTab.loadChestPointsTabData(true)">🔄 Refresh Chest Points</button>
         </div>
         <div id="chestPointsMeta" class="points-meta">Target: 3000 points (green), within 10% (orange), below (red).</div>
         <div class="table-container" style="max-height:52vh;">
@@ -863,6 +863,7 @@
       let filteredData = [];
       let currentSort = { column: null, direction: 'asc' };
       let chestPointsData = null;
+      let chestPointsLoadedAt = 0;
 
       function init() {
         loadMembers();
@@ -873,12 +874,19 @@
         });
       }
 
-      async function loadChestPointsTabData() {
+      async function loadChestPointsTabData(forceRefresh = false) {
         const loading = document.getElementById('chestPointsLoading');
         const error = document.getElementById('chestPointsError');
         const table = document.getElementById('chestPointsTable');
         const empty = document.getElementById('chestPointsEmpty');
         if (!loading || !error || !table || !empty) return;
+
+        const cacheAgeMs = Date.now() - chestPointsLoadedAt;
+        if (!forceRefresh && chestPointsData && cacheAgeMs < 21600000) {
+          error.style.display = 'none';
+          renderChestPointsTable();
+          return;
+        }
 
         loading.style.display = 'block';
         error.style.display = 'none';
@@ -898,6 +906,7 @@
           }
 
           chestPointsData = result;
+          chestPointsLoadedAt = Date.now();
           renderChestPointsTable();
         } catch (e) {
           error.textContent = `Error: ${e.message || e}`;
@@ -1240,7 +1249,29 @@
               status.classList.add('ok');
               document.getElementById('mightValue').value = '';
               document.getElementById('mightMemberSelect').focus();
-              setTimeout(loadMembers, 500);
+              // Optimistic update: patch the member in-memory and re-render without a network round-trip.
+              // This avoids the expensive getMembersListWithProgress reload on every might save.
+              const memberIdx = membersData.findIndex(m => m.name === member);
+              if (memberIdx !== -1) {
+                const prevMight = membersData[memberIdx].latestMight != null
+                  ? membersData[memberIdx].latestMight
+                  : membersData[memberIdx].startMight;
+                membersData[memberIdx].latestMight = might;
+                membersData[memberIdx].latestMightDate = date;
+                membersData[memberIdx].recentGrowthPercent = (prevMight && prevMight > 0)
+                  ? ((might - prevMight) / prevMight) * 100
+                  : 0;
+                // Keep filteredData in sync (it may hold a copy of the same object)
+                const filteredIdx = filteredData.findIndex(m => m.name === member);
+                if (filteredIdx !== -1) {
+                  filteredData[filteredIdx] = membersData[memberIdx];
+                }
+                updateStats();
+                renderTable();
+              } else {
+                // Member not in local cache (edge case) – fall back to full reload
+                setTimeout(loadMembers, 500);
+              }
             } else {
               status.textContent = result?.message || 'Failed to save.';
               status.classList.add('err');
