@@ -760,6 +760,7 @@
     <div class="tabs-container">
       <div class="tabs">
         <button class="tab active" onclick="MembersTab.switchTab('mightTab', event)">📊 Track Might</button>
+        <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
         <button class="tab" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
         <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
         <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
@@ -769,6 +770,16 @@
         <h3 style="margin:0 0 12px 0;">Track Member Might</h3>
         <div class="form-grid might-form-grid"><div><label for="mightMemberSelect">Member</label><select id="mightMemberSelect"></select></div><div><label for="mightValue">Might</label><input type="number" id="mightValue" placeholder="Enter current might" onkeypress="if(event.key==='Enter'){MembersTab.submitMightEntry();}"></div><div><label for="mightDate">Date</label><input type="date" id="mightDate"><div class="note">Defaults to today</div></div></div>
         <button class="btn" onclick="MembersTab.submitMightEntry()">💾 Save Might</button><div id="mightStatus" class="status"></div>
+      </div>
+      <div id="heroTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Track Hero Level</h3>
+        <div class="form-grid might-form-grid">
+          <div><label for="heroMemberSelect">Member</label><select id="heroMemberSelect"></select></div>
+          <div><label for="heroLevelValue">Hero Level</label><input type="number" id="heroLevelValue" placeholder="Enter hero level" min="0" step="1" onkeypress="if(event.key==='Enter'){MembersTab.submitHeroLevelEntry();}"></div>
+          <div><label for="heroLevelDate">Date</label><input type="date" id="heroLevelDate"><div class="note">Defaults to today</div></div>
+        </div>
+        <button class="btn" onclick="MembersTab.submitHeroLevelEntry()">💾 Save Hero Level</button>
+        <div id="heroLevelStatus" class="status"></div>
       </div>
       <div id="addMemberTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Add New Member</h3>
@@ -828,6 +839,7 @@
         <thead>
           <tr>
             <th class="sortable" data-column="name">Name</th>
+            <th class="sortable" data-column="heroLevel" title="Latest recorded hero level">Hero Level</th>
             <th class="sortable" data-column="startMight">Starting Might</th>
             <th class="sortable" data-column="joinDate">Join Date</th>
             <th class="sortable" data-column="growth" title="Total growth from start to latest (all-time)">Growth %</th>
@@ -1165,6 +1177,7 @@
             case 'startMight': aVal = a.startMight || 0; bVal = b.startMight || 0; break;
             case 'latestMight': aVal = a.latestMight || 0; bVal = b.latestMight || 0; break;
             case 'latestMightDate': aVal = parseDateUTC(a.latestMightDate) || new Date(0); bVal = parseDateUTC(b.latestMightDate) || new Date(0); break;
+            case 'heroLevel': aVal = a.heroLevel !== null && a.heroLevel !== undefined ? a.heroLevel : -1; bVal = b.heroLevel !== null && b.heroLevel !== undefined ? b.heroLevel : -1; break;
             case 'growth': aVal = (a.startMight && a.latestMight && a.startMight > 0) ? ((a.latestMight - a.startMight) / a.startMight) * 100 : -Infinity; bVal = (b.startMight && b.latestMight && b.startMight > 0) ? ((b.latestMight - b.startMight) / b.startMight) * 100 : -Infinity; break;
             case 'recentGrowth': aVal = a.recentGrowthPercent || 0; bVal = b.recentGrowthPercent || 0; break;
             default: aVal = 0; bVal = 0;
@@ -1195,28 +1208,32 @@
             recentGrowthPercent = (member.recentGrowthPercent).toFixed(1) + '%';
           }
           const row = document.createElement('tr');
-          row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td class="might-value">${formatMight(member.startMight)}</td><td class="date-value">${formatDate(member.joinDate)}</td><td class="might-value">${growthPercent}</td><td class="might-value">${formatMight(member.latestMight)}</td><td class="date-value">${formatDate(member.latestMightDate)}</td><td class="might-value">${recentGrowthPercent}</td>`;
+          const heroLevelDisplay = member.heroLevel !== null && member.heroLevel !== undefined
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#4a148c;color:#e1bee7;" title="Updated: ${member.heroLevelDate || '?'}">${member.heroLevel}</span>`
+            : '<span style="color:#666">—</span>';
+          row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroLevelDisplay}</td><td class="might-value">${formatMight(member.startMight)}</td><td class="date-value">${formatDate(member.joinDate)}</td><td class="might-value">${growthPercent}</td><td class="might-value">${formatMight(member.latestMight)}</td><td class="date-value">${formatDate(member.latestMightDate)}</td><td class="might-value">${recentGrowthPercent}</td>`;
           tbody.appendChild(row);
         });
       }
 
       function populateMemberSelect() {
         const select = document.getElementById('mightMemberSelect');
+        const heroSelect = document.getElementById('heroMemberSelect');
         const oldSelect = document.getElementById('oldMemberSelect');
         const removeSelect = document.getElementById('removeMemberSelect');
         if (!membersData || membersData.length === 0) {
           const empty = '<option value="">-- No members --</option>';
-          [select, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = empty; });
+          [select, heroSelect, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = empty; });
           return;
         }
         const sorted = [...membersData].sort((a, b) => a.name.localeCompare(b.name));
         const options = ['<option value="">-- Select member --</option>'].concat(sorted.map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`)).join('');
-        [select, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = options; });
+        [select, heroSelect, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = options; });
       }
 
       function setTodayDefault() {
         const today = getTodayUTCString();
-        ['mightDate', 'joinDate', 'endDate'].forEach(id => {
+        ['mightDate', 'heroLevelDate', 'joinDate', 'endDate'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.value = today;
         });
@@ -1281,6 +1298,47 @@
             status.textContent = `Error: ${error.message}`;
             status.classList.add('err');
           });
+      }
+
+      function submitHeroLevelEntry() {
+        const playerName = document.getElementById('heroMemberSelect').value;
+        const levelRaw = document.getElementById('heroLevelValue').value;
+        const date = document.getElementById('heroLevelDate').value;
+        const status = document.getElementById('heroLevelStatus');
+        status.textContent = '';
+        status.className = 'status';
+        if (!playerName) { status.textContent = 'Please select a member.'; status.classList.add('err'); return; }
+        const level = parseInt(levelRaw, 10);
+        if (isNaN(level) || level < 0) { status.textContent = 'Enter a valid hero level (0 or higher).'; status.classList.add('err'); return; }
+        status.textContent = 'Saving...';
+        const customTimestamp = date ? date + 'T12:00:00Z' : null;
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'recordHeroLevel', playerName, level, customTimestamp })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success) {
+              status.textContent = result.message || `Hero level ${level} saved for ${playerName}.`;
+              status.classList.add('ok');
+              document.getElementById('heroLevelValue').value = '';
+              document.getElementById('heroMemberSelect').focus();
+              // Optimistic update in local data
+              const idx = membersData.findIndex(m => m.name === playerName);
+              if (idx !== -1) {
+                membersData[idx].heroLevel = level;
+                membersData[idx].heroLevelDate = date || null;
+                const fidx = filteredData.findIndex(m => m.name === playerName);
+                if (fidx !== -1) filteredData[fidx] = membersData[idx];
+                renderTable();
+              }
+            } else {
+              status.textContent = result?.message || 'Failed to save.';
+              status.classList.add('err');
+            }
+          })
+          .catch(error => { status.textContent = `Error: ${error.message}`; status.classList.add('err'); });
       }
 
       function submitAddMember() {
@@ -1446,7 +1504,7 @@
         document.getElementById('memberEmpty').style.display = 'block';
       }
 
-      return { init, loadMembers, switchTab, submitMightEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData };
+      return { init, loadMembers, switchTab, submitMightEntry, submitHeroLevelEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData };
     })();
   </script>
 </body>
