@@ -1209,7 +1209,7 @@
           }
           const row = document.createElement('tr');
           const heroLevelDisplay = member.heroLevel !== null && member.heroLevel !== undefined
-            ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#4a148c;color:#e1bee7;" title="Updated: ${member.heroLevelDate || '?'}">${member.heroLevel}</span>`
+            ? (() => { const lvl = member.heroLevel; let bg, fg; if (lvl > 500) { bg='#4a148c'; fg='#e1bee7'; } else if (lvl > 400) { bg='#0d47a1'; fg='#bbdefb'; } else if (lvl > 300) { bg='#1b5e20'; fg='#c8e6c9'; } else if (lvl > 200) { bg='#827717'; fg='#fff9c4'; } else if (lvl > 100) { bg='#37474f'; fg='#eceff1'; } else { bg='#4e342e'; fg='#d7ccc8'; } return `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${bg};color:${fg};" title="Updated: ${member.heroLevelDate || '?'}">${lvl}</span>`; })()
             : '<span style="color:#666">—</span>';
           row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroLevelDisplay}</td><td class="might-value">${formatMight(member.startMight)}</td><td class="date-value">${formatDate(member.joinDate)}</td><td class="might-value">${growthPercent}</td><td class="might-value">${formatMight(member.latestMight)}</td><td class="date-value">${formatDate(member.latestMightDate)}</td><td class="might-value">${recentGrowthPercent}</td>`;
           tbody.appendChild(row);
