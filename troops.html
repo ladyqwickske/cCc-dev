@@ -428,6 +428,24 @@
       color: #ffb300;
     }
 
+    /* Category badges */
+    .troop-category {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      min-width: 40px;
+    }
+    .troop-category.cat-T9  { background: #6a1fd1; color: #e8d5ff; border: 1px solid #9c5de8; }
+    .troop-category.cat-G9  { background: #1565c0; color: #bbdefb; border: 1px solid #42a5f5; }
+    .troop-category.cat-T8  { background: #2e7d32; color: #c8e6c9; border: 1px solid #66bb6a; }
+    .troop-category.cat-G8  { background: #e65100; color: #ffe0b2; border: 1px solid #ffa726; }
+    .troop-category.cat-G7  { background: #37474f; color: #cfd8dc; border: 1px solid #78909c; }
+    .troop-category.cat-none { color: #666; font-style: italic; font-weight: 400; font-size: 12px; }
+
     /* Header Paragraph */
     .header { margin-bottom: 16px; }
     .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
@@ -982,6 +1000,7 @@
           <thead>
             <tr>
               <th class="sortable" data-column="playerName" rowspan="2">Member Name</th>
+              <th class="center sortable" data-column="category" rowspan="2">Category</th>
               <th class="center" colspan="2">G</th>
               <th class="center" colspan="2">M</th>
               <th class="center" colspan="2">S</th>
@@ -1069,8 +1088,36 @@
         renderTroopSummary();
       }
 
+      // Category priority order (highest first) for sorting
+      const CATEGORY_ORDER = { 'T9': 1, 'G9': 2, 'T8': 3, 'G8': 4, 'G7': 5 };
+
+      /**
+       * Determine the highest troop category for a member based on current G, M, S levels.
+       * T9 = G≥9 AND S≥9 AND M≥9
+       * G9 = G≥9
+       * T8 = G≥8 AND S≥8 AND M≥8
+       * G8 = G≥8
+       * G7 = G≥7
+       */
+      function calculateTroopCategory(member) {
+        const g = member.G_currentLevel !== null && member.G_currentLevel !== undefined ? Number(member.G_currentLevel) : null;
+        const m = member.M_currentLevel !== null && member.M_currentLevel !== undefined ? Number(member.M_currentLevel) : null;
+        const s = member.S_currentLevel !== null && member.S_currentLevel !== undefined ? Number(member.S_currentLevel) : null;
+        if (g === null) return null;
+        if (g >= 9 && m !== null && m >= 9 && s !== null && s >= 9) return 'T9';
+        if (g >= 9) return 'G9';
+        if (g >= 8 && m !== null && m >= 8 && s !== null && s >= 8) return 'T8';
+        if (g >= 8) return 'G8';
+        if (g >= 7) return 'G7';
+        return null;
+      }
+
       function getSortValue(member, column) {
         if (column === 'playerName') return (member.playerName || '').toLowerCase();
+        if (column === 'category') {
+          const cat = calculateTroopCategory(member);
+          return cat ? (CATEGORY_ORDER[cat] || 99) : 100;
+        }
         if (column && column.endsWith('Date')) {
           const value = member[column];
           if (!value) return null;
@@ -1114,6 +1161,23 @@
           nameCell.style.fontWeight = '500';
           nameCell.textContent = member.playerName;
           row.appendChild(nameCell);
+
+          // Category cell
+          const catCell = document.createElement('td');
+          catCell.className = 'center';
+          const cat = calculateTroopCategory(member);
+          if (cat) {
+            const badge = document.createElement('span');
+            badge.className = `troop-category cat-${cat}`;
+            badge.textContent = cat;
+            catCell.appendChild(badge);
+          } else {
+            const span = document.createElement('span');
+            span.className = 'troop-category cat-none';
+            span.textContent = '—';
+            catCell.appendChild(span);
+          }
+          row.appendChild(catCell);
 
           types.forEach(type => {
             const levelCell = document.createElement('td');
@@ -1318,6 +1382,7 @@
               showStatus(result.message, 'ok');
               resetTroopForm();
               updatePlayerHistory();
+              loadTroopSummary();
             } else {
               showStatus(result.message, 'err');
             }
