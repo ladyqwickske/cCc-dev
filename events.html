@@ -790,12 +790,12 @@
       <!-- TROOP EVENTS TAB -->
       <div id="troopEventsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Troop Events</h3>
-        <p style="margin-bottom:12px; color:#e0e0e0;">Track troop G-level participation for events with troop-based targets.</p>
+        <p style="margin-bottom:12px; color:#e0e0e0;">Track troop category participation for events with category-based targets.</p>
         <div class="form-grid" style="margin-bottom:12px;">
           <div><label for="troopEventSelect">Event</label><select id="troopEventSelect" onchange="EventsTab.onTroopEventSelected()"><option value="">-- Select Troop Event --</option></select></div>
         </div>
         <div id="troopEventActions" style="display:none; margin-bottom:12px;">
-          <p style="color:#e0e0e0; font-size:13px; margin-bottom:12px;">Event configured with G-level targets. Enter points for each member below or troop levels will be automatically calculated from the Troops tracker.</p>
+          <p style="color:#e0e0e0; font-size:13px; margin-bottom:12px;">Event configured with category-based targets (G7/G8/T8/G9/T9). Enter points for each member below.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div><label for="troopMember">Member</label><select id="troopMember"><option value="">-- Select Member --</option></select></div>
             <div><label for="troopPoints">Points Achieved</label><input type="number" id="troopPoints" placeholder="Enter points" onkeypress="if(event.key==='Enter'){EventsTab.submitTroopEntry();}"></div>
@@ -828,10 +828,10 @@
           <div class="form-grid"><div><label for="newEventTypeName">Event Type Name</label><input type="text" id="newEventTypeName" placeholder="e.g., Alliance War"></div><div><label for="newEventTypeMethod">Tracking Method</label><select id="newEventTypeMethod" onchange="EventsTab.updateEventTypeMethod()"><option value="" selected>-- Select Method --</option><option value="chest-based">Chest-Based</option><option value="manual-entry">Manual Entry</option><option value="troop-based">Troop-Based</option><option value="period-marker">Period Marker (No Tracking)</option></select></div></div>
           <div id="chestTypeSection" style="display:none; margin-bottom:12px;"><label>Chest Types for This Event Type</label><div id="chestTypesList" style="max-height:200px; overflow-y:auto; border:1px solid #444; border-radius:6px; padding:8px; background:#232526;"><div class="loading" style="padding:20px; text-align:center; color:#e0e0e0;">Loading chest types...</div></div><div class="note">Select which chest types count for this event type.</div></div>
           <div id="troopTargetSection" style="display:none; margin-bottom:12px;">
-            <label style="display:block; margin-bottom:8px;">G Level Targets</label>
-            <p style="color:#e0e0e0; font-size:12px; margin-bottom:12px;">Set target points for each G level.</p>
+            <label style="display:block; margin-bottom:8px;">Category Targets</label>
+            <p style="color:#e0e0e0; font-size:12px; margin-bottom:12px;">Set target points for each troop category (G7, G8, T8, G9, T9).</p>
             <div id="troopTargetsList" style="border:1px solid #444; border-radius:6px; padding:12px; background:#232526; margin-bottom:12px; max-height:250px; overflow-y:auto;"></div>
-            <button type="button" class="btn" style="width:100%; margin-bottom:12px;" onclick="EventsTab.addTroopTargetRow()">➕ Add G Level Target</button>
+            <button type="button" class="btn" style="width:100%; margin-bottom:12px;" onclick="EventsTab.addTroopTargetRow()">➕ Add Category Target</button>
           </div>
           <div style="margin-bottom:12px;"><label for="newEventTypeDesc">Description (Optional)</label><input type="text" id="newEventTypeDesc" placeholder="Brief description"></div>
           <div style="margin-bottom:12px;"><label for="newEventTypeThreshold">Threshold (Optional)</label><input type="number" id="newEventTypeThreshold" placeholder="0" min="0" step="1"><div class="note">Target chest count, points, or troop count (0 to disable).</div></div>
@@ -1172,7 +1172,7 @@
         return fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getAllTroopLevelsSummary' })
+          body: JSON.stringify({ action: 'getTroopCategories' })
         })
           .then(res => res.json())
           .then(result => {
@@ -1614,7 +1614,7 @@
         const tbody = document.getElementById('manualParticipationTableBody');
         const columns = [
           { key: 'memberName', label: 'Member Name' },
-          { key: 'gLevel', label: 'G Level' },
+          { key: 'category', label: 'Category' },
           { key: 'target', label: 'Target' },
           { key: 'achieved', label: 'Achieved' },
           { key: 'status', label: 'Status' }
@@ -1624,14 +1624,11 @@
         let rows = participationRawData.map(p => {
           const pts = Number(p.value1 ?? 0);
           const nameKey = normalizeName(p.memberName);
-          const troopSummary = troopSummaryMap[nameKey] || {};
-          const gLevelRaw = troopSummary.G_currentLevel ?? troopSummary.G ?? null;
-          const gLevel = gLevelRaw !== null && gLevelRaw !== undefined ? Number(gLevelRaw) : null;
+          const troopEntry = troopSummaryMap[nameKey] || {};
+          const category = troopEntry.category || null;
           const eventTypeName = selectedEvent?.eventType || '';
           const targets = getEventTroopTargets(eventTypeName);
-          const targetPoints = (targets && gLevel !== null && gLevel !== undefined)
-            ? Number(targets[String(gLevel)])
-            : null;
+          const targetPoints = (targets && category) ? Number(targets[category]) : null;
           const eventEndDate = parseDateSafe(selectedEvent?.endDate);
           const joinDate = memberJoinDatesMap[nameKey] || null;
           const notInClan = joinDate && eventEndDate && joinDate > eventEndDate;
@@ -1651,11 +1648,12 @@
           }
           return {
             memberName: p.memberName,
-            gLevel: gLevel !== null && !isNaN(gLevel) ? gLevel : '—',
+            category: category || '—',
             target: targetPoints !== null && !isNaN(targetPoints) ? targetPoints : '—',
             achieved: pts,
             status: statusIcon,
-            _statusSort: statusSort
+            _statusSort: statusSort,
+            _categorySort: category ? ['G7','G8','T8','G9','T9'].indexOf(category) : -1
           };
         });
         // Sorting
@@ -1665,7 +1663,10 @@
             if (manualSortColumn === 'memberName') {
               vA = (vA || '').toLowerCase();
               vB = (vB || '').toLowerCase();
-            } else if (manualSortColumn === 'gLevel' || manualSortColumn === 'target' || manualSortColumn === 'achieved') {
+            } else if (manualSortColumn === 'category') {
+              vA = a._categorySort;
+              vB = b._categorySort;
+            } else if (manualSortColumn === 'target' || manualSortColumn === 'achieved') {
               vA = Number(vA) || 0;
               vB = Number(vB) || 0;
             } else if (manualSortColumn === 'status') {
@@ -1679,7 +1680,10 @@
         }
         tbody.innerHTML = '';
         rows.forEach(row => {
-          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
+          const catBadge = row.category !== '—'
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#37474f;color:#cfd8dc;">${escapeHtml(row.category)}</span>`
+            : '<span style="color:#666">—</span>';
+          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
         });
         // Add sort indicators
         thead.querySelectorAll('th.sortable').forEach(th => {
@@ -1697,7 +1701,7 @@
         const tbody = document.getElementById('troopParticipationTableBody');
         const columns = [
           { key: 'memberName', label: 'Member Name' },
-          { key: 'gLevel', label: 'G Level' },
+          { key: 'category', label: 'Category' },
           { key: 'target', label: 'Target' },
           { key: 'achieved', label: 'Achieved' },
           { key: 'status', label: 'Status' }
@@ -1707,14 +1711,11 @@
         let rows = participationRawData.map(p => {
           const pts = Number(p.value1 ?? 0);
           const nameKey = normalizeName(p.memberName);
-          const troopSummary = troopSummaryMap[nameKey] || {};
-          const gLevelRaw = troopSummary.G_currentLevel ?? troopSummary.G ?? null;
-          const gLevel = gLevelRaw !== null && gLevelRaw !== undefined ? Number(gLevelRaw) : null;
+          const troopEntry = troopSummaryMap[nameKey] || {};
+          const category = troopEntry.category || null;
           const eventTypeName = selectedEvent?.eventType || '';
           const targets = getEventTroopTargets(eventTypeName);
-          const targetPoints = (targets && gLevel !== null && gLevel !== undefined)
-            ? Number(targets[String(gLevel)])
-            : null;
+          const targetPoints = (targets && category) ? Number(targets[category]) : null;
           const eventEndDate = parseDateSafe(selectedEvent?.endDate);
           const joinDate = memberJoinDatesMap[nameKey] || null;
           const notInClan = joinDate && eventEndDate && joinDate > eventEndDate;
@@ -1734,11 +1735,12 @@
           }
           return {
             memberName: p.memberName,
-            gLevel: gLevel !== null && !isNaN(gLevel) ? gLevel : '—',
+            category: category || '—',
             target: targetPoints !== null && !isNaN(targetPoints) ? targetPoints : '—',
             achieved: pts,
             status: statusIcon,
-            _statusSort: statusSort
+            _statusSort: statusSort,
+            _categorySort: category ? ['G7','G8','T8','G9','T9'].indexOf(category) : -1
           };
         });
         // Sorting
@@ -1748,7 +1750,10 @@
             if (troopSortColumn === 'memberName') {
               vA = (vA || '').toLowerCase();
               vB = (vB || '').toLowerCase();
-            } else if (troopSortColumn === 'gLevel' || troopSortColumn === 'target' || troopSortColumn === 'achieved') {
+            } else if (troopSortColumn === 'category') {
+              vA = a._categorySort;
+              vB = b._categorySort;
+            } else if (troopSortColumn === 'target' || troopSortColumn === 'achieved') {
               vA = Number(vA) || 0;
               vB = Number(vB) || 0;
             } else if (troopSortColumn === 'status') {
@@ -1762,7 +1767,10 @@
         }
         tbody.innerHTML = '';
         rows.forEach(row => {
-          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td>${row.gLevel}</td><td>${row.target}</td><td>${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
+          const catBadge = row.category !== '—'
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#37474f;color:#cfd8dc;">${escapeHtml(row.category)}</span>`
+            : '<span style="color:#666">—</span>';
+          tbody.innerHTML += `<tr><td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.status}</td></tr>`;
         });
         // Add sort indicators
         thead.querySelectorAll('th.sortable').forEach(th => {
@@ -1902,20 +1910,16 @@
         row.className = 'troop-target-row';
         row.id = rowId;
         row.style.cssText = 'display:grid; grid-template-columns:1fr 2fr auto; gap:8px; margin-bottom:8px;';
+        const categories = ['G7', 'G8', 'T8', 'G9', 'T9'];
+        const options = categories.map(cat =>
+          `<option value="${cat}" ${level === cat ? 'selected' : ''}>${cat}</option>`
+        ).join('');
         row.innerHTML = `
           <select style="padding:6px; border:1px solid #444; border-radius:4px; background:#232526; color:#e0e0e0;">
-            <option value="">-- Select --</option>
-            <option value="1" ${level == 1 ? 'selected' : ''}>Level 1</option>
-            <option value="2" ${level == 2 ? 'selected' : ''}>Level 2</option>
-            <option value="3" ${level == 3 ? 'selected' : ''}>Level 3</option>
-            <option value="4" ${level == 4 ? 'selected' : ''}>Level 4</option>
-            <option value="5" ${level == 5 ? 'selected' : ''}>Level 5</option>
-            <option value="6" ${level == 6 ? 'selected' : ''}>Level 6</option>
-            <option value="7" ${level == 7 ? 'selected' : ''}>Level 7</option>
-            <option value="8" ${level == 8 ? 'selected' : ''}>Level 8</option>
-            <option value="9" ${level == 9 ? 'selected' : ''}>Level 9</option>
+            <option value="">-- Category --</option>
+            ${options}
           </select>
-          <input type="number" placeholder="Points" value="${points}" style="padding:6px; border:1px solid #444; border-radius:4px; background:#232526; color:#e0e0e0;" min="0" step="1">
+          <input type="number" placeholder="Target points" value="${points}" style="padding:6px; border:1px solid #444; border-radius:4px; background:#232526; color:#e0e0e0;" min="0" step="1">
           <button type="button" class="btn btn-secondary" style="padding:4px 8px;" onclick="EventsTab.removeTroopTargetRow('${rowId}')">✖ Remove</button>
         `;
         container.appendChild(row);
@@ -2029,6 +2033,11 @@
           populateChestEventSelect();
           document.getElementById('chestEventSelect').value = eventName;
           EventsTab.onChestEventSelected();
+        } else if (evt.participationMethod === 'troop-based') {
+          switchTab('troopEventsTab');
+          populateTroopEventSelect();
+          document.getElementById('troopEventSelect').value = eventName;
+          EventsTab.onTroopEventSelected();
         } else {
           switchTab('manualEventsTab');
           populateManualEventSelect();
