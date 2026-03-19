@@ -815,7 +815,37 @@
         <h3 style="margin:0 0 12px 0;">Chest Points - Last Active Periods</h3>
         <div class="controls" style="margin-bottom:10px;">
           <button class="btn" onclick="MembersTab.loadChestPointsTabData(true)">🔄 Refresh Chest Points</button>
+          <button class="btn" onclick="MembersTab.togglePointTargetsPanel()" style="margin-left:8px;">⚙️ Point Targets</button>
         </div>
+
+        <!-- Point Targets Configuration Panel -->
+        <div id="pointTargetsPanel" style="display:none; margin-bottom:14px; background:rgba(255,255,255,0.04); border:1px solid #333; border-radius:8px; padding:14px 16px;">
+          <p style="font-size:12px;color:#b0b0b0;margin:0 0 12px 0;">Set the default target and optional overrides per active period or per player. Saved locally in this browser.</p>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+            <label style="font-size:12px;color:#ffb300;white-space:nowrap;font-weight:600;">Default target:</label>
+            <input type="number" id="ptDefaultInput" min="0" step="100" value="3000" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:13px;">
+            <button onclick="MembersTab.savePtDefault()" class="btn" style="padding:5px 14px;font-size:12px;">Save</button>
+          </div>
+          <div style="border-top:1px solid #333;padding-top:10px;margin-bottom:10px;">
+            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:6px;">Per-period targets <span style="color:#b0b0b0;font-weight:normal;">(overrides default for that period's column)</span></div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+              <input type="text" id="ptPeriodNameInput" placeholder="Period name (e.g. Period 1)" style="flex:1;min-width:140px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <input type="number" id="ptPeriodPointsInput" placeholder="Points" min="0" step="100" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <button onclick="MembersTab.addPeriodTarget()" class="btn" style="padding:5px 12px;font-size:12px;">➕ Add</button>
+            </div>
+            <div id="ptPeriodList" style="max-height:100px;overflow-y:auto;"></div>
+          </div>
+          <div style="border-top:1px solid #333;padding-top:10px;">
+            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:6px;">Per-player targets <span style="color:#b0b0b0;font-weight:normal;">(overrides default for that player in every period)</span></div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+              <input type="text" id="ptPlayerNameInput" placeholder="Player name" style="flex:1;min-width:140px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <input type="number" id="ptPlayerPointsInput" placeholder="Points" min="0" step="100" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <button onclick="MembersTab.addPlayerTarget()" class="btn" style="padding:5px 12px;font-size:12px;">➕ Add</button>
+            </div>
+            <div id="ptPlayerList" style="max-height:100px;overflow-y:auto;"></div>
+          </div>
+        </div>
+
         <div id="chestPointsMeta" class="points-meta">Target: 3000 points (green), within 10% (orange), below (red).</div>
         <div class="table-container" style="max-height:52vh;">
           <div id="chestPointsLoading" class="loading" style="display:none;"><div class="spinner"></div>Loading chest points...</div>
@@ -886,6 +916,166 @@
         });
       }
 
+      // ── Point Targets (localStorage) ──────────────────────────────────────
+      const PT_KEY = 'ccc_point_targets';
+      function loadPointTargets() {
+        try { return JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"periods":{},"players":{}}'); }
+        catch(e) { return { default: 3000, periods: {}, players: {} }; }
+      }
+      function savePointTargets(obj) {
+        try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+      }
+      // Resolve target for a specific period (falls back to default)
+      function getPeriodTarget(periodName) {
+        const pt = loadPointTargets();
+        const key = (periodName || '').trim();
+        if (pt.periods && pt.periods[key] !== undefined) return pt.periods[key];
+        return pt.default || 3000;
+      }
+      // Resolve target for a player in a given period (player override → period override → default)
+      function getEffectiveTarget(playerName, periodName) {
+        const pt = loadPointTargets();
+        const pkey = (playerName || '').toLowerCase().trim();
+        for (const [k, v] of Object.entries(pt.players || {})) {
+          if (k.toLowerCase() === pkey) return v;
+        }
+        return getPeriodTarget(periodName);
+      }
+      function escapeHtmlMem(text) {
+        const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+      }
+      function togglePointTargetsPanel() {
+        const panel = document.getElementById('pointTargetsPanel');
+        if (!panel) return;
+        const open = panel.style.display !== 'none';
+        panel.style.display = open ? 'none' : 'block';
+        if (!open) renderPointTargetsPanel();
+      }
+      function renderPointTargetsPanel() {
+        const pt = loadPointTargets();
+        const defInput = document.getElementById('ptDefaultInput');
+        if (defInput) defInput.value = pt.default || 3000;
+        // Period list
+        const pList = document.getElementById('ptPeriodList');
+        if (pList) {
+          const entries = Object.entries(pt.periods || {});
+          if (entries.length === 0) {
+            pList.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No per-period overrides yet.</p>';
+          } else {
+            pList.innerHTML = entries.map(([name, pts]) =>
+              `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #2a2a2a;font-size:12px;">
+                <span style="color:#e0e0e0;">${escapeHtmlMem(name)}</span>
+                <span style="display:flex;align-items:center;gap:6px;">
+                  <input type="number" value="${pts}" min="0" step="100" data-period="${escapeHtmlMem(name)}"
+                    onchange="MembersTab.updatePeriodTarget(this)" style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+                  <button data-remove-period="${escapeHtmlMem(name)}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
+                </span>
+              </div>`
+            ).join('');
+            pList.querySelectorAll('button[data-remove-period]').forEach(btn => {
+              btn.addEventListener('click', function() { removePeriodTarget(this.getAttribute('data-remove-period')); });
+            });
+          }
+        }
+        // Player list
+        const plList = document.getElementById('ptPlayerList');
+        if (plList) {
+          const entries = Object.entries(pt.players || {});
+          if (entries.length === 0) {
+            plList.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No per-player overrides yet.</p>';
+          } else {
+            plList.innerHTML = entries.map(([name, pts]) =>
+              `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #2a2a2a;font-size:12px;">
+                <span style="color:#e0e0e0;">${escapeHtmlMem(name)}</span>
+                <span style="display:flex;align-items:center;gap:6px;">
+                  <input type="number" value="${pts}" min="0" step="100" data-player="${escapeHtmlMem(name)}"
+                    onchange="MembersTab.updatePlayerTarget(this)" style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+                  <button data-remove-player="${escapeHtmlMem(name)}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
+                </span>
+              </div>`
+            ).join('');
+            plList.querySelectorAll('button[data-remove-player]').forEach(btn => {
+              btn.addEventListener('click', function() { removePlayerTarget(this.getAttribute('data-remove-player')); });
+            });
+          }
+        }
+      }
+      function savePtDefault() {
+        const val = parseInt(document.getElementById('ptDefaultInput').value, 10);
+        if (isNaN(val) || val < 0) return;
+        const pt = loadPointTargets();
+        pt.default = val;
+        savePointTargets(pt);
+        renderChestPointsTable();
+      }
+      function addPeriodTarget() {
+        const name = (document.getElementById('ptPeriodNameInput').value || '').trim();
+        const pts = parseInt(document.getElementById('ptPeriodPointsInput').value, 10);
+        if (!name || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        if (!pt.periods) pt.periods = {};
+        pt.periods[name] = pts;
+        savePointTargets(pt);
+        document.getElementById('ptPeriodNameInput').value = '';
+        document.getElementById('ptPeriodPointsInput').value = '';
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      function updatePeriodTarget(input) {
+        const name = input.getAttribute('data-period');
+        const pts = parseInt(input.value, 10);
+        if (!name || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        if (!pt.periods) pt.periods = {};
+        pt.periods[name] = pts;
+        savePointTargets(pt);
+        renderChestPointsTable();
+      }
+      function removePeriodTarget(name) {
+        const pt = loadPointTargets();
+        if (!pt.periods) return;
+        for (const k of Object.keys(pt.periods)) {
+          if (k === name) { delete pt.periods[k]; break; }
+        }
+        savePointTargets(pt);
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      function addPlayerTarget() {
+        const name = (document.getElementById('ptPlayerNameInput').value || '').trim();
+        const pts = parseInt(document.getElementById('ptPlayerPointsInput').value, 10);
+        if (!name || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        if (!pt.players) pt.players = {};
+        pt.players[name] = pts;
+        savePointTargets(pt);
+        document.getElementById('ptPlayerNameInput').value = '';
+        document.getElementById('ptPlayerPointsInput').value = '';
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      function updatePlayerTarget(input) {
+        const name = input.getAttribute('data-player');
+        const pts = parseInt(input.value, 10);
+        if (!name || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        if (!pt.players) pt.players = {};
+        pt.players[name] = pts;
+        savePointTargets(pt);
+        renderChestPointsTable();
+      }
+      function removePlayerTarget(name) {
+        const pt = loadPointTargets();
+        if (!pt.players) return;
+        for (const k of Object.keys(pt.players)) {
+          if (k.toLowerCase() === name.toLowerCase()) { delete pt.players[k]; break; }
+        }
+        savePointTargets(pt);
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      // ──────────────────────────────────────────────────────────────────────
+
       async function loadChestPointsTabData(forceRefresh = false) {
         const loading = document.getElementById('chestPointsLoading');
         const error = document.getElementById('chestPointsError');
@@ -909,7 +1099,7 @@
           const res = await fetch(window.GAS_WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getRecentActivePeriodChestPoints', limitPeriods: 5, targetPoints: 3000 })
+            body: JSON.stringify({ action: 'getRecentActivePeriodChestPoints', limitPeriods: 5, targetPoints: loadPointTargets().default || 3000 })
           });
           const result = await res.json();
 
@@ -939,7 +1129,8 @@
         const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
         const membersRaw = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
 
-        meta.textContent = `Target: ${Number(chestPointsData?.targetPoints || 3000)} points (green), within 10% (orange), below (red). '-' = not a member in that period, '*' = joined during that period.`;
+        const defaultTgt = loadPointTargets().default || 3000;
+        meta.textContent = `Default target: ${defaultTgt} points (green ≥ target, orange ≥ 90%, red below). Per-period or per-player overrides may apply. '-' = not a member in that period, '*' = joined during that period.`;
 
         if (periods.length === 0 || membersRaw.length === 0) {
           table.style.display = 'none';
@@ -1022,14 +1213,16 @@
             const periodEnd = toYmd(period.endDate);
             const isMemberDuringPeriod = !aJoinDate || !periodEnd || aJoinDate <= periodEnd;
             if (!isMemberDuringPeriod) return count;
-            return count + (Number(r?.points || 0) < Number(chestPointsData?.targetPoints || 3000) ? 1 : 0);
+            const tgt = getEffectiveTarget(a.member, period.periodName);
+            return count + (Number(r?.points || 0) < tgt ? 1 : 0);
           }, 0);
           const bMissedCount = bResults.reduce((count, r, idx) => {
             const period = periods[idx] || {};
             const periodEnd = toYmd(period.endDate);
             const isMemberDuringPeriod = !bJoinDate || !periodEnd || bJoinDate <= periodEnd;
             if (!isMemberDuringPeriod) return count;
-            return count + (Number(r?.points || 0) < Number(chestPointsData?.targetPoints || 3000) ? 1 : 0);
+            const tgt = getEffectiveTarget(b.member, period.periodName);
+            return count + (Number(r?.points || 0) < tgt ? 1 : 0);
           }, 0);
 
           if (aMissedCount !== bMissedCount) return bMissedCount - aMissedCount;
@@ -1054,7 +1247,8 @@
         header.innerHTML = '<th>Member</th>';
         periods.forEach(period => {
           const th = document.createElement('th');
-          th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate})`;
+          const periodTgt = getPeriodTarget(period.periodName);
+          th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate}) · ${periodTgt.toLocaleString()} pts`;
           header.appendChild(th);
         });
 
@@ -1063,7 +1257,6 @@
           const row = document.createElement('tr');
           const firstCell = document.createElement('td');
           const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
-          const targetPoints = Number(chestPointsData?.targetPoints || 3000);
           const joinDate = toYmdMemberJoinDate(memberRow.joinDate);
           const firstPeriodStart = toYmd(periods[0]?.startDate);
           const joinedAfterPeriodStart = !!joinDate && !!firstPeriodStart && joinDate > firstPeriodStart;
@@ -1071,7 +1264,12 @@
             const periodEnd = toYmd(periods[idx]?.endDate);
             return !joinDate || !periodEnd || joinDate <= periodEnd;
           });
-          const missedAllGoals = eligibleResults.length > 0 && eligibleResults.every(result => Number(result?.points || 0) < targetPoints);
+          const missedAllGoals = eligibleResults.length > 0 && eligibleResults.every((result, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            if (joinDate && periodEnd && joinDate > periodEnd) return false; // not a member then
+            return Number(result?.points || 0) < getEffectiveTarget(memberRow.member, period.periodName);
+          });
 
           firstCell.className = `member-name${missedAllGoals ? ' missed-all-goals' : ''}`;
           firstCell.textContent = joinedAfterPeriodStart
@@ -1091,8 +1289,11 @@
               td.className = 'points-cell points-na';
               td.textContent = '-';
             } else {
-              td.className = `points-cell points-${data.status || 'red'}`;
-              const pointsText = Number(data.points || 0).toLocaleString();
+              const cellPts = Number(data.points || 0);
+              const cellTgt = getEffectiveTarget(memberRow.member, period.periodName);
+              const cellStatus = cellPts >= cellTgt ? 'green' : (cellPts >= cellTgt * 0.9 ? 'orange' : 'red');
+              td.className = `points-cell points-${cellStatus}`;
+              const pointsText = cellPts.toLocaleString();
               td.textContent = joinedDuringPeriod ? `${pointsText}*` : pointsText;
             }
             row.appendChild(td);
@@ -1209,7 +1410,7 @@
           }
           const row = document.createElement('tr');
           const heroLevelDisplay = member.heroLevel !== null && member.heroLevel !== undefined
-            ? (() => { const lvl = member.heroLevel; let bg, fg; if (lvl > 500) { bg='#4a148c'; fg='#e1bee7'; } else if (lvl > 400) { bg='#0d47a1'; fg='#bbdefb'; } else if (lvl > 300) { bg='#1b5e20'; fg='#c8e6c9'; } else if (lvl > 200) { bg='#827717'; fg='#fff9c4'; } else if (lvl > 100) { bg='#37474f'; fg='#eceff1'; } else { bg='#4e342e'; fg='#d7ccc8'; } return `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${bg};color:${fg};" title="Updated: ${member.heroLevelDate || '?'}">${lvl}</span>`; })()
+            ? (() => { const lvl = member.heroLevel; let bg, fg; if (lvl > 500) { bg='#4a148c'; fg='#e1bee7'; } else if (lvl > 400) { bg='#0d47a1'; fg='#bbdefb'; } else if (lvl > 300) { bg='#1b5e20'; fg='#c8e6c9'; } else if (lvl > 200) { bg='#fbc02d'; fg='#3e2723'; } else if (lvl > 100) { bg='#37474f'; fg='#eceff1'; } else { bg='#4e342e'; fg='#d7ccc8'; } return `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${bg};color:${fg};" title="Updated: ${member.heroLevelDate || '?'}">${lvl}</span>`; })()
             : '<span style="color:#666">—</span>';
           row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroLevelDisplay}</td><td class="might-value">${formatMight(member.startMight)}</td><td class="date-value">${formatDate(member.joinDate)}</td><td class="might-value">${growthPercent}</td><td class="might-value">${formatMight(member.latestMight)}</td><td class="date-value">${formatDate(member.latestMightDate)}</td><td class="might-value">${recentGrowthPercent}</td>`;
           tbody.appendChild(row);
@@ -1504,7 +1705,7 @@
         document.getElementById('memberEmpty').style.display = 'block';
       }
 
-      return { init, loadMembers, switchTab, submitMightEntry, submitHeroLevelEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData };
+      return { init, loadMembers, switchTab, submitMightEntry, submitHeroLevelEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPeriodTarget, updatePeriodTarget, addPlayerTarget, updatePlayerTarget };
     })();
   </script>
 </body>

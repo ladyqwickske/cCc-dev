@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cCc Champions - Dashboard</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <script src="site-config.js"></script>
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
   <style>
@@ -700,6 +701,7 @@
     </div>
 
     <h2>🥇 Player Rankings</h2>
+
     <div style="margin-bottom:16px;max-width:400px;margin-left:auto;margin-right:auto;">
       <input type="text" id="playerFilterInput" placeholder="🔍 Filter by member name..." style="width:100%;padding:10px 14px;font-size:15px;border-radius:6px;border:1px solid #444;background:#232526;color:#ffb300;outline:none;box-shadow:0 1px 6px rgba(0,0,0,0.15);margin-bottom:4px;" oninput="filterPlayerTable()">
     </div>
@@ -707,6 +709,29 @@
   </div>
 
   <script>
+    // ── Per-player custom point targets ──────────────────────────────────────
+    const PT_KEY = 'ccc_point_targets';
+
+    function loadPointTargets() {
+      try { return JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"periods":{},"players":{}}'); }
+      catch(e) { return { default: 3000, players: {} }; }
+    }
+    function savePointTargets(obj) {
+      try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+    }
+    function getPlayerTarget(name) {
+      const pt = loadPointTargets();
+      const key = (name || '').toLowerCase().trim();
+      for (const [k, v] of Object.entries(pt.players || {})) {
+        if (k.toLowerCase() === key) return v;
+      }
+      return pt.default || 3000;
+    }
+    function escapeHtmlDash(text) {
+      const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Helper: Format date in UTC
 function formatDateUTC(date) {
   if (!(date instanceof Date)) return '';
@@ -1399,7 +1424,8 @@ function filterPlayerTable() {
       playerArray.forEach((player,idx)=>{
         const commonCryptInfo = player.chestsByTypeGrouped?.['Common Crypt'];
         const totalPointsVal = player.totalPoints || 0;
-        const pointsClass = totalPointsVal >= 3000 ? 'player-green' : (totalPointsVal >= 2700 ? 'player-orange' : 'player-red');
+        const playerTarget = getPlayerTarget(player.player);
+        const pointsClass = totalPointsVal >= playerTarget ? 'player-green' : (totalPointsVal >= playerTarget * 0.9 ? 'player-orange' : 'player-red');
         
         // Check if member joined after the current viewing start date
         let isNewMember = false;
