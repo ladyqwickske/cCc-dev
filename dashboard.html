@@ -722,10 +722,9 @@
     function getPlayerTarget(name) {
       const pt = loadPointTargets();
       const key = (name || '').toLowerCase().trim();
-      for (const [k, v] of Object.entries(pt.players || {})) {
-        if (k.toLowerCase() === key) return v;
-      }
-      return pt.default || 3000;
+      // Find any override for this player (across all periods) — take the first match
+      const match = (pt.overrides || []).find(o => o.player.toLowerCase() === key);
+      return match ? match.points : (pt.default || 3000);
     }
     function escapeHtmlDash(text) {
       const d = document.createElement('div'); d.textContent = text; return d.innerHTML;

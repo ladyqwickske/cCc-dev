@@ -820,29 +820,21 @@
 
         <!-- Point Targets Configuration Panel -->
         <div id="pointTargetsPanel" style="display:none; margin-bottom:14px; background:rgba(255,255,255,0.04); border:1px solid #333; border-radius:8px; padding:14px 16px;">
-          <p style="font-size:12px;color:#b0b0b0;margin:0 0 12px 0;">Set the default target and optional overrides per active period or per player. Saved locally in this browser.</p>
-          <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+          <p style="font-size:12px;color:#b0b0b0;margin:0 0 12px 0;">Set a custom point target per player per active period. Overrides the default for that cell only. Saved locally in this browser.</p>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
             <label style="font-size:12px;color:#ffb300;white-space:nowrap;font-weight:600;">Default target:</label>
-            <input type="number" id="ptDefaultInput" min="0" step="100" value="3000" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:13px;">
-            <button onclick="MembersTab.savePtDefault()" class="btn" style="padding:5px 14px;font-size:12px;">Save</button>
+            <input type="number" id="ptDefaultInput" min="0" step="100" value="3000" style="width:100px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:13px;">
+            <button onclick="MembersTab.savePtDefault()" class="btn" style="padding:5px 14px;font-size:12px;">Save default</button>
           </div>
-          <div style="border-top:1px solid #333;padding-top:10px;margin-bottom:10px;">
-            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:6px;">Per-period targets <span style="color:#b0b0b0;font-weight:normal;">(overrides default for that period's column)</span></div>
-            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-              <input type="text" id="ptPeriodNameInput" placeholder="Period name (e.g. Period 1)" style="flex:1;min-width:140px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-              <input type="number" id="ptPeriodPointsInput" placeholder="Points" min="0" step="100" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-              <button onclick="MembersTab.addPeriodTarget()" class="btn" style="padding:5px 12px;font-size:12px;">➕ Add</button>
+          <div style="border-top:1px solid #333;padding-top:12px;">
+            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:8px;">Per-player / per-period overrides</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 110px auto;gap:6px;align-items:center;margin-bottom:10px;">
+              <select id="ptPlayerSelect" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;"><option value="">— select player —</option></select>
+              <select id="ptPeriodSelect" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;"><option value="">— select period —</option></select>
+              <input type="number" id="ptOverridePoints" placeholder="Points" min="0" step="100" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <button onclick="MembersTab.addPtOverride()" class="btn" style="padding:5px 12px;font-size:12px;white-space:nowrap;">➕ Add</button>
             </div>
-            <div id="ptPeriodList" style="max-height:100px;overflow-y:auto;"></div>
-          </div>
-          <div style="border-top:1px solid #333;padding-top:10px;">
-            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:6px;">Per-player targets <span style="color:#b0b0b0;font-weight:normal;">(overrides default for that player in every period)</span></div>
-            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-              <input type="text" id="ptPlayerNameInput" placeholder="Player name" style="flex:1;min-width:140px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-              <input type="number" id="ptPlayerPointsInput" placeholder="Points" min="0" step="100" style="width:90px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-              <button onclick="MembersTab.addPlayerTarget()" class="btn" style="padding:5px 12px;font-size:12px;">➕ Add</button>
-            </div>
-            <div id="ptPlayerList" style="max-height:100px;overflow-y:auto;"></div>
+            <div id="ptOverrideList" style="max-height:160px;overflow-y:auto;"></div>
           </div>
         </div>
 
@@ -917,29 +909,31 @@
       }
 
       // ── Point Targets (localStorage) ──────────────────────────────────────
+      // Schema: { default: 3000, overrides: [ { player, period, points } ] }
       const PT_KEY = 'ccc_point_targets';
       function loadPointTargets() {
-        try { return JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"periods":{},"players":{}}'); }
-        catch(e) { return { default: 3000, periods: {}, players: {} }; }
+        try {
+          const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"overrides":[]}');
+          if (!Array.isArray(raw.overrides)) raw.overrides = [];
+          return raw;
+        } catch(e) { return { default: 3000, overrides: [] }; }
       }
       function savePointTargets(obj) {
         try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
       }
-      // Resolve target for a specific period (falls back to default)
-      function getPeriodTarget(periodName) {
-        const pt = loadPointTargets();
-        const key = (periodName || '').trim();
-        if (pt.periods && pt.periods[key] !== undefined) return pt.periods[key];
-        return pt.default || 3000;
-      }
-      // Resolve target for a player in a given period (player override → period override → default)
+      // Resolve target for a specific player+period; falls back to default
       function getEffectiveTarget(playerName, periodName) {
         const pt = loadPointTargets();
         const pkey = (playerName || '').toLowerCase().trim();
-        for (const [k, v] of Object.entries(pt.players || {})) {
-          if (k.toLowerCase() === pkey) return v;
-        }
-        return getPeriodTarget(periodName);
+        const perkey = (periodName || '').trim();
+        const match = (pt.overrides || []).find(o =>
+          o.player.toLowerCase() === pkey && o.period === perkey
+        );
+        return match ? match.points : (pt.default || 3000);
+      }
+      // getPeriodTarget: column header uses global default (no period-level override)
+      function getPeriodTarget() {
+        return loadPointTargets().default || 3000;
       }
       function escapeHtmlMem(text) {
         const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
@@ -951,54 +945,60 @@
         panel.style.display = open ? 'none' : 'block';
         if (!open) renderPointTargetsPanel();
       }
+      function populatePtSelects() {
+        const playerSel = document.getElementById('ptPlayerSelect');
+        if (playerSel) {
+          const current = playerSel.value;
+          playerSel.innerHTML = '<option value="">— select player —</option>';
+          const names = [...new Set(membersData.map(m => m.name || m.player || '').filter(Boolean))].sort();
+          names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; playerSel.appendChild(o); });
+          if (current) playerSel.value = current;
+        }
+        const periodSel = document.getElementById('ptPeriodSelect');
+        if (periodSel) {
+          const current = periodSel.value;
+          periodSel.innerHTML = '<option value="">— select period —</option>';
+          const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
+          periods.forEach(p => { const o = document.createElement('option'); o.value = p.periodName; o.textContent = `${p.periodName} (${p.startDate} – ${p.endDate})`; periodSel.appendChild(o); });
+          if (current) periodSel.value = current;
+        }
+      }
       function renderPointTargetsPanel() {
         const pt = loadPointTargets();
         const defInput = document.getElementById('ptDefaultInput');
         if (defInput) defInput.value = pt.default || 3000;
-        // Period list
-        const pList = document.getElementById('ptPeriodList');
-        if (pList) {
-          const entries = Object.entries(pt.periods || {});
-          if (entries.length === 0) {
-            pList.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No per-period overrides yet.</p>';
-          } else {
-            pList.innerHTML = entries.map(([name, pts]) =>
-              `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #2a2a2a;font-size:12px;">
-                <span style="color:#e0e0e0;">${escapeHtmlMem(name)}</span>
-                <span style="display:flex;align-items:center;gap:6px;">
-                  <input type="number" value="${pts}" min="0" step="100" data-period="${escapeHtmlMem(name)}"
-                    onchange="MembersTab.updatePeriodTarget(this)" style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-                  <button data-remove-period="${escapeHtmlMem(name)}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
-                </span>
-              </div>`
-            ).join('');
-            pList.querySelectorAll('button[data-remove-period]').forEach(btn => {
-              btn.addEventListener('click', function() { removePeriodTarget(this.getAttribute('data-remove-period')); });
-            });
-          }
+        populatePtSelects();
+        const list = document.getElementById('ptOverrideList');
+        if (!list) return;
+        const overrides = pt.overrides || [];
+        if (overrides.length === 0) {
+          list.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No overrides yet. Select a player and period above to add one.</p>';
+          return;
         }
-        // Player list
-        const plList = document.getElementById('ptPlayerList');
-        if (plList) {
-          const entries = Object.entries(pt.players || {});
-          if (entries.length === 0) {
-            plList.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No per-player overrides yet.</p>';
-          } else {
-            plList.innerHTML = entries.map(([name, pts]) =>
-              `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #2a2a2a;font-size:12px;">
-                <span style="color:#e0e0e0;">${escapeHtmlMem(name)}</span>
-                <span style="display:flex;align-items:center;gap:6px;">
-                  <input type="number" value="${pts}" min="0" step="100" data-player="${escapeHtmlMem(name)}"
-                    onchange="MembersTab.updatePlayerTarget(this)" style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
-                  <button data-remove-player="${escapeHtmlMem(name)}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
-                </span>
-              </div>`
-            ).join('');
-            plList.querySelectorAll('button[data-remove-player]').forEach(btn => {
-              btn.addEventListener('click', function() { removePlayerTarget(this.getAttribute('data-remove-player')); });
-            });
-          }
-        }
+        list.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr>
+            <th style="text-align:left;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Player</th>
+            <th style="text-align:left;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Period</th>
+            <th style="text-align:right;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Target pts</th>
+            <th style="padding:4px 8px;border-bottom:1px solid #333;"></th>
+          </tr></thead>
+          <tbody>${overrides.map((o, i) =>
+            `<tr>
+              <td style="padding:4px 8px;color:#e0e0e0;border-bottom:1px solid #2a2a2a;">${escapeHtmlMem(o.player)}</td>
+              <td style="padding:4px 8px;color:#b0b0b0;border-bottom:1px solid #2a2a2a;">${escapeHtmlMem(o.period)}</td>
+              <td style="padding:4px 8px;text-align:right;border-bottom:1px solid #2a2a2a;">
+                <input type="number" value="${o.points}" min="0" step="100" data-idx="${i}"
+                  onchange="MembersTab.updatePtOverride(this)"
+                  style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              </td>
+              <td style="padding:4px 8px;border-bottom:1px solid #2a2a2a;">
+                <button data-remove-idx="${i}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
+              </td>
+            </tr>`
+          ).join('')}</tbody></table>`;
+        list.querySelectorAll('button[data-remove-idx]').forEach(btn => {
+          btn.addEventListener('click', function() { removePtOverride(parseInt(this.getAttribute('data-remove-idx'), 10)); });
+        });
       }
       function savePtDefault() {
         const val = parseInt(document.getElementById('ptDefaultInput').value, 10);
@@ -1008,68 +1008,30 @@
         savePointTargets(pt);
         renderChestPointsTable();
       }
-      function addPeriodTarget() {
-        const name = (document.getElementById('ptPeriodNameInput').value || '').trim();
-        const pts = parseInt(document.getElementById('ptPeriodPointsInput').value, 10);
-        if (!name || isNaN(pts) || pts < 0) return;
+      function addPtOverride() {
+        const player = (document.getElementById('ptPlayerSelect').value || '').trim();
+        const period = (document.getElementById('ptPeriodSelect').value || '').trim();
+        const pts = parseInt(document.getElementById('ptOverridePoints').value, 10);
+        if (!player || !period || isNaN(pts) || pts < 0) return;
         const pt = loadPointTargets();
-        if (!pt.periods) pt.periods = {};
-        pt.periods[name] = pts;
+        const idx = (pt.overrides || []).findIndex(o => o.player.toLowerCase() === player.toLowerCase() && o.period === period);
+        if (idx >= 0) { pt.overrides[idx].points = pts; }
+        else { pt.overrides.push({ player, period, points: pts }); }
         savePointTargets(pt);
-        document.getElementById('ptPeriodNameInput').value = '';
-        document.getElementById('ptPeriodPointsInput').value = '';
+        document.getElementById('ptOverridePoints').value = '';
         renderPointTargetsPanel();
         renderChestPointsTable();
       }
-      function updatePeriodTarget(input) {
-        const name = input.getAttribute('data-period');
+      function updatePtOverride(input) {
+        const idx = parseInt(input.getAttribute('data-idx'), 10);
         const pts = parseInt(input.value, 10);
-        if (!name || isNaN(pts) || pts < 0) return;
+        if (isNaN(idx) || isNaN(pts) || pts < 0) return;
         const pt = loadPointTargets();
-        if (!pt.periods) pt.periods = {};
-        pt.periods[name] = pts;
-        savePointTargets(pt);
-        renderChestPointsTable();
+        if (pt.overrides[idx]) { pt.overrides[idx].points = pts; savePointTargets(pt); renderChestPointsTable(); }
       }
-      function removePeriodTarget(name) {
+      function removePtOverride(idx) {
         const pt = loadPointTargets();
-        if (!pt.periods) return;
-        for (const k of Object.keys(pt.periods)) {
-          if (k === name) { delete pt.periods[k]; break; }
-        }
-        savePointTargets(pt);
-        renderPointTargetsPanel();
-        renderChestPointsTable();
-      }
-      function addPlayerTarget() {
-        const name = (document.getElementById('ptPlayerNameInput').value || '').trim();
-        const pts = parseInt(document.getElementById('ptPlayerPointsInput').value, 10);
-        if (!name || isNaN(pts) || pts < 0) return;
-        const pt = loadPointTargets();
-        if (!pt.players) pt.players = {};
-        pt.players[name] = pts;
-        savePointTargets(pt);
-        document.getElementById('ptPlayerNameInput').value = '';
-        document.getElementById('ptPlayerPointsInput').value = '';
-        renderPointTargetsPanel();
-        renderChestPointsTable();
-      }
-      function updatePlayerTarget(input) {
-        const name = input.getAttribute('data-player');
-        const pts = parseInt(input.value, 10);
-        if (!name || isNaN(pts) || pts < 0) return;
-        const pt = loadPointTargets();
-        if (!pt.players) pt.players = {};
-        pt.players[name] = pts;
-        savePointTargets(pt);
-        renderChestPointsTable();
-      }
-      function removePlayerTarget(name) {
-        const pt = loadPointTargets();
-        if (!pt.players) return;
-        for (const k of Object.keys(pt.players)) {
-          if (k.toLowerCase() === name.toLowerCase()) { delete pt.players[k]; break; }
-        }
+        pt.overrides.splice(idx, 1);
         savePointTargets(pt);
         renderPointTargetsPanel();
         renderChestPointsTable();
@@ -1247,7 +1209,7 @@
         header.innerHTML = '<th>Member</th>';
         periods.forEach(period => {
           const th = document.createElement('th');
-          const periodTgt = getPeriodTarget(period.periodName);
+          const periodTgt = getPeriodTarget();
           th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate}) · ${periodTgt.toLocaleString()} pts`;
           header.appendChild(th);
         });
@@ -1705,7 +1667,7 @@
         document.getElementById('memberEmpty').style.display = 'block';
       }
 
-      return { init, loadMembers, switchTab, submitMightEntry, submitHeroLevelEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPeriodTarget, updatePeriodTarget, addPlayerTarget, updatePlayerTarget };
+      return { init, loadMembers, switchTab, submitMightEntry, submitHeroLevelEntry, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPtOverride, updatePtOverride };
     })();
   </script>
 </body>
