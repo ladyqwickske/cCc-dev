@@ -1454,10 +1454,15 @@ function filterPlayerTable() {
             joinDateLabel = ` <span style="font-size:10px;opacity:0.8;">(Joined: ${daysLabel})</span>`;
           }
         }
-        
+
+        const defaultTarget = loadPointTargets().default || 3000;
+        const targetLabel = playerTarget !== defaultTarget
+          ? ` <span style="font-size:10px;opacity:0.75;color:#ffb300;">(◎ ${playerTarget.toLocaleString()})</span>`
+          : '';
+
         const rowClass = isNewMember ? 'player-row new-member-row' : 'player-row';
         rowsHtml += `<div class="${rowClass}">`;
-        rowsHtml += `<div class="cell rank-col">${idx+1}</div><div class="cell ${pointsClass}">${player.player}${joinDateLabel}</div><div class="cell">${totalPointsVal || '-'}</div>`;
+        rowsHtml += `<div class="cell rank-col">${idx+1}</div><div class="cell ${pointsClass}">${player.player}${joinDateLabel}${targetLabel}</div><div class="cell">${totalPointsVal || '-'}</div>`;
         // Calculate total chests: use totalChests if available, otherwise sum from chestsByTypeGrouped (don't double-count eventChests!)
         let totalChests = player.totalChests || 0;
         if (totalChests === 0 && player.chestsByTypeGrouped) {
