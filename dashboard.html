@@ -719,12 +719,20 @@
     function savePointTargets(obj) {
       try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
     }
-    function getPlayerTarget(name) {
+    function getPlayerTarget(name, periodName) {
       const pt = loadPointTargets();
       const key = (name || '').toLowerCase().trim();
-      // Find any override for this player (across all periods) — take the first match
-      const match = (pt.overrides || []).find(o => o.player.toLowerCase() === key);
-      return match ? match.points : (pt.default || 3000);
+      const perkey = (periodName || '').trim();
+      // 1. Exact player + period match
+      if (perkey) {
+        const exact = (pt.overrides || []).find(o => o.player.toLowerCase() === key && o.period === perkey);
+        if (exact) return exact.points;
+      }
+      // 2. Any override for this player (period-agnostic fallback)
+      const anyMatch = (pt.overrides || []).find(o => o.player.toLowerCase() === key);
+      if (anyMatch) return anyMatch.points;
+      // 3. Global default
+      return pt.default || 3000;
     }
     function escapeHtmlDash(text) {
       const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
@@ -941,6 +949,7 @@ function filterPlayerTable() {
     const isSidebar = false;
     const expandedTypes = new Set();
     let currentViewingStartDate = null; // Store start date for highlighting new members
+    let currentViewingPeriodName = null; // Store period name for per-player target lookup
     let currentPreset = 'lastday'; // Keep selected preset so backend can canonicalize range
     
     // Update UI based on read-only mode
@@ -1113,6 +1122,7 @@ function filterPlayerTable() {
             startInput.value = formatDateAsUTC(start);
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Active Period (${activePeriod.eventName}): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+            currentViewingPeriodName = activePeriod.eventName || null;
             const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
        //     console.log('[Countdown] Calling updateCountdownTimer (Active Period) with:', endDateStr);
             updateCountdownTimer(endDateStr);
@@ -1237,6 +1247,7 @@ function filterPlayerTable() {
             startInput.value = formatDateAsUTC(start);
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Previous Period (${previousPeriod.eventName}): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+            currentViewingPeriodName = previousPeriod.eventName || null;
             loadDashboard();
           })
           .catch(error => {
@@ -1283,6 +1294,7 @@ function filterPlayerTable() {
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
       currentViewingStartDate = startDate; // Store for new member highlighting
+      currentViewingPeriodName = null; // Will be overridden by preset logic if applicable
       document.getElementById('playerList').innerHTML = '<div class="loading">Loading...</div>';
       const requestId = `dash-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       
@@ -1423,7 +1435,7 @@ function filterPlayerTable() {
       playerArray.forEach((player,idx)=>{
         const commonCryptInfo = player.chestsByTypeGrouped?.['Common Crypt'];
         const totalPointsVal = player.totalPoints || 0;
-        const playerTarget = getPlayerTarget(player.player);
+        const playerTarget = getPlayerTarget(player.player, currentViewingPeriodName);
         const pointsClass = totalPointsVal >= playerTarget ? 'player-green' : (totalPointsVal >= playerTarget * 0.9 ? 'player-orange' : 'player-red');
         
         // Check if member joined after the current viewing start date
