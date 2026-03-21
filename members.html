@@ -1205,16 +1205,19 @@
           const joinDate = toYmd(memberRow.joinDate);
           const firstPeriodStart = toYmd(periods[0]?.startDate);
           const joinedAfterPeriodStart = !!joinDate && !!firstPeriodStart && joinDate > firstPeriodStart;
-          const eligibleResults = periodResults.filter((result, idx) => {
-            const periodEnd = toYmd(periods[idx]?.endDate);
-            return !joinDate || !periodEnd || joinDate <= periodEnd;
-          });
-          const missedAllGoals = eligibleResults.length > 0 && eligibleResults.every((result, idx) => {
+          let eligibleCount = 0;
+          let allMissed = true;
+          periodResults.forEach((result, idx) => {
             const period = periods[idx] || {};
             const periodEnd = toYmd(period.endDate);
-            if (joinDate && periodEnd && joinDate > periodEnd) return false; // not a member then
-            return Number(result?.points || 0) < getEffectiveTarget(memberRow.member, period.periodName);
+            const isEligible = !joinDate || !periodEnd || joinDate <= periodEnd;
+            if (!isEligible) return;
+            eligibleCount++;
+            if (Number(result?.points || 0) >= getEffectiveTarget(memberRow.member, period.periodName)) {
+              allMissed = false;
+            }
           });
+          const missedAllGoals = eligibleCount > 0 && allMissed;
 
           firstCell.className = `member-name${missedAllGoals ? ' missed-all-goals' : ''}`;
           firstCell.textContent = joinedAfterPeriodStart

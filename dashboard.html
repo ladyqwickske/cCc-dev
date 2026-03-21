@@ -713,8 +713,11 @@
     const PT_KEY = 'ccc_point_targets';
 
     function loadPointTargets() {
-      try { return JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"periods":{},"players":{}}'); }
-      catch(e) { return { default: 3000, players: {} }; }
+      try {
+        const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"overrides":[]}');
+        if (!Array.isArray(raw.overrides)) raw.overrides = [];
+        return raw;
+      } catch(e) { return { default: 3000, overrides: [] }; }
     }
     function savePointTargets(obj) {
       try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
@@ -723,16 +726,10 @@
       const pt = loadPointTargets();
       const key = (name || '').toLowerCase().trim();
       const perkey = (periodName || '').trim();
-      // 1. Exact player + period match
-      if (perkey) {
-        const exact = (pt.overrides || []).find(o => o.player.toLowerCase() === key && o.period === perkey);
-        if (exact) return exact.points;
-      }
-      // 2. Any override for this player (period-agnostic fallback)
-      const anyMatch = (pt.overrides || []).find(o => o.player.toLowerCase() === key);
-      if (anyMatch) return anyMatch.points;
-      // 3. Global default
-      return pt.default || 3000;
+      const match = (pt.overrides || []).find(o =>
+        o.player.toLowerCase() === key && o.period === perkey
+      );
+      return match ? match.points : (pt.default || 3000);
     }
     function escapeHtmlDash(text) {
       const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
