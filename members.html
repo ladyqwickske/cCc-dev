@@ -908,18 +908,45 @@
         });
       }
 
-      // ── Point Targets (localStorage) ──────────────────────────────────────
+      // ── Point Targets (server-backed with localStorage cache) ─────────
       // Schema: { default: 3000, overrides: [ { player, period, points } ] }
       const PT_KEY = 'ccc_point_targets';
+      let pointTargetsCache = null; // in-memory cache
+
       function loadPointTargets() {
+        if (pointTargetsCache) return pointTargetsCache;
         try {
           const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"overrides":[]}');
           if (!Array.isArray(raw.overrides)) raw.overrides = [];
+          pointTargetsCache = raw;
           return raw;
         } catch(e) { return { default: 3000, overrides: [] }; }
       }
       function savePointTargets(obj) {
+        pointTargetsCache = obj;
         try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+        // Persist to server (fire-and-forget)
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'savePointTargets', targets: obj })
+        }).catch(() => {});
+      }
+      function loadPointTargetsFromServer() {
+        return fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getPointTargets' })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success !== false) {
+              const obj = { default: result.default || 3000, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
+              pointTargetsCache = obj;
+              try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+            }
+          })
+          .catch(() => {}); // fall back to localStorage cache
       }
       // Resolve target for a specific player+period; falls back to default
       function getEffectiveTarget(playerName, periodName) {
@@ -1039,6 +1066,9 @@
       // ──────────────────────────────────────────────────────────────────────
 
       async function loadChestPointsTabData(forceRefresh = false) {
+        // Load point targets from server (updates localStorage cache)
+        await loadPointTargetsFromServer();
+
         const loading = document.getElementById('chestPointsLoading');
         const error = document.getElementById('chestPointsError');
         const table = document.getElementById('chestPointsTable');

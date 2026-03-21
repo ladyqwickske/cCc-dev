@@ -709,18 +709,43 @@
   </div>
 
   <script>
-    // ── Per-player custom point targets ──────────────────────────────────────
+    // ── Per-player custom point targets (server-backed with localStorage cache) ──
     const PT_KEY = 'ccc_point_targets';
+    let pointTargetsCache = null;
 
     function loadPointTargets() {
+      if (pointTargetsCache) return pointTargetsCache;
       try {
         const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"overrides":[]}');
         if (!Array.isArray(raw.overrides)) raw.overrides = [];
+        pointTargetsCache = raw;
         return raw;
       } catch(e) { return { default: 3000, overrides: [] }; }
     }
     function savePointTargets(obj) {
+      pointTargetsCache = obj;
       try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+      fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'savePointTargets', targets: obj })
+      }).catch(() => {});
+    }
+    function loadPointTargetsFromServer() {
+      return fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getPointTargets' })
+      })
+        .then(res => res.json())
+        .then(result => {
+          if (result && result.success !== false) {
+            const obj = { default: result.default || 3000, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
+            pointTargetsCache = obj;
+            try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+          }
+        })
+        .catch(() => {});
     }
     function getPlayerTarget(name, periodName) {
       const pt = loadPointTargets();
@@ -994,7 +1019,7 @@ function filterPlayerTable() {
 
       // Dashboard
     window.onload = function() { 
-      setDateRange('lastday');
+      loadPointTargetsFromServer().then(() => setDateRange('lastday'));
     };
     
     function setDateRange(preset) {
