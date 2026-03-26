@@ -32,7 +32,9 @@ const SITE_CONFIG = {
     'Red Kit',
     'Avciss',
     'ZaZa 276',
-    'Otto'
+    'Otto S4',
+    'PANDA',
+    'cCc Cp City',
     // 'AnotherSpecialMember'
   ],
 
@@ -42,6 +44,7 @@ const SITE_CONFIG = {
     { name: 'Events', file: 'events.html', icon: 'events.png' },
     { name: 'Members', file: 'members.html', icon: 'members.png' },
     { name: 'Troops', file: 'troops.html', icon: 'troops.png' },
-    { name: 'Progress', file: 'progress.html', icon: 'progress.png' }
+    { name: 'Progress', file: 'progress.html', icon: 'progress.png' },
+    { name: 'Calendar', file: 'calendar.html', icon: 'calendar.png' }
   ]
 };
