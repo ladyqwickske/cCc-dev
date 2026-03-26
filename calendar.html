@@ -426,7 +426,7 @@
         var email=td.email;
         var r=await fetch(BACKEND_VERIFY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verifyUserPermission',email:email})});
         var data=await r.json();
-        if(data.isAllowedEditor){try{localStorage.setItem(AUTH_KEY,'1')}catch(e){}try{localStorage.setItem(AUTH_EMAIL_KEY,email)}catch(e){}setReadOnlyMode(false);updateSignedInBadge(email);var ov=document.getElementById('login-overlay');if(ov)ov.style.display='none';}
+        if(data.isAllowedEditor){try{localStorage.setItem(AUTH_KEY,'1')}catch(e){}try{localStorage.setItem(AUTH_EMAIL_KEY,email)}catch(e){}setReadOnlyMode(false);updateSignedInBadge(email);var ov=document.getElementById('login-overlay');if(ov)ov.style.display='none';setTimeout(function(){location.reload();},200);}
         else{setReadOnlyMode(true);var ed=document.getElementById('login-error');if(ed){ed.style.display='block';ed.textContent='Your account does not have editor access';}}
       }catch(err){console.error(err);var ed2=document.getElementById('login-error');if(ed2){ed2.style.display='block';ed2.textContent='Sign-in failed: '+err.message;}}
     };
