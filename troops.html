@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc Champions - Troops</title>
+  <title>cCc League One - Troops</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -70,8 +70,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #232526 0%, #414345 100%);
-      color: #f3f3f3;
+      background: linear-gradient(135deg, #f0f2f5 0%, #d8dce8 100%);
+      color: #1a1c2e;
       text-align: center;
       padding: 32px 16px 60px 16px;
       min-height: 100vh;
@@ -89,13 +89,13 @@
 
     /* Top Tabs */
     .tab-nav {
-      background: rgba(30, 34, 40, 0.95);
-      border-bottom: 1px solid #444;
+      background: rgba(70, 80, 105, 0.92);
+      border-bottom: 1px solid #c0c4d8;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       position: sticky; top: 0; z-index: 1000;
     }
     .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #6c5ce7; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
     .nav-brand img { height: 32px; width: auto; }
     .tab-buttons {
       display: flex;
@@ -110,7 +110,7 @@
       padding: 12px 16px; 
       background: none; 
       border: none; 
-      color: #e0e0e0; 
+      color: #2c2f45; 
       font-size: 28px; 
       font-weight: 500; 
       border-bottom: 3px solid transparent; 
@@ -121,22 +121,22 @@
       cursor: pointer; 
       position: relative; 
     }
-    .tab-btn:hover { color: #ffb300; background: #232526; }
-    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn:hover { color: #6c5ce7; background: #f0f2f5; }
+    .tab-btn.active { color: #6c5ce7; border-bottom-color: #6c5ce7; }
     .tab-btn[title]:hover::after {
       content: attr(title);
       position: absolute;
       top: -42px;
       left: 50%;
       transform: translateX(-50%);
-      background: #232526;
-      color: #ffb300;
+      background: #f0f2f5;
+      color: #6c5ce7;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 1001;
-      border: 1px solid #444;
+      border: 1px solid #c0c4d8;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
@@ -153,44 +153,44 @@
     }
 
     /* Tab Content */
-    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(82, 90, 114, 0.93); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
     .tab-content.active { display: block; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
-    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
-    h3 { color: #ffb300; }
-    .loading { text-align: center; padding: 32px; color: #e0e0e0; }
-    .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #6c5ce7; text-shadow: 0 2px 8px #000a; }
+    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #f0f2f5; }
+    h3 { color: #6c5ce7; }
+    .loading { text-align: center; padding: 32px; color: #2c2f45; }
+    .spinner { border: 4px solid #c0c4d8; border-top: 4px solid #6c5ce7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .note { font-size: 12px; color: #b0b0b0; margin-top: 4px; }
+    .note { font-size: 12px; color: #6b6f85; margin-top: 4px; }
     
     /* Sub-tabs */
     .tabs-container { margin-top: 12px; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #444; flex-wrap: wrap; padding-bottom: 12px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.25); flex-wrap: wrap; padding-bottom: 12px; }
     .tab { 
       padding: 8px 12px; 
       background: none; 
       border: none; 
-      color: #e0e0e0; 
+      color: #d8dce8; 
       font-size: 14px; 
       font-weight: 500; 
       border-bottom: 2px solid transparent;
       cursor: pointer; 
       transition: all 0.2s;
     }
-    .tab:hover { color: #ffb300; }
-    .tab.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab:hover { color: #f0f2f5; }
+    .tab.active { color: #f0f2f5; border-bottom-color: #f0f2f5; }
     
     .tab-content { display: none; margin-top: 12px; }
     .tab-content.active { display: block; }
 
     /* Controls */
     .controls { 
-      background: #232526; 
+      background: #f0f2f5; 
       padding: 16px; 
       border-radius: 8px; 
       margin-bottom: 16px; 
       box-shadow: 0 1px 3px rgba(0,0,0,0.25); 
-      border: 1px solid #444; 
+      border: 1px solid #c0c4d8; 
       display: flex; 
       gap: 12px; 
       align-items: flex-end; 
@@ -203,8 +203,8 @@
     .control-group { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 
     .initial-entry-panel {
-      background: #1a1b1c;
-      border: 1px solid #444;
+      background: #e8eaf2;
+      border: 1px solid #c0c4d8;
       border-radius: 8px;
       padding: 16px;
       margin-top: 20px;
@@ -230,34 +230,34 @@
     }
     .helper-text {
       font-size: 12px;
-      color: #b0b0b0;
+      color: #6b6f85;
       margin-top: 6px;
     }
 
     /* Forms */
     .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #6c5ce7; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea { 
       padding: 10px 12px; 
-      border: 1px solid #444; 
+      border: 1px solid #c0c4d8; 
       border-radius: 6px; 
       font-size: 14px; 
-      background: #232526; 
-      color: #e0e0e0;
+      background: #f0f2f5; 
+      color: #2c2f45;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: inherit;
     }
     input:focus, select:focus, textarea:focus { 
       outline: none; 
-      border-color: #ffb300; 
+      border-color: #6c5ce7; 
       box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
     }
     
     /* Buttons */
     .btn { 
       padding: 10px 16px; 
-      background: #ffb300; 
-      color: #232526; 
+      background: #6c5ce7; 
+      color: #f0f2f5; 
       border: none; 
       border-radius: 6px; 
       font-size: 13px; 
@@ -266,9 +266,9 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .btn:hover { background: #ffc933; }
-    .btn-secondary { background: #444; color: #ffb300; border: 1px solid #444; }
-    .btn-secondary:hover { background: #555; }
+    .btn:hover { background: #8b7cf8; }
+    .btn-secondary { background: #c0c4d8; color: #6c5ce7; border: 1px solid #c0c4d8; }
+    .btn-secondary:hover { background: #d0d3e8; }
 
     /* Status Messages */
     .status { padding: 12px 14px; border-radius: 6px; margin: 8px 0; font-size: 13px; }
@@ -276,50 +276,50 @@
     .status.err { background: #b71c1c; color: #ef5350; border: 1px solid #d32f2f; }
 
     /* Table */
-    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
-    table { width: 100%; border-collapse: collapse; background: #232526; table-layout: fixed; }
-    thead { background: #1a1b1c; }
+    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #c0c4d8; }
+    table { width: 100%; border-collapse: collapse; background: #f0f2f5; table-layout: fixed; }
+    thead { background: #e8eaf2; }
     th { 
       padding: 12px 8px; 
       font-weight: 600; 
       font-size: 11px; 
-      color: #ffb300; 
+      color: #6c5ce7; 
       text-transform: uppercase; 
       letter-spacing: 0.5px;
-      border-bottom: 2px solid #444;
+      border-bottom: 2px solid #c0c4d8;
       text-align: left;
       position: sticky;
       top: 0;
-      background: #1a1b1c;
+      background: #e8eaf2;
       z-index: 10;
     }
     th:first-child {
       position: sticky;
       left: 0;
       z-index: 11;
-      background: #1a1b1c;
+      background: #e8eaf2;
     }
     th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { color: #ffc933; }
+    th.sortable:hover { color: #8b7cf8; }
     th.asc::after { content: ' ↑'; }
     th.desc::after { content: ' ↓'; }
     th.center { text-align: center; }
     td { 
       padding: 12px 8px; 
-      border-bottom: 1px solid #444; 
-      color: #e0e0e0;
+      border-bottom: 1px solid #c0c4d8; 
+      color: #2c2f45;
       font-size: 13px;
     }
     td:first-child {
       position: sticky;
       left: 0;
-      background: #232526;
+      background: #f0f2f5;
       z-index: 9;
       font-weight: 500;
     }
     td.center { text-align: center; }
-    tr:hover { background: #2a2b2c; }
-    tr:hover td:first-child { background: #2a2b2c; }
+    tr:hover { background: #e2e5ef; }
+    tr:hover td:first-child { background: #e2e5ef; }
     #troopMembersTable th[data-column="playerName"],
     #troopMembersTable td:first-child {
       width: 200px;
@@ -336,9 +336,9 @@
 
     /* History Table */
     .history-table {
-      background: #232526;
+      background: #f0f2f5;
       border-radius: 6px;
-      border: 1px solid #444;
+      border: 1px solid #c0c4d8;
       overflow: hidden;
       margin-top: 12px;
     }
@@ -346,17 +346,17 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 2fr;
       gap: 0;
-      background: #1a1b1c;
+      background: #e8eaf2;
       font-weight: 600;
       font-size: 12px;
-      color: #ffb300;
+      color: #6c5ce7;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-bottom: 2px solid #444;
+      border-bottom: 2px solid #c0c4d8;
     }
     .table-header > div {
       padding: 12px 8px;
-      border-right: 1px solid #444;
+      border-right: 1px solid #c0c4d8;
     }
     .table-header > div:last-child {
       border-right: none;
@@ -365,15 +365,15 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 2fr;
       gap: 0;
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #c0c4d8;
     }
     .table-row:hover {
-      background: #2a2b2c;
+      background: #e2e5ef;
     }
     .table-cell {
       padding: 12px 8px;
-      border-right: 1px solid #444;
-      color: #e0e0e0;
+      border-right: 1px solid #c0c4d8;
+      color: #2c2f45;
       font-size: 13px;
       text-align: left;
     }
@@ -386,12 +386,12 @@
     }
     .table-cell.timestamp {
       font-size: 12px;
-      color: #b0b0b0;
+      color: #6b6f85;
     }
     .no-data {
       padding: 32px;
       text-align: center;
-      color: #b0b0b0;
+      color: #6b6f85;
     }
 
     /* Latest Levels Grid */
@@ -403,55 +403,37 @@
     }
     .level-card {
       padding: 12px;
-      background: #232526;
-      border: 1px solid #444;
+      background: #f0f2f5;
+      border: 1px solid #c0c4d8;
       border-radius: 4px;
       text-align: center;
     }
     .level-card.crypt {
-      background: #3a2e1f;
-      border-color: #ffb300;
+      background: #ede7ff;
+      border-color: #6c5ce7;
     }
     .level-card-label {
       font-size: 12px;
-      color: #e0e0e0;
+      color: #2c2f45;
       font-weight: 500;
       margin-bottom: 6px;
     }
     .level-card.crypt .level-card-label {
-      color: #ffb300;
+      color: #6c5ce7;
       font-weight: bold;
     }
     .level-card-value {
       font-size: 20px;
       font-weight: 600;
-      color: #ffb300;
+      color: #6c5ce7;
     }
-
-    /* Category badges */
-    .troop-category {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-align: center;
-      min-width: 40px;
-    }
-    .troop-category.cat-T9  { background: #6a1fd1; color: #e8d5ff; border: 1px solid #9c5de8; }
-    .troop-category.cat-G9  { background: #1565c0; color: #bbdefb; border: 1px solid #42a5f5; }
-    .troop-category.cat-T8  { background: #2e7d32; color: #c8e6c9; border: 1px solid #66bb6a; }
-    .troop-category.cat-G8  { background: #e65100; color: #ffe0b2; border: 1px solid #ffa726; }
-    .troop-category.cat-G7  { background: #37474f; color: #cfd8dc; border: 1px solid #78909c; }
-    .troop-category.cat-none { color: #666; font-style: italic; font-weight: 400; font-size: 12px; }
 
     /* Header Paragraph */
     .header { margin-bottom: 16px; }
-    .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
+    .header p { color: #d8dce8; font-size: 14px; margin-top: 8px; }
 
     /* Error */
-    .error { color: #ff5252; padding: 12px; background: #1a0000; border-radius: 6px; }
+    .error { color: #ff5252; padding: 12px; background: #ffcdd2; border-radius: 6px; }
 
     /* Read-only Mode */
     .read-only-mode input,
@@ -460,10 +442,10 @@
     .read-only-mode button:not(.tab-btn):not(.tab):not(.hamburger) {
       pointer-events: none !important;
       background: #f5f5f5 !important;
-      color: #666 !important;
+      color: #6b6f85 !important;
       cursor: not-allowed !important;
       opacity: 0.7 !important;
-      border-color: #ddd !important;
+      border-color: #c0c4d8 !important;
     }
 
     /* Hamburger menu */
@@ -480,7 +462,7 @@
       display: block;
       width: 24px;
       height: 3px;
-      background: #ffb300;
+      background: #6c5ce7;
       border-radius: 2px;
       transition: all 0.2s;
     }
@@ -521,7 +503,7 @@
         align-items: stretch;
         max-height: 60vh;
         overflow-y: auto;
-        background: #232526;
+        background: #f0f2f5;
         position: absolute;
         top: 60px;
         left: 0;
@@ -540,7 +522,7 @@
       .tab-btn {
         font-size: 18px;
         padding: 18px 24px;
-        border-bottom: 1px solid #444;
+        border-bottom: 1px solid #c0c4d8;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -593,7 +575,7 @@
 <body>
   <!-- Google Translate Widget -->
   <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #c0c4d8;border-radius:8px;background:#f0f2f5;color:#6c5ce7;font-size:18px;cursor:pointer;">🌐</button>
   <style>
     @media (max-width: 800px) {
       #google_translate_element {
@@ -641,8 +623,8 @@
   <script>
     // --- Google Sign-In for edit access ---
     const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
-    const AUTH_KEY = 'ccc_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+    const AUTH_KEY = 'clo_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'clo_portal_google_email';
 
     function setReadOnlyMode(enabled) {
       if (enabled) {
@@ -685,13 +667,13 @@
       loginDiv.id = 'login-overlay';
       loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
       loginDiv.innerHTML = `
-        <div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
-          <h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
-          <p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
+        <div style="background:#f0f2f5;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #c0c4d8;">
+          <h2 style="margin-bottom:8px;color:#6c5ce7;">Sign in to Manage</h2>
+          <p style="font-size:14px;color:#2c2f45;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
           <div id="g_id_onload" data-client_id="47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com" data-callback="onGoogleSignIn" data-auto_prompt="false" data-ux_mode="popup"></div>
           <div id="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin" data-shape="rectangular" data-logo_alignment="left"></div>
-          <div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
-          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;">Continue as Guest (Read-Only)</button>
+          <div style="width:100%;height:1px;background:#c0c4d8;margin:8px 0;"></div>
+          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #c0c4d8;background:#f0f2f5;color:#6c5ce7;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;">Continue as Guest (Read-Only)</button>
           <div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
         </div>
       `;
@@ -806,7 +788,7 @@
 
   <nav class="tab-nav">
     <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc League One</div>
       <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -855,7 +837,7 @@
         </a>
       </div>
       <div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
-      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
+      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #e8eaf2; border-radius: 4px; font-size: 12px; color: #6c5ce7; border: 1px solid #c0c4d8;"></div>
       <button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
     </div>
   </nav>
@@ -903,7 +885,12 @@
           </div>
           <div class="field checkbox-field" style="display: flex; align-items: center; gap: 8px; padding-bottom: 10px;">
             <input type="checkbox" id="troopIsStarting" />
-            <label for="troopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Starting</label>
+            <label for="troopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Starting</label>
+          </div>
+          <div class="field">
+            <label for="troopEntryDate">Date</label>
+            <input type="date" id="troopEntryDate" />
+            <small style="color:#999;font-size:10px;">Leave empty for today</small>
           </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -936,11 +923,11 @@
             </div>
             <div class="field checkbox-field checkbox-inline">
               <input type="checkbox" id="initialTroopIsStarting" checked />
-              <label for="initialTroopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Mark as Starting</label>
+              <label for="initialTroopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Mark as Starting</label>
             </div>
             <div class="field checkbox-field checkbox-inline">
               <input type="checkbox" id="initialTroopFillZeros" checked />
-              <label for="initialTroopFillZeros" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Auto-fill zeros</label>
+              <label for="initialTroopFillZeros" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Auto-fill zeros</label>
             </div>
           </div>
 
@@ -971,6 +958,11 @@
             <div class="field" style="min-width: 160px;">
               <label for="initialApplyLevel">Apply level to all</label>
               <input type="number" id="initialApplyLevel" min="0" placeholder="45" />
+            </div>
+            <div class="field" style="min-width: 160px;">
+              <label for="initialTroopDate">Date</label>
+              <input type="date" id="initialTroopDate" />
+              <small style="color:#999;font-size:10px;">Leave empty for today</small>
             </div>
             <button type="button" class="btn btn-secondary" onclick="TroopsTab.applyInitialLevelToAll()">Apply</button>
             <button type="button" class="btn" onclick="TroopsTab.submitInitialTroopEntry()">✅ Save Initial Troops</button>
@@ -1197,13 +1189,13 @@
             if (currentLevel !== null && currentLevel !== undefined) {
               levelCell.textContent = currentLevel;
               if (currentLevel !== startLevel) {
-                levelCell.style.color = '#ffb300';
+                levelCell.style.color = '#6c5ce7';
               } else {
-                levelCell.style.color = '#e0e0e0';
+                levelCell.style.color = '#2c2f45';
               }
             } else {
               levelCell.textContent = '−';
-              levelCell.style.color = '#b0b0b0';
+              levelCell.style.color = '#6b6f85';
               levelCell.style.fontWeight = '400';
             }
             row.appendChild(levelCell);
@@ -1218,13 +1210,13 @@
             if (currentDate !== null && currentDate !== undefined) {
               dateCell.textContent = formatSummaryDate(currentDate);
               if (currentLevel !== startLevel) {
-                dateCell.style.color = '#ffb300';
+                dateCell.style.color = '#6c5ce7';
               } else {
-                dateCell.style.color = '#e0e0e0';
+                dateCell.style.color = '#2c2f45';
               }
             } else {
               dateCell.textContent = '−';
-              dateCell.style.color = '#dadce0';
+              dateCell.style.color = '#9096b0';
             }
             row.appendChild(dateCell);
           });
@@ -1369,6 +1361,9 @@
           return;
         }
 
+        const dateInput = document.getElementById('troopEntryDate').value;
+        const customTimestamp = dateInput ? dateInput + 'T00:00:00.000Z' : undefined;
+
         fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1377,7 +1372,8 @@
             playerName,
             troopType,
             troopLevel: parseInt(troopLevel),
-            notes
+            notes,
+            customTimestamp
           })
         })
           .then(res => res.json())
@@ -1402,6 +1398,7 @@
         document.getElementById('troopLevel').value = '';
         document.getElementById('troopResearch').value = '';
         document.getElementById('troopIsStarting').checked = false;
+        document.getElementById('troopEntryDate').value = '';
         document.getElementById('troopPlayerHistoryContainer').style.display = 'none';
         document.getElementById('troopEntryMessage').className = 'status';
       }
@@ -1421,6 +1418,7 @@
         document.getElementById('initialTroopIsStarting').checked = true;
         document.getElementById('initialTroopFillZeros').checked = true;
         document.getElementById('initialApplyLevel').value = '';
+        document.getElementById('initialTroopDate').value = '';
         ['G', 'M', 'S', 'E', 'C'].forEach(type => {
           const input = document.getElementById(`initialTroop${type}`);
           if (input) input.value = '';
@@ -1474,6 +1472,9 @@
         // Send requests sequentially to avoid GAS web app concurrency issues
         showInitialStatus('Saving entries...', 'ok');
         
+        const dateInput = document.getElementById('initialTroopDate').value;
+        const customTimestamp = dateInput ? dateInput + 'T00:00:00.000Z' : undefined;
+
         (async () => {
           try {
             let successCount = 0;
@@ -1483,7 +1484,8 @@
                 playerName,
                 troopType: entry.type,
                 troopLevel: entry.level,
-                notes
+                notes,
+                customTimestamp
               };
               console.log(`[DEBUG] Sending payload for type ${entry.type}:`, payload);
               
@@ -1586,7 +1588,7 @@
               .then(res => res.json())
               .then(latest => {
                 let html = '<div style="margin-bottom: 20px;">';
-                html += '<h2 style="font-size: 14px; margin-bottom: 12px; color: #e0e0e0;">Latest Levels</h2>';
+                html += '<h2 style="font-size: 14px; margin-bottom: 12px; color: #2c2f45;">Latest Levels</h2>';
                 html += '<div class="latest-levels">';
 
                 const types = ['G', 'M', 'S', 'E', 'C'];

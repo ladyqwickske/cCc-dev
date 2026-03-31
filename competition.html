@@ -1,18 +1,20 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+	<base target="_top">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>cCc Champions - Competition Leaderboard</title>
+	<title>cCc League One - Competition Leaderboard</title>
 	<link rel="icon" href="favicon.png" type="image/png">
+	<script src="site-config.js"></script>
 	<script src="config.js"></script>
 	<script src="portal-shim.js"></script>
 	<style>
 		* { margin: 0; padding: 0; box-sizing: border-box; }
 		body {
 			font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-			background: linear-gradient(135deg, #232526 0%, #414345 100%);
-			color: #f3f3f3;
+			background: linear-gradient(135deg, #f0f2f5 0%, #d8dce8 100%);
+			color: #1a1c2e;
 			text-align: center;
 			padding: 32px 16px 60px 16px;
 			min-height: 100vh;
@@ -23,10 +25,16 @@
 		.goog-te-banner-frame.skiptranslate { display: none !important; }
 		iframe.goog-te-banner-frame { display: none !important; }
 		.goog-te-balloon-frame { display: none !important; }
+    html, body { margin-top: 0 !important; top: 0 !important; }
+    body.translated-ltr, body.translated-rtl { margin-top: 0 !important; top: 0 !important; }
+    .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; height: 0 !important; }
+    #goog-gt-tt, .goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
+    .goog-text-highlight { background: transparent !important; box-shadow: none !important; }
+    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
 
 		.tab-nav {
-			background: rgba(30, 34, 40, 0.95);
-			border-bottom: 1px solid #444;
+			background: rgba(70, 80, 105, 0.92);
+			border-bottom: 1px solid #c0c4d8;
 			box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 			position: sticky;
 			top: 0;
@@ -37,7 +45,7 @@
 			overflow: visible;
 		}
 		.tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
-		.nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+		.nav-brand { font-size: 20px; font-weight: 700; color: #6c5ce7; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
 		.nav-brand img { height: 32px; width: auto; }
 		.tab-buttons {
 			display: flex;
@@ -52,7 +60,7 @@
 			padding: 12px 16px;
 			background: none;
 			border: none;
-			color: #e0e0e0;
+			color: #2c2f45;
 			font-size: 28px;
 			font-weight: 500;
 			border-bottom: 3px solid transparent;
@@ -63,22 +71,22 @@
 			cursor: pointer;
 			position: relative;
 		}
-		.tab-btn:hover { color: #ffb300; background: #232526; }
-		.tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+		.tab-btn:hover { color: #6c5ce7; background: #f0f2f5; }
+		.tab-btn.active { color: #6c5ce7; border-bottom-color: #6c5ce7; }
 		.tab-btn[title]:hover::after {
 			content: attr(title);
 			position: absolute;
 			top: -42px;
 			left: 50%;
 			transform: translateX(-50%);
-			background: #232526;
-			color: #ffb300;
+			background: #f0f2f5;
+			color: #6c5ce7;
 			padding: 6px 12px;
 			border-radius: 4px;
 			font-size: 12px;
 			white-space: nowrap;
 			z-index: 1001;
-			border: 1px solid #444;
+			border: 1px solid #c0c4d8;
 			box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 		}
 		.tab-btn .tab-icon {
@@ -102,7 +110,7 @@
 			display: block;
 			width: 24px;
 			height: 3px;
-			background: #ffb300;
+			background: #6c5ce7;
 			border-radius: 2px;
 			transition: all 0.2s;
 		}
@@ -110,18 +118,18 @@
 		.tab-label.mobile-only { display: none; }
 		.tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
 
-		.tab-content { padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+		.tab-content { padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(82, 90, 114, 0.93); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
 		.header { margin-bottom: 16px; }
-		h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; display: flex; align-items: center; justify-content: center; gap: 12px; }
-		.header p { color: #b0b0b0; font-size: 14px; }
+		h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #6c5ce7; text-shadow: 0 2px 8px #000a; display: flex; align-items: center; justify-content: center; gap: 12px; }
+		.header p { color: #d8dce8; font-size: 14px; }
 		.final-notice {
 			display: inline-block;
 			margin-top: 10px;
 			padding: 8px 12px;
-			border: 1px solid #ffb300;
+			border: 1px solid #6c5ce7;
 			border-radius: 8px;
-			background: rgba(255, 179, 0, 0.12);
-			color: #ffdf8a;
+			background: rgba(108, 92, 231, 0.12);
+			color: #b388ff;
 			font-size: 13px;
 			font-weight: 600;
 		}
@@ -136,14 +144,14 @@
 		.btn {
 			padding: 10px 16px;
 			border-radius: 6px;
-			border: 1px solid #444;
-			background: #232526;
-			color: #ffb300;
+			border: 1px solid #c0c4d8;
+			background: #f0f2f5;
+			color: #6c5ce7;
 			font-weight: 600;
 			cursor: pointer;
 			transition: all 0.2s;
 		}
-		.btn:hover { background: #33343a; border-color: #ffb300; }
+		.btn:hover { background: #e2e5ef; border-color: #6c5ce7; }
 
 		.summary-cards {
 			display: grid;
@@ -152,44 +160,44 @@
 			margin-bottom: 16px;
 		}
 		.card {
-			background: #1a1b1c;
-			border: 1px solid #444;
+			background: #e8eaf2;
+			border: 1px solid #c0c4d8;
 			border-radius: 8px;
 			padding: 16px;
 		}
-		.card-value { font-size: 24px; color: #ffb300; font-weight: 700; margin-bottom: 4px; }
-		.card-label { font-size: 12px; color: #bbb; text-transform: uppercase; letter-spacing: .5px; }
+		.card-value { font-size: 24px; color: #6c5ce7; font-weight: 700; margin-bottom: 4px; }
+		.card-label { font-size: 12px; color: #6b6f85; text-transform: uppercase; letter-spacing: .5px; }
 
 		.table-wrap {
-			background: #1a1b1c;
-			border: 1px solid #444;
+			background: #e8eaf2;
+			border: 1px solid #c0c4d8;
 			border-radius: 8px;
 			overflow: auto;
 		}
 		table { width: 100%; border-collapse: collapse; }
-		thead { background: #232526; border-bottom: 2px solid #444; }
+		thead { background: #f0f2f5; border-bottom: 2px solid #c0c4d8; }
 		th {
 			padding: 14px 12px;
-			color: #ffb300;
+			color: #6c5ce7;
 			text-transform: uppercase;
 			letter-spacing: 1px;
 			font-size: 12px;
-			border-right: 1px solid #333;
+			border-right: 1px solid #c0c4d8;
 		}
 		th:last-child { border-right: none; }
 		td {
 			padding: 12px;
-			border-bottom: 1px solid #333;
-			border-right: 1px solid #333;
+			border-bottom: 1px solid #c0c4d8;
+			border-right: 1px solid #c0c4d8;
 			font-size: 13px;
-			color: #e0e0e0;
+			color: #2c2f45;
 		}
 		td:last-child { border-right: none; }
-		tbody tr:hover { background: #232526; }
-		.rank { color: #ffb300; font-weight: 700; }
+		tbody tr:hover { background: #f0f2f5; }
+		.rank { color: #6c5ce7; font-weight: 700; }
 		.player { text-align: left; font-weight: 600; }
 		.points { color: #8bc34a; font-weight: 700; }
-		.empty { padding: 22px; color: #bbb; }
+		.empty { padding: 22px; color: #6b6f85; }
 
 		@media (max-width: 800px) {
 			.tab-nav {
@@ -223,7 +231,7 @@
 				align-items: stretch;
 				max-height: 60vh;
 				overflow-y: auto;
-				background: #232526;
+				background: #f0f2f5;
 				position: absolute;
 				top: 60px;
 				left: 0;
@@ -243,7 +251,7 @@
 			.tab-btn {
 				font-size: 18px;
 				padding: 18px 24px;
-				border-bottom: 1px solid #444;
+				border-bottom: 1px solid #c0c4d8;
 				display: flex;
 				align-items: center;
 				justify-content: flex-start;
@@ -296,7 +304,7 @@
 <body>
 	<!-- Google Translate Widget -->
 	<div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-	<button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+	<button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #c0c4d8;border-radius:8px;background:#f0f2f5;color:#6c5ce7;font-size:18px;cursor:pointer;">🌐</button>
 	<style>
 		@media (max-width: 800px) {
 			#google_translate_element {
@@ -342,10 +350,8 @@
 	<script src="https://accounts.google.com/gsi/client" async defer></script>
 	<script>
 		const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
-		const AUTH_KEY = 'ccc_portal_google_auth';
-		const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
-
-		function setReadOnlyMode(enabled) {
+            const AUTH_KEY = 'clo_portal_google_auth';
+            const AUTH_EMAIL_KEY = 'clo_portal_google_email';		function setReadOnlyMode(enabled) {
 			if (enabled) {
 				document.documentElement.classList.add('read-only-mode');
 				if (document.body) document.body.classList.add('read-only-mode');
@@ -386,12 +392,12 @@
 			loginDiv.id = 'login-overlay';
 			loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
 			loginDiv.innerHTML = `
-				<div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
-					<h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
-					<p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
+				<div style="background:#f0f2f5;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #c0c4d8;">
+					<h2 style="margin-bottom:8px;color:#6c5ce7;">Sign in to Manage</h2>
+					<p style="font-size:14px;color:#2c2f45;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
 					<div id="g_id_signin"></div>
-					<div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
-					<button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">Continue as Guest (Read-Only)</button>
+					<div style="width:100%;height:1px;background:#c0c4d8;margin:8px 0;"></div>
+					<button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #c0c4d8;background:#f0f2f5;color:#6c5ce7;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">Continue as Guest (Read-Only)</button>
 					<div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
 				</div>
 			`;
@@ -514,7 +520,7 @@
 
 	<nav class="tab-nav">
 		<div class="tab-nav-container">
-			<div class="nav-brand" id="navBrand"><img src="favicon.png" alt=""> cCc Champions</div>
+			<div class="nav-brand" id="navBrand"><img src="favicon.png" alt=""> cCc League One</div>
 			<button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
 				<span></span>
 				<span></span>
@@ -533,7 +539,7 @@
 				<a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;"><img src="bank.png" alt="Bank" class="tab-icon desktop-only"><span class="tab-label mobile-only">Bank</span></a>
 			</div>
 			<div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
-			<div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
+			<div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #e8eaf2; border-radius: 4px; font-size: 12px; color: #6c5ce7; border: 1px solid #c0c4d8;"></div>
 			<button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
 		</div>
 	</nav>
@@ -679,15 +685,12 @@
 			function update() {
 				const now = Date.now();
 				if (now < startMs) {
-					// Before competition starts
 					const ms = startMs - now;
 					noticeTextEl.innerHTML = `A new competition starts at reset — in <strong id="resetCountdown">${formatCountdown(ms)}</strong>`;
 				} else if (now < endMs) {
-					// Competition is live
 					const ms = endMs - now;
 					noticeTextEl.innerHTML = `🏆 Competition is live! Ends in <strong id="resetCountdown">${formatCountdown(ms)}</strong>`;
 				} else {
-					// Competition has ended
 					noticeTextEl.innerHTML = 'This competition has concluded. The results shown below are the final results.';
 					clearInterval(intervalId);
 				}

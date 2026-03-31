@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc Champions - Events</title>
+  <title>cCc League One - Events</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -64,8 +64,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #232526 0%, #414345 100%);
-      color: #f3f3f3;
+      background: linear-gradient(135deg, #f0f2f5 0%, #d8dce8 100%);
+      color: #1a1c2e;
       text-align: center;
       padding: 32px 16px 60px 16px;
       min-height: 100vh;
@@ -83,13 +83,13 @@
 
     /* Top Tabs */
     .tab-nav {
-      background: rgba(30, 34, 40, 0.95);
-      border-bottom: 1px solid #444;
+      background: rgba(70, 80, 105, 0.92);
+      border-bottom: 1px solid #c0c4d8;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       position: sticky; top: 0; z-index: 1000;
     }
     .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #6c5ce7; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
     .nav-brand img { height: 32px; width: auto; }
     .tab-buttons {
       display: flex;
@@ -104,7 +104,7 @@
       padding: 12px 16px; 
       background: none; 
       border: none; 
-      color: #e0e0e0; 
+      color: #2c2f45; 
       font-size: 28px; 
       font-weight: 500; 
       border-bottom: 3px solid transparent; 
@@ -115,22 +115,22 @@
       cursor: pointer; 
       position: relative; 
     }
-    .tab-btn:hover { color: #ffb300; background: #232526; }
-    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn:hover { color: #6c5ce7; background: #f0f2f5; }
+    .tab-btn.active { color: #6c5ce7; border-bottom-color: #6c5ce7; }
     .tab-btn[title]:hover::after {
       content: attr(title);
       position: absolute;
       top: -42px;
       left: 50%;
       transform: translateX(-50%);
-      background: #232526;
-      color: #ffb300;
+      background: #f0f2f5;
+      color: #6c5ce7;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 1001;
-      border: 1px solid #444;
+      border: 1px solid #c0c4d8;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
@@ -147,33 +147,33 @@
     }
 
     /* Tab Content */
-    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(82, 90, 114, 0.93); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
     .tab-content.active { display: block; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
-    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
-    h3 { color: #ffb300; }
-    h4 { color: #ffb300; }
-    .loading { text-align: center; padding: 32px; color: #e0e0e0; }
-    .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #6c5ce7; text-shadow: 0 2px 8px #000a; }
+    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #f0f2f5; }
+    h3 { color: #6c5ce7; }
+    h4 { color: #6c5ce7; }
+    .loading { text-align: center; padding: 32px; color: #2c2f45; }
+    .spinner { border: 4px solid #c0c4d8; border-top: 4px solid #6c5ce7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .note { font-size: 12px; color: #b0b0b0; margin-top: 4px; }
+    .note { font-size: 12px; color: #6b6f85; margin-top: 4px; }
     
     /* Tabs within content */
     .tabs-container { margin-top: 12px; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #444; flex-wrap: wrap; padding-bottom: 12px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.25); flex-wrap: wrap; padding-bottom: 12px; }
     .tab { 
       padding: 8px 12px; 
       background: none; 
       border: none; 
-      color: #e0e0e0; 
+      color: #d8dce8; 
       font-size: 14px; 
       font-weight: 500; 
       border-bottom: 2px solid transparent;
       cursor: pointer; 
       transition: all 0.2s;
     }
-    .tab:hover { color: #ffb300; }
-    .tab.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab:hover { color: #f0f2f5; }
+    .tab.active { color: #f0f2f5; border-bottom-color: #f0f2f5; }
     
     .tab-content { display: none; margin-top: 12px; }
     .tab-content.active { display: block; }
@@ -181,29 +181,29 @@
     /* Forms */
     .form-group { margin-bottom: 16px; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #6c5ce7; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea { 
       width: 100%; 
       padding: 10px 12px; 
-      border: 1px solid #444; 
+      border: 1px solid #c0c4d8; 
       border-radius: 6px; 
       font-size: 14px; 
-      background: #232526; 
-      color: #e0e0e0;
+      background: #f0f2f5; 
+      color: #2c2f45;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: inherit;
     }
     input:focus, select:focus, textarea:focus { 
       outline: none; 
-      border-color: #ffb300; 
+      border-color: #6c5ce7; 
       box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
     }
     
     /* Buttons */
     .btn { 
       padding: 10px 16px; 
-      background: #ffb300; 
-      color: #232526; 
+      background: #6c5ce7; 
+      color: #f0f2f5; 
       border: none; 
       border-radius: 6px; 
       font-size: 13px; 
@@ -212,52 +212,52 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .btn:hover { background: #ffc933; }
-    .btn-secondary { background: #444; color: #ffb300; border: 1px solid #444; }
-    .btn-secondary:hover { background: #555; }
+    .btn:hover { background: #8b7cf8; }
+    .btn-secondary { background: #c0c4d8; color: #6c5ce7; border: 1px solid #c0c4d8; }
+    .btn-secondary:hover { background: #d0d3e8; }
     .action-btn { padding: 4px 8px; font-size: 11px; }
 
     /* Table */
-    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
-    table { width: 100%; border-collapse: collapse; background: #232526; }
-    thead { background: #1a1b1c; }
+    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #c0c4d8; }
+    table { width: 100%; border-collapse: collapse; background: #f0f2f5; }
+    thead { background: #e8eaf2; }
     th { 
       padding: 12px 8px; 
       font-weight: 600; 
       font-size: 11px; 
-      color: #ffb300; 
+      color: #6c5ce7; 
       text-transform: uppercase; 
       letter-spacing: 0.5px;
-      border-bottom: 2px solid #444;
+      border-bottom: 2px solid #c0c4d8;
       text-align: center;
       position: sticky;
       top: 0;
-      background: #1a1b1c;
+      background: #e8eaf2;
       z-index: 10;
     }
     th:first-child {
       position: sticky;
       left: 0;
       z-index: 11;
-      background: #1a1b1c;
+      background: #e8eaf2;
     }
     th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { color: #ffc933; }
+    th.sortable:hover { color: #8b7cf8; }
     td { 
       padding: 12px 8px; 
-      border-bottom: 1px solid #444; 
-      color: #e0e0e0;
+      border-bottom: 1px solid #c0c4d8; 
+      color: #2c2f45;
       font-size: 13px;
     }
     td:first-child {
       position: sticky;
       left: 0;
-      background: #232526;
+      background: #f0f2f5;
       z-index: 9;
       font-weight: 500;
     }
-    tr:hover { background: #2a2b2c; }
-    tr:hover td:first-child { background: #2a2b2c; }
+    tr:hover { background: #e2e5ef; }
+    tr:hover td:first-child { background: #e2e5ef; }
     .sortable { cursor: pointer; }
 
     /* Status Messages */
@@ -300,22 +300,22 @@
       padding: 0;
       margin: 0;
     }
-    .checkbox-item:hover { background: #2a2b2c; }
+    .checkbox-item:hover { background: #e2e5ef; }
     .checkbox-item input[type="checkbox"] { cursor: pointer; }
-    .checkbox-item label { margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0; cursor: pointer; }
+    .checkbox-item label { margin: 0; font-weight: normal; text-transform: none; color: #2c2f45; cursor: pointer; }
 
     /* Event Type Section */
     .event-type-form {
       padding: 16px; 
-      background: #232526; 
+      background: #f0f2f5; 
       border-radius: 6px; 
-      border: 1px solid #444;
+      border: 1px solid #c0c4d8;
       margin-bottom: 16px;
     }
 
     /* Header Paragraph */
     .header { margin-bottom: 16px; }
-    .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
+    .header p { color: #d8dce8; font-size: 14px; margin-top: 8px; }
 
     /* Read-only Mode */
     .read-only-mode input,
@@ -323,10 +323,10 @@
     .read-only-mode textarea {
       pointer-events: none !important;
       background: #f5f5f5 !important;
-      color: #666 !important;
+      color: #6b6f85 !important;
       cursor: not-allowed !important;
       opacity: 0.7 !important;
-      border-color: #ddd !important;
+      border-color: #c0c4d8 !important;
     }
 
     /* Hamburger menu */
@@ -343,7 +343,7 @@
       display: block;
       width: 24px;
       height: 3px;
-      background: #ffb300;
+      background: #6c5ce7;
       border-radius: 2px;
       transition: all 0.2s;
     }
@@ -384,7 +384,7 @@
         align-items: stretch;
         max-height: 60vh;
         overflow-y: auto;
-        background: #232526;
+        background: #f0f2f5;
         position: absolute;
         top: 60px;
         left: 0;
@@ -403,7 +403,7 @@
       .tab-btn {
         font-size: 18px;
         padding: 18px 24px;
-        border-bottom: 1px solid #444;
+        border-bottom: 1px solid #c0c4d8;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -456,7 +456,7 @@
 <body>
   <!-- Google Translate Widget -->
   <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #c0c4d8;border-radius:8px;background:#f0f2f5;color:#6c5ce7;font-size:18px;cursor:pointer;">🌐</button>
   <style>
     @media (max-width: 800px) {
       #google_translate_element {
@@ -504,8 +504,8 @@
   <script>
     // --- Google Sign-In for edit access ---
     const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
-    const AUTH_KEY = 'ccc_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+    const AUTH_KEY = 'clo_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'clo_portal_google_email';
 
     function setReadOnlyMode(enabled) {
       if (enabled) {
@@ -550,9 +550,9 @@
       loginDiv.id = 'login-overlay';
       loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
       loginDiv.innerHTML = `
-        <div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
-          <h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
-          <p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
+        <div style="background:#f0f2f5;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #c0c4d8;">
+          <h2 style="margin-bottom:8px;color:#6c5ce7;">Sign in to Manage</h2>
+          <p style="font-size:14px;color:#2c2f45;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
           <div id="g_id_onload"
             data-client_id="47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com"
             data-callback="onGoogleSignIn"
@@ -560,8 +560,8 @@
             data-ux_mode="popup"
             ></div>
           <div id="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin" data-shape="rectangular" data-logo_alignment="left"></div>
-          <div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
-          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">Continue as Guest (Read-Only)</button>
+          <div style="width:100%;height:1px;background:#c0c4d8;margin:8px 0;"></div>
+          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #c0c4d8;background:#f0f2f5;color:#6c5ce7;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">Continue as Guest (Read-Only)</button>
           <div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
         </div>
       `;
@@ -680,7 +680,7 @@
 
   <nav class="tab-nav">
     <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc League One</div>
       <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -729,7 +729,7 @@
         </a>
       </div>
       <div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
-      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
+      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #e8eaf2; border-radius: 4px; font-size: 12px; color: #6c5ce7; border: 1px solid #c0c4d8;"></div>
       <button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
     </div>
   </nav>
@@ -749,8 +749,16 @@
       <!-- MANAGE EVENTS TAB -->
       <div id="manageTab" class="tab-content active">
         <h3 style="margin:0 0 12px 0;">All Events</h3>
-        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
           <button class="btn" onclick="EventsTab.loadEvents()">🔄 Refresh</button>
+          <button class="btn" id="generateEventsBtn" onclick="EventsTab.generateEvents()" style="background:#4CAF50;">📅 Generate Upcoming Events</button>
+          <select id="generateDaysSelect" style="padding:8px; border-radius:4px; border:1px solid #444; background:#3a3a4e; color:#e0e0e0; font-size:13px;">
+            <option value="7">Next 7 days</option>
+            <option value="14">Next 14 days</option>
+            <option value="30" selected>Next 30 days</option>
+            <option value="60">Next 60 days</option>
+          </select>
+          <span id="generateStatus" style="font-size:13px;"></span>
         </div>
         <div class="table-container">
           <div id="eventsLoading" class="loading"><div class="spinner"></div><p>Loading events...</p></div>
@@ -765,7 +773,7 @@
       <!-- CHEST EVENTS TAB -->
       <div id="chestEventsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Chest-Based Events</h3>
-        <p style="margin-bottom:12px; color:#e0e0e0;">View and calculate participation for chest-based events.</p>
+        <p style="margin-bottom:12px; color:#2c2f45;">View and calculate participation for chest-based events.</p>
         <div style="margin-bottom:12px;"><label for="chestEventSelect">Select Event</label><select id="chestEventSelect" onchange="EventsTab.onChestEventSelected()" style="max-width:400px;"><option value="">-- Select Chest Event --</option></select></div>
         <div id="chestEventActions" style="display:none; margin-bottom:12px;">
           <button class="btn" onclick="EventsTab.calculateChestParticipation()">🔄 Calculate Participation</button>
@@ -781,7 +789,7 @@
       <!-- MANUAL EVENTS TAB -->
       <div id="manualEventsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Manual Events</h3>
-        <p style="margin-bottom:12px; color:#e0e0e0;">Manually track participation for events.</p>
+        <p style="margin-bottom:12px; color:#2c2f45;">Manually track participation for events.</p>
         <div class="form-grid" style="margin-bottom:12px;">
           <div><label for="manualEventSelect">Event</label><select id="manualEventSelect" onchange="EventsTab.onManualEventSelected()"><option value="">-- Select Event --</option></select></div>
           <div><label for="manualMember">Member</label><select id="manualMember"><option value="">-- Select Member --</option></select></div>
@@ -794,12 +802,12 @@
       <!-- TROOP EVENTS TAB -->
       <div id="troopEventsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Troop Events</h3>
-        <p style="margin-bottom:12px; color:#e0e0e0;">Track troop category participation for events with category-based targets.</p>
+        <p style="margin-bottom:12px; color:#2c2f45;">Track troop category participation for events with category-based targets.</p>
         <div class="form-grid" style="margin-bottom:12px;">
           <div><label for="troopEventSelect">Event</label><select id="troopEventSelect" onchange="EventsTab.onTroopEventSelected()"><option value="">-- Select Troop Event --</option></select></div>
         </div>
         <div id="troopEventActions" style="display:none; margin-bottom:12px;">
-          <p style="color:#e0e0e0; font-size:13px; margin-bottom:12px;">Event configured with category-based targets (G7/G8/T8/G9/T9). Enter points for each member below.</p>
+          <p style="color:#2c2f45; font-size:13px; margin-bottom:12px;">Event configured with category-based targets (G7/G8/T8/G9/T9). Enter points for each member below.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div><label for="troopMember">Member</label><select id="troopMember"><option value="">-- Select Member --</option></select></div>
             <div><label for="troopPoints">Points Achieved</label><input type="number" id="troopPoints" placeholder="Enter points" onkeypress="if(event.key==='Enter'){EventsTab.submitTroopEntry();}"></div>
@@ -830,11 +838,11 @@
         <div class="event-type-form">
           <h4 style="margin:0 0 8px 0;">Add New Event Type</h4>
           <div class="form-grid"><div><label for="newEventTypeName">Event Type Name</label><input type="text" id="newEventTypeName" placeholder="e.g., Alliance War"></div><div><label for="newEventTypeMethod">Tracking Method</label><select id="newEventTypeMethod" onchange="EventsTab.updateEventTypeMethod()"><option value="" selected>-- Select Method --</option><option value="chest-based">Chest-Based</option><option value="manual-entry">Manual Entry</option><option value="troop-based">Troop-Based</option><option value="period-marker">Period Marker (No Tracking)</option></select></div></div>
-          <div id="chestTypeSection" style="display:none; margin-bottom:12px;"><label>Chest Types for This Event Type</label><div id="chestTypesList" style="max-height:200px; overflow-y:auto; border:1px solid #444; border-radius:6px; padding:8px; background:#232526;"><div class="loading" style="padding:20px; text-align:center; color:#e0e0e0;">Loading chest types...</div></div><div class="note">Select which chest types count for this event type.</div></div>
+          <div id="chestTypeSection" style="display:none; margin-bottom:12px;"><label>Chest Types for This Event Type</label><div id="chestTypesList" style="max-height:200px; overflow-y:auto; border:1px solid #c0c4d8; border-radius:6px; padding:8px; background:#f0f2f5;"><div class="loading" style="padding:20px; text-align:center; color:#2c2f45;">Loading chest types...</div></div><div class="note">Select which chest types count for this event type.</div></div>
           <div id="troopTargetSection" style="display:none; margin-bottom:12px;">
             <label style="display:block; margin-bottom:8px;">Category Targets</label>
-            <p style="color:#e0e0e0; font-size:12px; margin-bottom:12px;">Set target points for each troop category (G7, G8, T8, G9, T9).</p>
-            <div id="troopTargetsList" style="border:1px solid #444; border-radius:6px; padding:12px; background:#232526; margin-bottom:12px; max-height:250px; overflow-y:auto;"></div>
+            <p style="color:#2c2f45; font-size:12px; margin-bottom:12px;">Set target points for each troop category (G7, G8, T8, G9, T9).</p>
+            <div id="troopTargetsList" style="border:1px solid #c0c4d8; border-radius:6px; padding:12px; background:#f0f2f5; margin-bottom:12px; max-height:250px; overflow-y:auto;"></div>
             <button type="button" class="btn" style="width:100%; margin-bottom:12px;" onclick="EventsTab.addTroopTargetRow()">➕ Add Category Target</button>
           </div>
           <div style="margin-bottom:12px;"><label for="newEventTypeDesc">Description (Optional)</label><input type="text" id="newEventTypeDesc" placeholder="Brief description"></div>
@@ -1818,7 +1826,7 @@
       function renderChestTypesList() {
         const container = document.getElementById('chestTypesList');
         if (!availableChestTypes || availableChestTypes.length === 0) {
-          container.innerHTML = '<div style="padding:12px; color:#e0e0e0;">No chest types found</div>';
+          container.innerHTML = '<div style="padding:12px; color:#2c2f45;">No chest types found</div>';
           return;
         }
         container.innerHTML = availableChestTypes.map((type, index) => `<div class="checkbox-item"><input type="checkbox" id="chest_${index}" value="${escapeHtml(type)}"><label for="chest_${index}">${escapeHtml(type)}</label></div>`).join('');
@@ -1919,11 +1927,11 @@
           `<option value="${cat}" ${level === cat ? 'selected' : ''}>${cat}</option>`
         ).join('');
         row.innerHTML = `
-          <select style="padding:6px; border:1px solid #444; border-radius:4px; background:#232526; color:#e0e0e0;">
+          <select style="padding:6px; border:1px solid #c0c4d8; border-radius:4px; background:#f0f2f5; color:#2c2f45;">
             <option value="">-- Category --</option>
             ${options}
           </select>
-          <input type="number" placeholder="Target points" value="${points}" style="padding:6px; border:1px solid #444; border-radius:4px; background:#232526; color:#e0e0e0;" min="0" step="1">
+          <input type="number" placeholder="Target points" value="${points}" style="padding:6px; border:1px solid #c0c4d8; border-radius:4px; background:#f0f2f5; color:#2c2f45;" min="0" step="1">
           <button type="button" class="btn btn-secondary" style="padding:4px 8px;" onclick="EventsTab.removeTroopTargetRow('${rowId}')">✖ Remove</button>
         `;
         container.appendChild(row);
@@ -2029,6 +2037,44 @@
         }).catch(error => { alert('Error: ' + error.message); });
       }
 
+      function generateEvents() {
+        const btn = document.getElementById('generateEventsBtn');
+        const status = document.getElementById('generateStatus');
+        const daysAhead = document.getElementById('generateDaysSelect').value;
+        btn.disabled = true;
+        btn.textContent = '⏳ Generating...';
+        status.textContent = '';
+        status.style.color = '';
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'generateCalendarEvents', daysAhead: Number(daysAhead) })
+        })
+        .then(res => res.json())
+        .then(result => {
+          btn.disabled = false;
+          btn.textContent = '\uD83D\uDCC5 Generate Upcoming Events';
+          if (result && result.success) {
+            const parts = [];
+            if (result.created && result.created.length > 0) parts.push('✅ Created ' + result.created.length + ': ' + result.created.join(', '));
+            if (result.skipped && result.skipped.length > 0) parts.push('⏭️ Skipped ' + result.skipped.length + ' existing');
+            if (result.errors && result.errors.length > 0) parts.push('❌ ' + result.errors.length + ' error(s)');
+            status.innerHTML = parts.join('<br>') || 'No events to generate in this range.';
+            status.style.color = (result.errors && result.errors.length > 0) ? '#ff5252' : '#4CAF50';
+            loadEvents();
+          } else {
+            status.textContent = '❌ ' + (result?.message || 'Generation failed.');
+            status.style.color = '#ff5252';
+          }
+        })
+        .catch(error => {
+          btn.disabled = false;
+          btn.textContent = '\uD83D\uDCC5 Generate Upcoming Events';
+          status.textContent = '❌ Error: ' + error.message;
+          status.style.color = '#ff5252';
+        });
+      }
+
       function viewEventParticipation(eventName) {
         const evt = eventsData.find(e => e.eventName === eventName);
         if (!evt) return;
@@ -2050,7 +2096,7 @@
         }
       }
 
-      return { init, switchTab, loadEvents, onChestEventSelected, onManualEventSelected, onTroopEventSelected, submitManualEntry, submitTroopEntry, calculateManualNonParticipants, calculateTroopNonParticipants, calculateChestParticipation, submitCreateEvent, updateEventTypeMethod, submitAddEventType, renderEventTypesTable, cancelEditEventType, addTroopTargetRow, removeTroopTargetRow, editEventType, editEvent, deleteEvent, deleteEventType, viewEventParticipation, sortTable, sortManualTable };
+      return { init, switchTab, loadEvents, generateEvents, onChestEventSelected, onManualEventSelected, onTroopEventSelected, submitManualEntry, submitTroopEntry, calculateManualNonParticipants, calculateTroopNonParticipants, calculateChestParticipation, submitCreateEvent, updateEventTypeMethod, submitAddEventType, renderEventTypesTable, cancelEditEventType, addTroopTargetRow, removeTroopTargetRow, editEventType, editEvent, deleteEvent, deleteEventType, viewEventParticipation, sortTable, sortManualTable };
     })();
   </script>
 </body>

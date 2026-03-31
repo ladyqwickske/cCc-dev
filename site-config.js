@@ -1,11 +1,11 @@
-/**
- * cCc Champions Site Configuration
+﻿/**
+ * cCc League One Site Configuration
  */
 
 const SITE_CONFIG = {
   // Clan Identity
-  clanName: 'cCc Champions',
-  clanAbbr: 'ccc',
+  clanName: 'cCc League One',
+  clanAbbr: 'clo',
 
   // Progress ranking weights (must sum to 100)
   rankingWeights: {
@@ -16,8 +16,8 @@ const SITE_CONFIG = {
   },
   
   // Branding
-  primaryColor: '#ffb300',
-  secondaryColor: '#232526',
+  primaryColor: '#6c5ce7',
+  secondaryColor: '#f0f2f5',
   favicon: 'favicon.png',
   
   // Authentication
@@ -26,15 +26,11 @@ const SITE_CONFIG = {
   // Members hidden from progress stats when not logged in (e.g. leaders with special privileges)
   // Names must match exactly as they appear in the Members sheet (case-insensitive match applied at runtime)
   maskedMembers: [
-    'Euphrates',
-    'MerdOS1',
-    'LION',
-    'Red Kit',
-    'Avciss',
-    'ZaZa 276',
+    'LION S 5',
+    'MerdO LH', 
     'Otto S4',
-    'PANDA',
-    'cCc Cp City',
+    '01ASENA sk5',
+    'cCc CP City',
     // 'AnotherSpecialMember'
   ],
 
