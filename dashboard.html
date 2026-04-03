@@ -751,14 +751,21 @@
         })
         .catch(() => {});
     }
-    function getPlayerTarget(name, periodName) {
+    function getPlayerTarget(name, periodName, periodTargetPoints) {
       const pt = loadPointTargets();
       const key = (name || '').toLowerCase().trim();
       const perkey = (periodName || '').trim();
+      // 1. Per-player per-period override
       const match = (pt.overrides || []).find(o =>
         o.player.toLowerCase() === key && o.period === perkey
       );
-      return match ? match.points : (pt.default || 3000);
+      if (match) return match.points;
+      // 2. Period-level custom target (from the event's targetPoints field)
+      if (periodTargetPoints != null && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
+        return Number(periodTargetPoints);
+      }
+      // 3. Global default
+      return pt.default || 3000;
     }
     function escapeHtmlDash(text) {
       const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
@@ -976,6 +983,7 @@ function filterPlayerTable() {
     const expandedTypes = new Set();
     let currentViewingStartDate = null; // Store start date for highlighting new members
     let currentViewingPeriodName = null; // Store period name for per-player target lookup
+    let currentPeriodTargetPoints = null; // Store per-period custom target points (from event)
     let currentPreset = 'lastday'; // Keep selected preset so backend can canonicalize range
     
     // Update UI based on read-only mode
@@ -1064,6 +1072,9 @@ function filterPlayerTable() {
               startInput.value = formatDateAsUTC(start);
               endInput.value = formatDateAsUTC(end);
               displayElement.textContent = `Viewing: Active Period (Fallback): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+              currentPeriodTargetPoints = null;
+              currentViewingPeriodName = null;
+              updateRequiredPointsDisplay();
               // Use end of day UTC for countdown
               const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
              // console.log('[Countdown] Calling updateCountdownTimer (Fallback) with:', endDateStr);
@@ -1089,6 +1100,9 @@ function filterPlayerTable() {
               startInput.value = formatDateAsUTC(start);
               endInput.value = formatDateAsUTC(end);
               displayElement.textContent = `Viewing: Active Period (No Events): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+              currentPeriodTargetPoints = null;
+              currentViewingPeriodName = null;
+              updateRequiredPointsDisplay();
               const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
               console.log('[Countdown] Calling updateCountdownTimer (No Events) with:', endDateStr);
               updateCountdownTimer(endDateStr);
@@ -1134,6 +1148,9 @@ function filterPlayerTable() {
                 startInput.value = formatDateAsUTC(start);
                 endInput.value = formatDateAsUTC(end);
                 displayElement.textContent = `Viewing: Active Period (Between Events): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+                currentPeriodTargetPoints = null;
+                currentViewingPeriodName = null;
+                updateRequiredPointsDisplay();
                 loadDashboard();
                 return;
               }
@@ -1149,6 +1166,8 @@ function filterPlayerTable() {
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Active Period (${activePeriod.eventName}): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
             currentViewingPeriodName = activePeriod.eventName || null;
+            currentPeriodTargetPoints = activePeriod.targetPoints || null;
+            updateRequiredPointsDisplay();
             const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
        //     console.log('[Countdown] Calling updateCountdownTimer (Active Period) with:', endDateStr);
             updateCountdownTimer(endDateStr);
@@ -1165,6 +1184,9 @@ function filterPlayerTable() {
             startInput.value = formatDateAsUTC(start);
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Active Period (Error): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+            currentPeriodTargetPoints = null;
+            currentViewingPeriodName = null;
+            updateRequiredPointsDisplay();
             const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
             console.log('[Countdown] Calling updateCountdownTimer (Error) with:', endDateStr);
             updateCountdownTimer(endDateStr);
@@ -1192,6 +1214,9 @@ function filterPlayerTable() {
               startInput.value = formatDateAsUTC(start);
               endInput.value = formatDateAsUTC(end);
               displayElement.textContent = `Viewing: Previous Period (Fallback): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+              currentPeriodTargetPoints = null;
+              currentViewingPeriodName = null;
+              updateRequiredPointsDisplay();
               loadDashboard();
               return;
             }
@@ -1212,6 +1237,9 @@ function filterPlayerTable() {
               startInput.value = formatDateAsUTC(start);
               endInput.value = formatDateAsUTC(end);
               displayElement.textContent = `Viewing: Previous Period (No Events): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+              currentPeriodTargetPoints = null;
+              currentViewingPeriodName = null;
+              updateRequiredPointsDisplay();
               loadDashboard();
               return;
             }
@@ -1263,6 +1291,9 @@ function filterPlayerTable() {
               startInput.value = formatDateAsUTC(start);
               endInput.value = formatDateAsUTC(end);
               displayElement.textContent = `Viewing: Previous Period (Fallback): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+              currentPeriodTargetPoints = null;
+              currentViewingPeriodName = null;
+              updateRequiredPointsDisplay();
               loadDashboard();
               return;
             }
@@ -1274,6 +1305,8 @@ function filterPlayerTable() {
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Previous Period (${previousPeriod.eventName}): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
             currentViewingPeriodName = previousPeriod.eventName || null;
+            currentPeriodTargetPoints = previousPeriod.targetPoints || null;
+            updateRequiredPointsDisplay();
             loadDashboard();
           })
           .catch(error => {
@@ -1287,6 +1320,9 @@ function filterPlayerTable() {
             startInput.value = formatDateAsUTC(start);
             endInput.value = formatDateAsUTC(end);
             displayElement.textContent = `Viewing: Previous Period (Error): ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+            currentPeriodTargetPoints = null;
+            currentViewingPeriodName = null;
+            updateRequiredPointsDisplay();
             loadDashboard();
           });
         return;
@@ -1298,6 +1334,9 @@ function filterPlayerTable() {
         startInput.value = formatDateAsUTC(start);
         endInput.value = formatDateAsUTC(end);
         displayElement.textContent = `Viewing: Current Month: ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+        currentPeriodTargetPoints = null;
+        currentViewingPeriodName = null;
+        updateRequiredPointsDisplay();
         loadDashboard();
         return;
       }
@@ -1311,6 +1350,9 @@ function filterPlayerTable() {
         startInput.value = formatDateAsUTC(start);
         endInput.value = formatDateAsUTC(end);
         displayElement.textContent = `Viewing: Last Month: ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
+        currentPeriodTargetPoints = null;
+        currentViewingPeriodName = null;
+        updateRequiredPointsDisplay();
         loadDashboard();
         return;
       }
@@ -1320,7 +1362,8 @@ function filterPlayerTable() {
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
       currentViewingStartDate = startDate; // Store for new member highlighting
-      currentViewingPeriodName = null; // Will be overridden by preset logic if applicable
+      // Note: currentViewingPeriodName and currentPeriodTargetPoints are set by
+      // setDateRange() before calling loadDashboard(), so don't reset them here.
       document.getElementById('playerList').innerHTML = '<div class="loading">Loading...</div>';
       const requestId = `dash-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       
@@ -1407,10 +1450,33 @@ function filterPlayerTable() {
       updateLastImportedDisplay(data.lastImportTimestamp || null);
     }
 
+    function getEffectiveRequiredPoints() {
+      // Period-level custom target takes precedence over global default
+      if (currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0) {
+        return Number(currentPeriodTargetPoints);
+      }
+      return loadPointTargets().default || 3000;
+    }
+
+    function updateRequiredPointsDisplay() {
+      const display = document.getElementById('lastImportedDisplay');
+      if (!display) return;
+      const reqPts = getEffectiveRequiredPoints().toLocaleString();
+      const isCustom = currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0;
+      const label = isCustom ? 'Period Target' : 'Required Points';
+      // Preserve the existing "Last Imported:" portion
+      const existingHtml = display.innerHTML;
+      const importedMatch = existingHtml.match(/Last Imported:[^|]*/i);
+      const importedPart = importedMatch ? importedMatch[0].trim() : 'Last Imported: <span class="no-date">Loading...</span>';
+      display.innerHTML = `${importedPart} | ${label}: ${reqPts}`;
+    }
+
     function updateLastImportedDisplay(timestampText) {
       const display = document.getElementById('lastImportedDisplay');
       if (!display) return;
-      const reqPoints = (loadPointTargets().default || 3000).toLocaleString();
+      const reqPts = getEffectiveRequiredPoints().toLocaleString();
+      const isCustom = currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0;
+      const label = isCustom ? 'Period Target' : 'Required Points';
       if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') {
         // Timestamp missing from summary response — fetch it directly as a fallback
         fetch(window.GAS_WEB_APP_URL, {
@@ -1425,18 +1491,17 @@ function filterPlayerTable() {
                        (result && typeof result.value === 'string' && result.value) ||
                        (result && typeof result.lastImportTimestamp === 'string' && result.lastImportTimestamp) ||
                        null;
-            const reqPts = (loadPointTargets().default || 3000).toLocaleString();
             if (ts && ts !== 'Never' && ts !== 'No imports yet') {
-              display.innerHTML = `Last Imported: ${ts} | Required Points: ${reqPts}`;
+              display.innerHTML = `Last Imported: ${ts} | ${label}: ${reqPts}`;
             } else {
-              display.innerHTML = `Last Imported: <span class="no-date">No date</span> | Required Points: ${reqPts}`;
+              display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
             }
           })
           .catch(() => {
-            display.innerHTML = `Last Imported: <span class="no-date">No date</span> | Required Points: ${reqPoints}`;
+            display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
           });
       } else {
-        display.innerHTML = `Last Imported: ${timestampText} | Required Points: ${reqPoints}`;
+        display.innerHTML = `Last Imported: ${timestampText} | ${label}: ${reqPts}`;
       }
     }
     
@@ -1503,7 +1568,7 @@ function filterPlayerTable() {
       playerArray.forEach((player,idx)=>{
         const commonCryptInfo = player.chestsByTypeGrouped?.['Common Crypt'];
         const totalPointsVal = player.totalPoints || 0;
-        const playerTarget = getPlayerTarget(player.player, currentViewingPeriodName);
+        const playerTarget = getPlayerTarget(player.player, currentViewingPeriodName, currentPeriodTargetPoints);
         const pointsClass = totalPointsVal >= playerTarget ? 'player-green' : (totalPointsVal >= playerTarget * 0.9 ? 'player-orange' : 'player-red');
         
         // Check if member joined after the current viewing start date
@@ -1523,7 +1588,7 @@ function filterPlayerTable() {
           }
         }
 
-        const defaultTarget = loadPointTargets().default || 3000;
+        const defaultTarget = getEffectiveRequiredPoints();
         const targetLabel = playerTarget !== defaultTarget
           ? ` <span style="font-size:10px;opacity:0.75;color:#ffb300;">(◎ ${playerTarget.toLocaleString()})</span>`
           : '';
