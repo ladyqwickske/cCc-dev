@@ -952,18 +952,27 @@
           })
           .catch(() => {}); // fall back to localStorage cache
       }
-      // Resolve target for a specific player+period; falls back to default
-      function getEffectiveTarget(playerName, periodName) {
+      // Resolve target for a specific player+period; falls back to period-level target, then global default.
+      // periodTargetPoints: optional number from the period event's own target (from API response)
+      function getEffectiveTarget(playerName, periodName, periodTargetPoints) {
         const pt = loadPointTargets();
         const pkey = (playerName || '').toLowerCase().trim();
         const perkey = (periodName || '').trim();
         const match = (pt.overrides || []).find(o =>
           o.player.toLowerCase() === pkey && o.period === perkey
         );
-        return match ? match.points : (pt.default || 3000);
+        if (match) return match.points;
+        // Use period-level target if set, otherwise global default
+        if (periodTargetPoints !== null && periodTargetPoints !== undefined && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
+          return Number(periodTargetPoints);
+        }
+        return pt.default || 3000;
       }
-      // getPeriodTarget: column header uses global default (no period-level override)
-      function getPeriodTarget() {
+      // getPeriodTarget: returns the target for a specific period (period-level if set, else global default)
+      function getPeriodTarget(periodTargetPoints) {
+        if (periodTargetPoints !== null && periodTargetPoints !== undefined && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
+          return Number(periodTargetPoints);
+        }
         return loadPointTargets().default || 3000;
       }
       function escapeHtmlMem(text) {
@@ -1192,7 +1201,7 @@
             const periodEnd = toYmd(period.endDate);
             const isMemberDuringPeriod = !aJoinDate || !periodEnd || aJoinDate <= periodEnd;
             if (!isMemberDuringPeriod) return count;
-            const tgt = getEffectiveTarget(a.member, period.periodName);
+            const tgt = getEffectiveTarget(a.member, period.periodName, period.targetPoints);
             return count + (Number(r?.points || 0) < tgt ? 1 : 0);
           }, 0);
           const bMissedCount = bResults.reduce((count, r, idx) => {
@@ -1200,7 +1209,7 @@
             const periodEnd = toYmd(period.endDate);
             const isMemberDuringPeriod = !bJoinDate || !periodEnd || bJoinDate <= periodEnd;
             if (!isMemberDuringPeriod) return count;
-            const tgt = getEffectiveTarget(b.member, period.periodName);
+            const tgt = getEffectiveTarget(b.member, period.periodName, period.targetPoints);
             return count + (Number(r?.points || 0) < tgt ? 1 : 0);
           }, 0);
 
@@ -1226,7 +1235,7 @@
         header.innerHTML = '<th>Member</th>';
         periods.forEach(period => {
           const th = document.createElement('th');
-          const periodTgt = getPeriodTarget();
+          const periodTgt = getPeriodTarget(period.targetPoints);
           th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate}) · ${periodTgt.toLocaleString()} pts`;
           header.appendChild(th);
         });
@@ -1247,7 +1256,7 @@
             const isEligible = !joinDate || !periodEnd || joinDate <= periodEnd;
             if (!isEligible) return;
             eligibleCount++;
-            if (Number(result?.points || 0) >= getEffectiveTarget(memberRow.member, period.periodName)) {
+            if (Number(result?.points || 0) >= getEffectiveTarget(memberRow.member, period.periodName, period.targetPoints)) {
               allMissed = false;
             }
           });
@@ -1272,7 +1281,7 @@
               td.textContent = '-';
             } else {
               const cellPts = Number(data.points || 0);
-              const cellTgt = getEffectiveTarget(memberRow.member, period.periodName);
+              const cellTgt = getEffectiveTarget(memberRow.member, period.periodName, period.targetPoints);
               const cellStatus = cellPts >= cellTgt ? 'green' : (cellPts >= cellTgt * 0.9 ? 'orange' : 'red');
               td.className = `points-cell points-${cellStatus}`;
               const pointsText = cellPts.toLocaleString();
