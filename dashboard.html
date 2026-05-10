@@ -201,6 +201,42 @@
       border-radius: 3px;
       font-weight: 700;
     }
+
+    /* Chest Points Reference Popup */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #232526; border-radius: 16px; padding: 24px;
+      max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid #444;
+    }
+    .modal h2 { color: #ffb300; margin-bottom: 12px; }
+    .modal .close-btn {
+      float: right; background: none; border: none; color: #e0e0e0;
+      font-size: 1.5em; cursor: pointer; padding: 0 8px;
+    }
+    .modal .close-btn:hover { color: #ffb300; }
+    .modal input[type="text"] {
+      width: 100%; padding: 10px; background: #33343a; border: 1px solid #444;
+      border-radius: 8px; color: #e0e0e0; font-size: 0.9em; margin-bottom: 12px;
+    }
+    .modal input[type="text"]:focus { outline: none; border-color: #ffb300; box-shadow: 0 0 0 2px rgba(255,179,0,0.15); }
+    .chest-ref-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+    .chest-ref-table th { background: #33343a; padding: 8px; text-align: left; font-size: 0.85em; color: #ffb300; border-bottom: 2px solid #444; }
+    .chest-ref-table td { padding: 6px 8px; border-bottom: 1px solid #444; color: #e0e0e0; }
+    .chest-ref-table tr:hover { background: #33343a; }
+
+    /* Chest Points Ref Button */
+    .ref-btn {
+      background: #33343a; color: #ffb300; border: 1px solid #ffb300;
+      border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 0.85em;
+      display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .ref-btn:hover { background: #ffb300; color: #232526; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     
     /* READ-ONLY MODE STYLES */
     .read-only-mode input:not(#playerFilterInput),
@@ -680,7 +716,7 @@
     <div class="countdown-panel" id="countdownPanel" style="display:none;">
       <div class="countdown-title">⏳ Period Ends In</div>
       <div class="countdown-parts" id="countdownParts"></div>
-      <div class="countdown-subtitle" id="countdownSubtitle">Resets at 23:59 UTC on the period end date</div>
+      <div class="countdown-subtitle" id="countdownSubtitle">Resets at 17:00 UTC on the period end date</div>
     </div>
     
     <div class="date-filter">
@@ -688,11 +724,10 @@
       <div class="date-preset-btns">
         <button class="preset-btn" data-preset="lastday" onclick="setDateRange('lastday')">Active Period</button>
         <button class="preset-btn" data-preset="prevweek" onclick="setDateRange('prevweek')">Previous Period</button>
-        <button class="preset-btn" data-preset="currentmonth" onclick="setDateRange('currentmonth')">Current Month</button>
-        <button class="preset-btn" data-preset="lastmonth" onclick="setDateRange('lastmonth')">Last Month</button>
+        <button class="ref-btn" onclick="openChestPointsRef()">📋 Chest Points</button>
       </div>
       <div class="date-range-display" id="dateRangeDisplay">Viewing: All Time</div>
-      <div class="date-range-display" id="lastImportedDisplay" style="font-size: 12px; color: #ffb300; margin-top: 8px;">Last Imported: <span class="no-date">Loading...</span> | Required Points: 3000</div>
+      <div class="date-range-display" id="lastImportedDisplay" style="font-size: 12px; color: #ffb300; margin-top: 8px;">Last Imported: <span class="no-date">Loading...</span> | Required Points: 7500</div>
       <input type="date" id="startDate" style="display:none;">
       <input type="date" id="endDate" style="display:none;">
     </div>
@@ -712,6 +747,24 @@
     <div class="player-list" id="playerList"><div class="loading">Loading player stats...</div></div>
   </div>
 
+  <!-- Chest Points Reference Modal -->
+  <div class="modal-overlay" id="chestRefModal">
+    <div class="modal">
+      <button class="close-btn" onclick="closeChestPointsRef()">&times;</button>
+      <h2>📋 Chest Points Reference</h2>
+      <input type="text" id="chestRefSearch" placeholder="Search chests..." oninput="filterChestRef()">
+      <div class="table-container" style="overflow-x:auto;">
+        <table class="chest-ref-table">
+          <thead>
+            <tr><th>Type</th><th>Level</th><th>Points</th></tr>
+          </thead>
+          <tbody id="chestRefBody"></tbody>
+        </table>
+      </div>
+      <div class="loading" id="chestRefLoading" style="display:none"><div class="spinner" style="display:inline-block;width:24px;height:24px;border:3px solid #444;border-top-color:#ffb300;border-radius:50%;animation:spin 0.8s linear infinite;"></div><br>Loading...</div>
+    </div>
+  </div>
+
   <script>
     // ── Per-player custom point targets (server-backed with localStorage cache) ──
     const PT_KEY = 'ccc_point_targets';
@@ -720,11 +773,11 @@
     function loadPointTargets() {
       if (pointTargetsCache) return pointTargetsCache;
       try {
-        const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":3000,"overrides":[]}');
+        const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":7500,"overrides":[]}');
         if (!Array.isArray(raw.overrides)) raw.overrides = [];
         pointTargetsCache = raw;
         return raw;
-      } catch(e) { return { default: 3000, overrides: [] }; }
+      } catch(e) { return { default: 7500, overrides: [] }; }
     }
     function savePointTargets(obj) {
       pointTargetsCache = obj;
@@ -744,7 +797,7 @@
         .then(res => res.json())
         .then(result => {
           if (result && result.success !== false) {
-            const obj = { default: result.default || 3000, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
+            const obj = { default: result.default || 7500, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
             pointTargetsCache = obj;
             try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
           }
@@ -765,7 +818,7 @@
         return Number(periodTargetPoints);
       }
       // 3. Global default
-      return pt.default || 3000;
+      return pt.default || 7500;
     }
     function escapeHtmlDash(text) {
       const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
@@ -815,6 +868,19 @@ function getTodayUTC() {
   return getUTCStartOfDay(utc.year, utc.month, utc.day);
 }
 
+// Helper: Get effective date for period matching, accounting for the 5PM UTC boundary.
+// After 17:00 UTC, the next calendar day's period is considered active (matches server-side getActivePeriodDates logic).
+function getEffectiveDateUTC() {
+  const now = new Date();
+  const BOUNDARY_HOUR = 17; // Must match CONFIG.PERIOD_BOUNDARY_HOUR_UTC on the server
+  const effective = new Date(now);
+  if (now.getUTCHours() >= BOUNDARY_HOUR) {
+    effective.setUTCDate(effective.getUTCDate() + 1);
+  }
+  const utc = getUTCComponents(effective);
+  return getUTCStartOfDay(utc.year, utc.month, utc.day);
+}
+
 // Helper: Parse date string as UTC
 function parseDateUTC(str) {
   // Accepts ISO, 'YYYY-MM-DD', or 'YYYY-MM-DD HH:MM:SS'
@@ -838,10 +904,10 @@ function parseDateUTC(str) {
 }
 // Patch countdown and period display to use UTC
 function updateCountdownTimer(endDateStr) {
-  // Always treat endDateStr as UTC and append 'T23:59:59Z' if only a date is provided
+  // Always treat endDateStr as UTC and target 17:00:00Z (5PM UTC game reset)
   let endDate;
   if (/^\d{4}-\d{2}-\d{2}$/.test(endDateStr)) {
-    endDate = new Date(endDateStr + 'T23:59:59Z');
+    endDate = new Date(endDateStr + 'T17:00:00Z');
     //console.log('[Countdown][DEBUG] Parsed endDate from date only:', endDateStr, '->', endDate.toISOString());
   } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(endDateStr)) {
     endDate = new Date(endDateStr);
@@ -1075,8 +1141,8 @@ function filterPlayerTable() {
               currentPeriodTargetPoints = null;
               currentViewingPeriodName = null;
               updateRequiredPointsDisplay();
-              // Use end of day UTC for countdown
-              const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
+              // Use 5PM UTC (game reset time) for countdown
+              const endDateStr = formatDateAsUTC(end) + 'T17:00:00Z';
              // console.log('[Countdown] Calling updateCountdownTimer (Fallback) with:', endDateStr);
               updateCountdownTimer(endDateStr);
               loadDashboard();
@@ -1103,7 +1169,7 @@ function filterPlayerTable() {
               currentPeriodTargetPoints = null;
               currentViewingPeriodName = null;
               updateRequiredPointsDisplay();
-              const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
+              const endDateStr = formatDateAsUTC(end) + 'T17:00:00Z';
               console.log('[Countdown] Calling updateCountdownTimer (No Events) with:', endDateStr);
               updateCountdownTimer(endDateStr);
               loadDashboard();
@@ -1113,8 +1179,9 @@ function filterPlayerTable() {
             // Sort events by start date
             periodEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
             
-            // Find the current active period
-            const todayStr = formatDateAsUTC(todayUTC);
+            // Find the current active period using effective date (accounts for 5PM UTC boundary)
+            const effectiveDate = getEffectiveDateUTC();
+            const todayStr = formatDateAsUTC(effectiveDate);
             let activePeriod = null;
             
             // Look for the event that is currently active (today is between start and end)
@@ -1168,7 +1235,7 @@ function filterPlayerTable() {
             currentViewingPeriodName = activePeriod.eventName || null;
             currentPeriodTargetPoints = activePeriod.targetPoints || null;
             updateRequiredPointsDisplay();
-            const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
+            const endDateStr = formatDateAsUTC(end) + 'T17:00:00Z';
        //     console.log('[Countdown] Calling updateCountdownTimer (Active Period) with:', endDateStr);
             updateCountdownTimer(endDateStr);
             loadDashboard();
@@ -1187,7 +1254,7 @@ function filterPlayerTable() {
             currentPeriodTargetPoints = null;
             currentViewingPeriodName = null;
             updateRequiredPointsDisplay();
-            const endDateStr = formatDateAsUTC(end) + 'T23:59:59Z';
+            const endDateStr = formatDateAsUTC(end) + 'T17:00:00Z';
             console.log('[Countdown] Calling updateCountdownTimer (Error) with:', endDateStr);
             updateCountdownTimer(endDateStr);
             loadDashboard();
@@ -1247,7 +1314,9 @@ function filterPlayerTable() {
             // Sort events by start date
             periodEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
             
-            const todayStr = formatDateAsUTC(todayUTC);
+            // Use effective date (accounts for 5PM UTC boundary)
+            const effectiveDate = getEffectiveDateUTC();
+            const todayStr = formatDateAsUTC(effectiveDate);
             
             // Find the current active period first
             let activePeriod = null;
@@ -1325,35 +1394,6 @@ function filterPlayerTable() {
             updateRequiredPointsDisplay();
             loadDashboard();
           });
-        return;
-      }
-      if (preset === 'currentmonth') {
-        const start = getUTCStartOfDay(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth() + 1, 1);
-        const endUTC = getUTCComponents(todayUTC);
-        const end = getUTCEndOfDay(endUTC.year, endUTC.month + 1, 0);
-        startInput.value = formatDateAsUTC(start);
-        endInput.value = formatDateAsUTC(end);
-        displayElement.textContent = `Viewing: Current Month: ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
-        currentPeriodTargetPoints = null;
-        currentViewingPeriodName = null;
-        updateRequiredPointsDisplay();
-        loadDashboard();
-        return;
-      }
-      if (preset === 'lastmonth') {
-        const prevMonth = todayUTC.getUTCMonth();
-        const prevYear = prevMonth === 0 ? todayUTC.getUTCFullYear() - 1 : todayUTC.getUTCFullYear();
-        const month = prevMonth === 0 ? 12 : prevMonth;
-        const start = getUTCStartOfDay(prevYear, month, 1);
-        const endUtc = getUTCComponents(start);
-        const end = getUTCEndOfDay(endUtc.year, endUtc.month + 1, 0);
-        startInput.value = formatDateAsUTC(start);
-        endInput.value = formatDateAsUTC(end);
-        displayElement.textContent = `Viewing: Last Month: ${formatDisplayDate(start)} – ${formatDisplayDate(end)}`;
-        currentPeriodTargetPoints = null;
-        currentViewingPeriodName = null;
-        updateRequiredPointsDisplay();
-        loadDashboard();
         return;
       }
     }
@@ -1455,7 +1495,7 @@ function filterPlayerTable() {
       if (currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0) {
         return Number(currentPeriodTargetPoints);
       }
-      return loadPointTargets().default || 3000;
+      return loadPointTargets().default || 7500;
     }
 
     function updateRequiredPointsDisplay() {
@@ -1469,6 +1509,23 @@ function filterPlayerTable() {
       const importedMatch = existingHtml.match(/Last Imported:[^|]*/i);
       const importedPart = importedMatch ? importedMatch[0].trim() : 'Last Imported: <span class="no-date">Loading...</span>';
       display.innerHTML = `${importedPart} | ${label}: ${reqPts}`;
+    }
+
+    function formatTimestampWithAgo(timestampText) {
+      if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') return null;
+      // Parse UTC timestamp like "2026-04-18 14:30:00 UTC"
+      const cleaned = timestampText.replace(' UTC', '').replace(/\s*\(.*\)/, '').trim();
+      const parsed = new Date(cleaned + 'Z');
+      if (isNaN(parsed.getTime())) return timestampText;
+      const now = new Date();
+      const diffMs = now - parsed;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return timestampText + ' (just now)';
+      if (diffMins < 60) return timestampText + ` (${diffMins}m ago)`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return timestampText + ` (${diffHours}h ${diffMins % 60}m ago)`;
+      const diffDays = Math.floor(diffHours / 24);
+      return timestampText + ` (${diffDays}d ${diffHours % 24}h ago)`;
     }
 
     function updateLastImportedDisplay(timestampText) {
@@ -1492,7 +1549,8 @@ function filterPlayerTable() {
                        (result && typeof result.lastImportTimestamp === 'string' && result.lastImportTimestamp) ||
                        null;
             if (ts && ts !== 'Never' && ts !== 'No imports yet') {
-              display.innerHTML = `Last Imported: ${ts} | ${label}: ${reqPts}`;
+              const formatted = formatTimestampWithAgo(ts);
+              display.innerHTML = `Last Imported: ${formatted || ts} | ${label}: ${reqPts}`;
             } else {
               display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
             }
@@ -1501,7 +1559,8 @@ function filterPlayerTable() {
             display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
           });
       } else {
-        display.innerHTML = `Last Imported: ${timestampText} | ${label}: ${reqPts}`;
+        const formatted = formatTimestampWithAgo(timestampText);
+        display.innerHTML = `Last Imported: ${formatted || timestampText} | ${label}: ${reqPts}`;
       }
     }
     
@@ -1692,6 +1751,61 @@ function filterPlayerTable() {
   });
 }
     }
+
+    // ===========================
+    // CHEST POINTS REFERENCE
+    // ===========================
+    let chestRefData = [];
+
+    async function openChestPointsRef() {
+      document.getElementById('chestRefModal').classList.add('active');
+      if (chestRefData.length === 0) {
+        document.getElementById('chestRefLoading').style.display = 'block';
+        try {
+          const res = await fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getChestPointsReference' })
+          });
+          const result = await res.json();
+          if (result && result.success) {
+            chestRefData = result.data;
+            renderChestRef(chestRefData);
+          }
+        } catch (err) {
+          console.error('Chest ref load error:', err);
+        }
+        document.getElementById('chestRefLoading').style.display = 'none';
+      }
+    }
+
+    function closeChestPointsRef() {
+      document.getElementById('chestRefModal').classList.remove('active');
+    }
+
+    function renderChestRef(data) {
+      const tbody = document.getElementById('chestRefBody');
+      tbody.innerHTML = '';
+      data.forEach(chest => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + escapeHtmlDash(chest.type) + '</td><td>' + escapeHtmlDash(String(chest.level)) + '</td><td style="font-weight:600;color:#ffb300;">' + chest.points + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterChestRef() {
+      const query = document.getElementById('chestRefSearch').value.toLowerCase();
+      const filtered = chestRefData.filter(c =>
+        c.type.toLowerCase().includes(query) ||
+        String(c.level).toLowerCase().includes(query)
+      );
+      renderChestRef(filtered);
+    }
+
+    // Close modal on overlay click
+    document.getElementById('chestRefModal').addEventListener('click', function(e) {
+      if (e.target === this) closeChestPointsRef();
+    });
     
     function toggleType(typeName) {
       const header = document.querySelector(`.type-total-header[data-type="${typeName}"]`);
