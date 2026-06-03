@@ -350,14 +350,15 @@
       display: flex; align-items: center; gap: 8px;
       margin-left: auto; padding: 4px 0;
     }
-    .login-bar .user-email { font-size: 0.8em; color: #ffb300; }
+    .login-bar .user-email { font-size: 0.8em; color: #ffb300; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .login-bar button {
-      background: #1a73e8; color: #fff; border: none; border-radius: 5px;
-      padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em;
+      padding: 6px 14px; border: 1px solid #444; border-radius: 4px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
-    .login-bar button:hover { background: #1565c0; }
-    .login-bar .logout-btn { background: #c62828; }
-    .login-bar .logout-btn:hover { background: #b71c1c; }
+    #loginBtn { background: #1a1b1c; color: #ffb300; }
+    #loginBtn:hover { background: #2a2b2c; }
+    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
+    #logoutBtn:hover { background: #e53935; }
 
     /* Hamburger menu */
     .hamburger {
@@ -589,7 +590,7 @@
       } else {
         emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
       }
-      const restricted = ['events.html', 'members.html', 'troops.html', 'compensation.html'];
+      const restricted = ['events.html', 'members.html', 'troops.html', 'compensation.html', 'progress.html'];
       restricted.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
       });

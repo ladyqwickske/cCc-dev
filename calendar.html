@@ -358,7 +358,6 @@
       .tab-icon.desktop-only { display: none; }
       .tab-icon-emoji.desktop-only { display: none; }
       .login-bar { margin-left: 0; margin-top: 8px; justify-content: center; }
-      }
       body { padding-top: 100px; }
     }
     @media (min-width: 801px) {
@@ -497,7 +496,7 @@
       if (userEmail) userEmail.textContent = isLoggedIn ? currentUser : '';
       if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : '';
       if (logoutBtn) logoutBtn.style.display = isLoggedIn ? '' : 'none';
-      const restrictedTabs = ['events.html', 'members.html', 'troops.html', 'compensation.html'];
+      const restrictedTabs = ['events.html', 'members.html', 'troops.html', 'compensation.html', 'progress.html'];
       restrictedTabs.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(link => {
           link.style.display = isLoggedIn ? '' : 'none';

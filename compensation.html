@@ -1050,7 +1050,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       const setRestrictedTabsVisibility = (isVisible) => {
         const displayValue = isVisible ? '' : 'none';
-        ['events.html', 'members.html', 'troops.html', 'compensation.html'].forEach((href) => {
+        ['events.html', 'members.html', 'troops.html', 'compensation.html', 'progress.html'].forEach((href) => {
           document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach((link) => {
             link.style.display = displayValue;
           });

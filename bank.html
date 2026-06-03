@@ -500,7 +500,7 @@
       if (userEmail) userEmail.textContent = isLoggedIn ? currentUser : '';
       if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : '';
       if (logoutBtn) logoutBtn.style.display = isLoggedIn ? '' : 'none';
-      const restrictedTabs = ['events.html', 'members.html', 'troops.html', 'compensation.html'];
+      const restrictedTabs = ['events.html', 'members.html', 'troops.html', 'compensation.html', 'progress.html'];
       restrictedTabs.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(link => {
           link.style.display = isLoggedIn ? '' : 'none';
