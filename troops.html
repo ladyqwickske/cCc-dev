@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc League One - Troops</title>
+  <title>cCc Champions - Troops</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -70,8 +70,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #f0f2f5 0%, #d8dce8 100%);
-      color: #1a1c2e;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f3f3f3;
       text-align: center;
       padding: 32px 16px 60px 16px;
       min-height: 100vh;
@@ -89,13 +89,13 @@
 
     /* Top Tabs */
     .tab-nav {
-      background: rgba(70, 80, 105, 0.92);
-      border-bottom: 1px solid #c0c4d8;
+      background: rgba(30, 34, 40, 0.95);
+      border-bottom: 1px solid #444;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       position: sticky; top: 0; z-index: 1000;
     }
     .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #6c5ce7; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
     .nav-brand img { height: 32px; width: auto; }
     .tab-buttons {
       display: flex;
@@ -110,7 +110,7 @@
       padding: 12px 16px; 
       background: none; 
       border: none; 
-      color: #2c2f45; 
+      color: #e0e0e0; 
       font-size: 28px; 
       font-weight: 500; 
       border-bottom: 3px solid transparent; 
@@ -121,22 +121,22 @@
       cursor: pointer; 
       position: relative; 
     }
-    .tab-btn:hover { color: #6c5ce7; background: #f0f2f5; }
-    .tab-btn.active { color: #6c5ce7; border-bottom-color: #6c5ce7; }
+    .tab-btn:hover { color: #ffb300; background: #232526; }
+    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
     .tab-btn[title]:hover::after {
       content: attr(title);
       position: absolute;
       top: -42px;
       left: 50%;
       transform: translateX(-50%);
-      background: #f0f2f5;
-      color: #6c5ce7;
+      background: #232526;
+      color: #ffb300;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 1001;
-      border: 1px solid #c0c4d8;
+      border: 1px solid #444;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
@@ -153,44 +153,44 @@
     }
 
     /* Tab Content */
-    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(82, 90, 114, 0.93); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
     .tab-content.active { display: block; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #6c5ce7; text-shadow: 0 2px 8px #000a; }
-    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #f0f2f5; }
-    h3 { color: #6c5ce7; }
-    .loading { text-align: center; padding: 32px; color: #2c2f45; }
-    .spinner { border: 4px solid #c0c4d8; border-top: 4px solid #6c5ce7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
+    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
+    h3 { color: #ffb300; }
+    .loading { text-align: center; padding: 32px; color: #e0e0e0; }
+    .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .note { font-size: 12px; color: #6b6f85; margin-top: 4px; }
+    .note { font-size: 12px; color: #b0b0b0; margin-top: 4px; }
     
     /* Sub-tabs */
     .tabs-container { margin-top: 12px; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.25); flex-wrap: wrap; padding-bottom: 12px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #444; flex-wrap: wrap; padding-bottom: 12px; }
     .tab { 
       padding: 8px 12px; 
       background: none; 
       border: none; 
-      color: #d8dce8; 
+      color: #e0e0e0; 
       font-size: 14px; 
       font-weight: 500; 
       border-bottom: 2px solid transparent;
       cursor: pointer; 
       transition: all 0.2s;
     }
-    .tab:hover { color: #f0f2f5; }
-    .tab.active { color: #f0f2f5; border-bottom-color: #f0f2f5; }
+    .tab:hover { color: #ffb300; }
+    .tab.active { color: #ffb300; border-bottom-color: #ffb300; }
     
     .tab-content { display: none; margin-top: 12px; }
     .tab-content.active { display: block; }
 
     /* Controls */
     .controls { 
-      background: #f0f2f5; 
+      background: #232526; 
       padding: 16px; 
       border-radius: 8px; 
       margin-bottom: 16px; 
       box-shadow: 0 1px 3px rgba(0,0,0,0.25); 
-      border: 1px solid #c0c4d8; 
+      border: 1px solid #444; 
       display: flex; 
       gap: 12px; 
       align-items: flex-end; 
@@ -203,8 +203,8 @@
     .control-group { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 
     .initial-entry-panel {
-      background: #e8eaf2;
-      border: 1px solid #c0c4d8;
+      background: #1a1b1c;
+      border: 1px solid #444;
       border-radius: 8px;
       padding: 16px;
       margin-top: 20px;
@@ -230,34 +230,34 @@
     }
     .helper-text {
       font-size: 12px;
-      color: #6b6f85;
+      color: #b0b0b0;
       margin-top: 6px;
     }
 
     /* Forms */
     .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #6c5ce7; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea { 
       padding: 10px 12px; 
-      border: 1px solid #c0c4d8; 
+      border: 1px solid #444; 
       border-radius: 6px; 
       font-size: 14px; 
-      background: #f0f2f5; 
-      color: #2c2f45;
+      background: #232526; 
+      color: #e0e0e0;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: inherit;
     }
     input:focus, select:focus, textarea:focus { 
       outline: none; 
-      border-color: #6c5ce7; 
+      border-color: #ffb300; 
       box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
     }
     
     /* Buttons */
     .btn { 
       padding: 10px 16px; 
-      background: #6c5ce7; 
-      color: #f0f2f5; 
+      background: #ffb300; 
+      color: #232526; 
       border: none; 
       border-radius: 6px; 
       font-size: 13px; 
@@ -266,9 +266,9 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .btn:hover { background: #8b7cf8; }
-    .btn-secondary { background: #c0c4d8; color: #6c5ce7; border: 1px solid #c0c4d8; }
-    .btn-secondary:hover { background: #d0d3e8; }
+    .btn:hover { background: #ffc933; }
+    .btn-secondary { background: #444; color: #ffb300; border: 1px solid #444; }
+    .btn-secondary:hover { background: #555; }
 
     /* Status Messages */
     .status { padding: 12px 14px; border-radius: 6px; margin: 8px 0; font-size: 13px; }
@@ -276,50 +276,50 @@
     .status.err { background: #b71c1c; color: #ef5350; border: 1px solid #d32f2f; }
 
     /* Table */
-    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #c0c4d8; }
-    table { width: 100%; border-collapse: collapse; background: #f0f2f5; table-layout: fixed; }
-    thead { background: #e8eaf2; }
+    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
+    table { width: 100%; border-collapse: collapse; background: #232526; table-layout: fixed; }
+    thead { background: #1a1b1c; }
     th { 
       padding: 12px 8px; 
       font-weight: 600; 
       font-size: 11px; 
-      color: #6c5ce7; 
+      color: #ffb300; 
       text-transform: uppercase; 
       letter-spacing: 0.5px;
-      border-bottom: 2px solid #c0c4d8;
+      border-bottom: 2px solid #444;
       text-align: left;
       position: sticky;
       top: 0;
-      background: #e8eaf2;
+      background: #1a1b1c;
       z-index: 10;
     }
     th:first-child {
       position: sticky;
       left: 0;
       z-index: 11;
-      background: #e8eaf2;
+      background: #1a1b1c;
     }
     th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { color: #8b7cf8; }
+    th.sortable:hover { color: #ffc933; }
     th.asc::after { content: ' ↑'; }
     th.desc::after { content: ' ↓'; }
     th.center { text-align: center; }
     td { 
       padding: 12px 8px; 
-      border-bottom: 1px solid #c0c4d8; 
-      color: #2c2f45;
+      border-bottom: 1px solid #444; 
+      color: #e0e0e0;
       font-size: 13px;
     }
     td:first-child {
       position: sticky;
       left: 0;
-      background: #f0f2f5;
+      background: #232526;
       z-index: 9;
       font-weight: 500;
     }
     td.center { text-align: center; }
-    tr:hover { background: #e2e5ef; }
-    tr:hover td:first-child { background: #e2e5ef; }
+    tr:hover { background: #2a2b2c; }
+    tr:hover td:first-child { background: #2a2b2c; }
     #troopMembersTable th[data-column="playerName"],
     #troopMembersTable td:first-child {
       width: 200px;
@@ -336,9 +336,9 @@
 
     /* History Table */
     .history-table {
-      background: #f0f2f5;
+      background: #232526;
       border-radius: 6px;
-      border: 1px solid #c0c4d8;
+      border: 1px solid #444;
       overflow: hidden;
       margin-top: 12px;
     }
@@ -346,17 +346,17 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 2fr;
       gap: 0;
-      background: #e8eaf2;
+      background: #1a1b1c;
       font-weight: 600;
       font-size: 12px;
-      color: #6c5ce7;
+      color: #ffb300;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-bottom: 2px solid #c0c4d8;
+      border-bottom: 2px solid #444;
     }
     .table-header > div {
       padding: 12px 8px;
-      border-right: 1px solid #c0c4d8;
+      border-right: 1px solid #444;
     }
     .table-header > div:last-child {
       border-right: none;
@@ -365,15 +365,15 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 2fr;
       gap: 0;
-      border-bottom: 1px solid #c0c4d8;
+      border-bottom: 1px solid #444;
     }
     .table-row:hover {
-      background: #e2e5ef;
+      background: #2a2b2c;
     }
     .table-cell {
       padding: 12px 8px;
-      border-right: 1px solid #c0c4d8;
-      color: #2c2f45;
+      border-right: 1px solid #444;
+      color: #e0e0e0;
       font-size: 13px;
       text-align: left;
     }
@@ -386,12 +386,12 @@
     }
     .table-cell.timestamp {
       font-size: 12px;
-      color: #6b6f85;
+      color: #b0b0b0;
     }
     .no-data {
       padding: 32px;
       text-align: center;
-      color: #6b6f85;
+      color: #b0b0b0;
     }
 
     /* Latest Levels Grid */
@@ -403,50 +403,69 @@
     }
     .level-card {
       padding: 12px;
-      background: #f0f2f5;
-      border: 1px solid #c0c4d8;
+      background: #232526;
+      border: 1px solid #444;
       border-radius: 4px;
       text-align: center;
     }
     .level-card.crypt {
-      background: #ede7ff;
-      border-color: #6c5ce7;
+      background: #3a2e1f;
+      border-color: #ffb300;
     }
     .level-card-label {
       font-size: 12px;
-      color: #2c2f45;
+      color: #e0e0e0;
       font-weight: 500;
       margin-bottom: 6px;
     }
     .level-card.crypt .level-card-label {
-      color: #6c5ce7;
+      color: #ffb300;
       font-weight: bold;
     }
     .level-card-value {
       font-size: 20px;
       font-weight: 600;
-      color: #6c5ce7;
+      color: #ffb300;
     }
+
+    /* Category badges */
+    .troop-category {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      min-width: 40px;
+    }
+    .troop-category.cat-T9  { background: #6a1fd1; color: #e8d5ff; border: 1px solid #9c5de8; }
+    .troop-category.cat-G9  { background: #1565c0; color: #bbdefb; border: 1px solid #42a5f5; }
+    .troop-category.cat-T8  { background: #2e7d32; color: #c8e6c9; border: 1px solid #66bb6a; }
+    .troop-category.cat-G8  { background: #e65100; color: #ffe0b2; border: 1px solid #ffa726; }
+    .troop-category.cat-G7  { background: #37474f; color: #cfd8dc; border: 1px solid #78909c; }
+    .troop-category.cat-none { color: #666; font-style: italic; font-weight: 400; font-size: 12px; }
 
     /* Header Paragraph */
     .header { margin-bottom: 16px; }
-    .header p { color: #d8dce8; font-size: 14px; margin-top: 8px; }
+    .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
 
     /* Error */
-    .error { color: #ff5252; padding: 12px; background: #ffcdd2; border-radius: 6px; }
+    .error { color: #ff5252; padding: 12px; background: #1a0000; border-radius: 6px; }
 
-    /* Read-only Mode */
-    .read-only-mode input,
-    .read-only-mode select,
-    .read-only-mode textarea,
-    .read-only-mode button:not(.tab-btn):not(.tab):not(.hamburger) {
-      pointer-events: none !important;
-      background: #f5f5f5 !important;
-      color: #6b6f85 !important;
-      cursor: not-allowed !important;
-      opacity: 0.7 !important;
-      border-color: #c0c4d8 !important;
+    /* Login Bar */
+    .login-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin-left: auto; padding: 4px 0;
     }
+    .login-bar .user-email { font-size: 0.8em; color: #ffb300; }
+    .login-bar button {
+      background: #1a73e8; color: #fff; border: none; border-radius: 5px;
+      padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em;
+    }
+    .login-bar button:hover { background: #1565c0; }
+    .login-bar .logout-btn { background: #c62828; }
+    .login-bar .logout-btn:hover { background: #b71c1c; }
 
     /* Hamburger menu */
     .hamburger {
@@ -462,7 +481,7 @@
       display: block;
       width: 24px;
       height: 3px;
-      background: #6c5ce7;
+      background: #ffb300;
       border-radius: 2px;
       transition: all 0.2s;
     }
@@ -503,7 +522,7 @@
         align-items: stretch;
         max-height: 60vh;
         overflow-y: auto;
-        background: #f0f2f5;
+        background: #232526;
         position: absolute;
         top: 60px;
         left: 0;
@@ -522,7 +541,7 @@
       .tab-btn {
         font-size: 18px;
         padding: 18px 24px;
-        border-bottom: 1px solid #c0c4d8;
+        border-bottom: 1px solid #444;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -532,16 +551,13 @@
       .tab-btn:last-child { border-bottom: none; }
       .tab-label.mobile-only { display: inline; }
       .tab-icon.desktop-only { display: none; }
-      /* Auth buttons and badges on mobile */
-      #readOnlyBadge,
-      #signedInUserBadge,
-      #logoutBtn,
-      #signInManageBtn {
-        order: 3;
-        margin: 4px 0 4px auto !important;
-        font-size: 11px !important;
-        padding: 6px 8px !important;
+      .login-bar {
+        order: 2;
+        margin-left: auto;
+        gap: 6px;
       }
+      .login-bar .user-email { font-size: 0.7em; }
+      .login-bar button { font-size: 0.75em; padding: 5px 10px; }
       body {
         padding-top: 100px;
       }
@@ -575,7 +591,7 @@
 <body>
   <!-- Google Translate Widget -->
   <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #c0c4d8;border-radius:8px;background:#f0f2f5;color:#6c5ce7;font-size:18px;cursor:pointer;">🌐</button>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
   <style>
     @media (max-width: 800px) {
       #google_translate_element {
@@ -618,177 +634,94 @@
     }
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <!-- Google Sign-In integration -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
-    // --- Google Sign-In for edit access ---
-    const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
-    const AUTH_KEY = 'clo_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'clo_portal_google_email';
+    // --- Auth (SK6-style) ---
+    const AUTH_KEY = 'ccc_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+    let isLoggedIn = false;
+    let currentUser = null;
 
-    function setReadOnlyMode(enabled) {
-      if (enabled) {
-        document.documentElement.classList.add('read-only-mode');
-        if (document.body) document.body.classList.add('read-only-mode');
-      } else {
-        document.documentElement.classList.remove('read-only-mode');
-        if (document.body) document.body.classList.remove('read-only-mode');
-      }
+    function checkLoginState() {
+      try {
+        const authed = localStorage.getItem(AUTH_KEY) === '1';
+        const email = localStorage.getItem(AUTH_EMAIL_KEY);
+        if (authed && email) { isLoggedIn = true; currentUser = { email }; }
+      } catch (e) {}
+      updateLoginUI();
     }
 
-    function updateSignedInBadge(email) {
-      const badge = document.getElementById('signedInUserBadge');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const signInBtn = document.getElementById('signInManageBtn');
-      if (!badge) return;
-      if (email) {
-        badge.innerHTML = email;
-        badge.style.display = 'inline-block';
-        if (logoutBtn) logoutBtn.style.display = 'inline-block';
-        if (signInBtn) signInBtn.style.display = 'none';
-      } else {
-        badge.textContent = '';
-        badge.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        if (signInBtn) signInBtn.style.display = 'inline-block';
-      }
+    function handleLogin() {
+      if (!document.getElementById('gsi-script')) {
+        const s = document.createElement('script'); s.id = 'gsi-script';
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.onload = () => initGoogleLogin(); document.head.appendChild(s);
+      } else { initGoogleLogin(); }
+    }
+
+    function initGoogleLogin() {
+      google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
+      google.accounts.id.prompt();
+    }
+
+    async function handleGoogleCallback(response) {
+      try {
+        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+        const tokenRes = await fetch(cfWorkerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: response.credential }) });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.success || !tokenData.email) { showToast('Login failed', 'error'); return; }
+        const email = tokenData.email;
+        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const data = await res.json();
+        if (data.success && data.allowed) {
+          isLoggedIn = true; currentUser = { email };
+          localStorage.setItem(AUTH_KEY, '1'); localStorage.setItem(AUTH_EMAIL_KEY, email);
+          updateLoginUI(); showToast('Logged in as ' + email, 'success');
+        } else { showToast('Access denied for ' + email, 'error'); }
+      } catch (err) { showToast('Login error: ' + err.message, 'error'); }
     }
 
     function handleLogout() {
+      isLoggedIn = false; currentUser = null;
       try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
       try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
-      setReadOnlyMode(true);
-      updateSignedInBadge(null);
-      setTimeout(() => { window.location.reload(); }, 200);
+      updateLoginUI(); showToast('Logged out', 'success');
     }
 
-    function showGoogleLogin() {
-      const loginDiv = document.createElement('div');
-      loginDiv.id = 'login-overlay';
-      loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-      loginDiv.innerHTML = `
-        <div style="background:#f0f2f5;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #c0c4d8;">
-          <h2 style="margin-bottom:8px;color:#6c5ce7;">Sign in to Manage</h2>
-          <p style="font-size:14px;color:#2c2f45;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
-          <div id="g_id_onload" data-client_id="47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com" data-callback="onGoogleSignIn" data-auto_prompt="false" data-ux_mode="popup"></div>
-          <div id="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin" data-shape="rectangular" data-logo_alignment="left"></div>
-          <div style="width:100%;height:1px;background:#c0c4d8;margin:8px 0;"></div>
-          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #c0c4d8;background:#f0f2f5;color:#6c5ce7;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;">Continue as Guest (Read-Only)</button>
-          <div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
-        </div>
-      `;
-      document.body.appendChild(loginDiv);
-      setTimeout(() => {
-        const guestBtn = document.getElementById('guest-btn');
-        if (guestBtn) {
-          guestBtn.onclick = function() {
-            document.getElementById('login-overlay').remove();
-            setReadOnlyMode(true);
-            try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
-            try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
-            updateSignedInBadge(null);
-          };
-        }
-        if (window.google && google.accounts && google.accounts.id) {
-          try {
-            google.accounts.id.initialize({
-              client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
-              callback: onGoogleSignIn,
-              auto_select: false,
-              ux_mode: 'popup'
-            });
-            google.accounts.id.renderButton(document.getElementById('g_id_signin'), 
-              { type: 'standard', size: 'large', theme: 'outline', text: 'signin', shape: 'rectangular', logo_alignment: 'left' });
-          } catch (e) { console.error('Error rendering Google Sign-In button:', e); }
-        }
-      }, 100);
-    }
-
-    window.onGoogleSignIn = async function(response) {
-      const idToken = response.credential;
-      try {
-        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
-        let tokenRes = await fetch(cfWorkerUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken })
-        });
-        let tokenData = await tokenRes.json();
-        if (!tokenData.success || !tokenData.token_verified) {
-          throw new Error(tokenData.error || 'Token verification failed');
-        }
-        const email = tokenData.email;
-        const res = await fetch(BACKEND_VERIFY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'verifyUserPermission', email })
-        });
-        const data = await res.json();
-        const isAllowed = Boolean(data && (data.isAllowedEditor === true || data.allowed === true));
-        if (isAllowed) {
-          try { localStorage.setItem(AUTH_KEY, idToken); } catch (e) {}
-          try { localStorage.setItem(AUTH_EMAIL_KEY, email); } catch (e) {}
-          setReadOnlyMode(false);
-          updateSignedInBadge(email);
-          const overlay = document.getElementById('login-overlay');
-          if (overlay) overlay.style.display = 'none';
-        } else {
-          setReadOnlyMode(true);
-          const errorDiv = document.getElementById('login-error');
-          if (errorDiv) {
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = 'Your account does not have editor access';
-          }
-        }
-      } catch (error) {
-        console.error('Error during sign-in:', error);
-        const errorDiv = document.getElementById('login-error');
-        if (errorDiv) {
-          errorDiv.style.display = 'block';
-          errorDiv.textContent = 'Sign-in failed: ' + error.message;
-        }
-      }
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const setRestrictedTabsVisibility = (isVisible) => {
-        const displayValue = isVisible ? '' : 'none';
-        ['events.html', 'members.html', 'troops.html', 'compensation.html'].forEach((href) => {
-          document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach((link) => {
-            link.style.display = displayValue;
-          });
-        });
-      };
-      const token = (() => { try { return localStorage.getItem(AUTH_KEY); } catch (e) { return null; } })();
-      const email = (() => { try { return localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) { return null; } })();
-      if (token && email) {
-        setReadOnlyMode(false);
-        updateSignedInBadge(email);
-        setRestrictedTabsVisibility(true);
-        const bankTab = document.getElementById('bankTabBtn');
-        if (bankTab) bankTab.style.display = 'flex';
+    function updateLoginUI() {
+      const emailEl = document.getElementById('userEmail');
+      const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (isLoggedIn && currentUser) {
+        emailEl.textContent = currentUser.email; emailEl.style.display = 'inline';
+        loginBtn.style.display = 'none'; logoutBtn.style.display = 'inline';
       } else {
-        setReadOnlyMode(true);
-        updateSignedInBadge(null);
-        setRestrictedTabsVisibility(false);
-        const bankTab = document.getElementById('bankTabBtn');
-        if (bankTab) bankTab.style.display = 'none';
-        let nav = document.querySelector('.tab-nav-container');
-        if (nav && !document.getElementById('signInManageBtn')) {
-          const btn = document.createElement('button');
-          btn.id = 'signInManageBtn';
-          btn.textContent = '🔑 Sign in to Manage';
-          btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
-          btn.onclick = showGoogleLogin;
-          nav.appendChild(btn);
-        }
+        emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
       }
-    });
+      const restricted = ['events.html', 'members.html', 'troops.html', 'compensation.html'];
+      restricted.forEach(href => {
+        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
+      });
+      const bankBtn = document.getElementById('bankTabBtn');
+      if (bankBtn) bankBtn.style.display = isLoggedIn ? 'flex' : 'none';
+    }
+
+    function isUserLoggedIn() { return isLoggedIn; }
+
+    function showToast(msg, type) {
+      let t = document.getElementById('toast');
+      if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:3000;background:#232526;color:#f3f3f3;padding:12px 20px;border-radius:8px;font-size:0.9em;display:none;box-shadow:0 2px 12px rgba(0,0,0,0.3);'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.style.borderLeft = type === 'success' ? '4px solid #27ae60' : type === 'error' ? '4px solid #c62828' : '4px solid #ffb300';
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => checkLoginState());
   </script>
 
   <nav class="tab-nav">
     <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc League One</div>
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
       <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -823,10 +756,6 @@
           <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Competition</span>
         </a>
-        <a href="points.html" class="tab-btn" title="Points Reference">
-          <img src="chest_points.png" alt="Points Reference" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Points Reference</span>
-        </a>
         <a href="calendar.html" class="tab-btn" title="Calendar">
           <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Calendar</span>
@@ -836,9 +765,11 @@
           <span class="tab-label mobile-only">Bank</span>
         </a>
       </div>
-      <div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
-      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #e8eaf2; border-radius: 4px; font-size: 12px; color: #6c5ce7; border: 1px solid #c0c4d8;"></div>
-      <button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
+      <div class="login-bar">
+        <span class="user-email" id="userEmail" style="display:none"></span>
+        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+        <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
+      </div>
     </div>
   </nav>
 
@@ -885,7 +816,7 @@
           </div>
           <div class="field checkbox-field" style="display: flex; align-items: center; gap: 8px; padding-bottom: 10px;">
             <input type="checkbox" id="troopIsStarting" />
-            <label for="troopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Starting</label>
+            <label for="troopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Starting</label>
           </div>
           <div class="field">
             <label for="troopEntryDate">Date</label>
@@ -923,11 +854,11 @@
             </div>
             <div class="field checkbox-field checkbox-inline">
               <input type="checkbox" id="initialTroopIsStarting" checked />
-              <label for="initialTroopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Mark as Starting</label>
+              <label for="initialTroopIsStarting" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Mark as Starting</label>
             </div>
             <div class="field checkbox-field checkbox-inline">
               <input type="checkbox" id="initialTroopFillZeros" checked />
-              <label for="initialTroopFillZeros" style="margin: 0; font-weight: normal; text-transform: none; color: #2c2f45;">Auto-fill zeros</label>
+              <label for="initialTroopFillZeros" style="margin: 0; font-weight: normal; text-transform: none; color: #e0e0e0;">Auto-fill zeros</label>
             </div>
           </div>
 
@@ -1189,13 +1120,13 @@
             if (currentLevel !== null && currentLevel !== undefined) {
               levelCell.textContent = currentLevel;
               if (currentLevel !== startLevel) {
-                levelCell.style.color = '#6c5ce7';
+                levelCell.style.color = '#ffb300';
               } else {
-                levelCell.style.color = '#2c2f45';
+                levelCell.style.color = '#e0e0e0';
               }
             } else {
               levelCell.textContent = '−';
-              levelCell.style.color = '#6b6f85';
+              levelCell.style.color = '#b0b0b0';
               levelCell.style.fontWeight = '400';
             }
             row.appendChild(levelCell);
@@ -1210,13 +1141,13 @@
             if (currentDate !== null && currentDate !== undefined) {
               dateCell.textContent = formatSummaryDate(currentDate);
               if (currentLevel !== startLevel) {
-                dateCell.style.color = '#6c5ce7';
+                dateCell.style.color = '#ffb300';
               } else {
-                dateCell.style.color = '#2c2f45';
+                dateCell.style.color = '#e0e0e0';
               }
             } else {
               dateCell.textContent = '−';
-              dateCell.style.color = '#9096b0';
+              dateCell.style.color = '#dadce0';
             }
             row.appendChild(dateCell);
           });
@@ -1588,7 +1519,7 @@
               .then(res => res.json())
               .then(latest => {
                 let html = '<div style="margin-bottom: 20px;">';
-                html += '<h2 style="font-size: 14px; margin-bottom: 12px; color: #2c2f45;">Latest Levels</h2>';
+                html += '<h2 style="font-size: 14px; margin-bottom: 12px; color: #e0e0e0;">Latest Levels</h2>';
                 html += '<div class="latest-levels">';
 
                 const types = ['G', 'M', 'S', 'E', 'C'];
