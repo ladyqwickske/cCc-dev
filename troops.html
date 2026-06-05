@@ -698,7 +698,7 @@
       } else {
         emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
       }
-      const restricted = ['events.html', 'members.html', 'troops.html', 'compensation.html', 'progress.html'];
+      const restricted = ['events.html', 'members.html', 'troops.html', 'warnings.html'];
       restricted.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
       });
@@ -745,13 +745,9 @@
           <img src="troops.png" alt="Troops" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Troops</span>
         </a>
-        <a href="progress.html" class="tab-btn" title="Progress">
-          <img src="progress.png" alt="Progress" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Progress</span>
-        </a>
-        <a href="compensation.html" class="tab-btn" title="Compensation">
-          <img src="compensation.png" alt="Compensation" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Compensation</span>
+        <a href="warnings.html" class="tab-btn" title="Warnings">
+          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Warnings</span>
         </a>
         <a href="competition.html" class="tab-btn" title="Competition">
           <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
