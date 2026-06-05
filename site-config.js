@@ -1,11 +1,11 @@
-﻿/**
- * cCc League One Site Configuration
+/**
+ * cCc Champions Site Configuration
  */
 
 const SITE_CONFIG = {
   // Clan Identity
-  clanName: 'cCc League One',
-  clanAbbr: 'clo',
+  clanName: 'cCc Champions',
+  clanAbbr: 'ccc',
 
   // Progress ranking weights (must sum to 100)
   rankingWeights: {
@@ -16,8 +16,8 @@ const SITE_CONFIG = {
   },
   
   // Branding
-  primaryColor: '#6c5ce7',
-  secondaryColor: '#f0f2f5',
+  primaryColor: '#ffb300',
+  secondaryColor: '#232526',
   favicon: 'favicon.png',
   
   // Authentication
@@ -26,11 +26,15 @@ const SITE_CONFIG = {
   // Members hidden from progress stats when not logged in (e.g. leaders with special privileges)
   // Names must match exactly as they appear in the Members sheet (case-insensitive match applied at runtime)
   maskedMembers: [
-    'LION S 5',
-    'MerdO LH', 
+    'Euphrates',
+    'MerdOS1',
+    'LION',
+    'Red Kit',
+    'Avciss',
+    'ZaZa 276',
     'Otto S4',
-    '01ASENA sk5',
-    'cCc CP City',
+    'PANDA',
+    'cCc Cp City',
     // 'AnotherSpecialMember'
   ],
 
@@ -40,7 +44,7 @@ const SITE_CONFIG = {
     { name: 'Events', file: 'events.html', icon: 'events.png' },
     { name: 'Members', file: 'members.html', icon: 'members.png' },
     { name: 'Troops', file: 'troops.html', icon: 'troops.png' },
-    { name: 'Progress', file: 'progress.html', icon: 'progress.png' },
+    { name: 'Warnings', file: 'warnings.html', icon: 'warning.png' },
     { name: 'Calendar', file: 'calendar.html', icon: 'calendar.png' }
   ]
 };
