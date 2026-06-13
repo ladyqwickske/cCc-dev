@@ -980,8 +980,9 @@ function filterPlayerTable() {
 
       // Dashboard
     window.onload = function() {
-      loadPointTargets(); // instant from localStorage — no blocking server call
-      loadPointTargetsFromServer(); // background refresh, does NOT block rendering
+      loadPointTargets(); // instant from localStorage — no server call needed
+      // pointTargets are included in the getDashboardBundle response,
+      // so no separate loadPointTargetsFromServer() call is needed.
       setDateRange('lastday');
     };
 
