@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cCc Champions - Dashboard</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
   <script src="site-config.js"></script>
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -1225,7 +1226,8 @@ function filterPlayerTable() {
             if (activePeriod) {
               const activeStartStr = activePeriod.startDate;
               for (let i = periodEvents.length - 1; i >= 0; i--) {
-                if (periodEvents[i].endDate < activeStartStr) {
+                // Use <= because events share boundary days (e.g. Jun 1-6 ends on 6, Jun 6-12 starts on 6)
+                if (periodEvents[i] !== activePeriod && periodEvents[i].endDate <= activeStartStr) {
                   previousPeriod = periodEvents[i];
                   break;
                 }
@@ -1290,6 +1292,47 @@ function filterPlayerTable() {
       const requestId = `dash-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       
       // Store for re-rendering after splits load
+      let lastPlayerStats = null;
+
+      // Try the fast bundle endpoint first (single round-trip)
+      const bundlePayload = { action: 'getDashboardBundle', periodPreset: currentPreset };
+      console.log('[DEBUG] getDashboardBundle request:', bundlePayload);
+      const bundleStart = performance.now();
+      if (window.perfDebug) window.perfDebug.mark('Dashboard Load');
+      fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bundlePayload)
+      })
+        .then(res => res.json())
+        .then(bundle => {
+          const elapsed = Math.round(performance.now() - bundleStart);
+          console.log('[DEBUG] getDashboardBundle response in %dms, keys:', elapsed, Object.keys(bundle || {}));
+          if (bundle && bundle.statsSummary && bundle.playerStats) {
+            // Bundle succeeded — use all data at once
+            displaySummary(bundle.statsSummary);
+            lastPlayerStats = bundle.playerStats;
+            window.currentSplits = bundle.splits || {};
+            displayPlayerStats(bundle.playerStats);
+            if (bundle.pointTargets) {
+              pointTargetsCache = { default: bundle.pointTargets.default || 7500, overrides: Array.isArray(bundle.pointTargets.overrides) ? bundle.pointTargets.overrides : [] };
+              try { localStorage.setItem(PT_KEY, JSON.stringify(pointTargetsCache)); } catch(e) {}
+            }
+            console.log('[INFO] Dashboard loaded via bundle in %dms (server: %dms)', elapsed, bundle._timing ? bundle._timing.ms : '?');
+            if (window.perfDebug) window.perfDebug.measure('Dashboard Load', 'render');
+            return;
+          }
+          // Bundle returned but incomplete — fall back
+          console.warn('[WARN] getDashboardBundle returned incomplete data, falling back to individual calls');
+          loadDashboardLegacy_(startDate, endDate, requestId);
+        })
+        .catch(e => {
+          console.warn('[WARN] getDashboardBundle failed, falling back:', e);
+          loadDashboardLegacy_(startDate, endDate, requestId);
+        });
+    }
+
+    function loadDashboardLegacy_(startDate, endDate, requestId) {
       let lastPlayerStats = null;
       
       // Use CORS proxy (Cloudflare Worker) for API calls
@@ -1361,6 +1404,7 @@ function filterPlayerTable() {
     }
     
     function displaySummary(data) {
+      if (window.perfDebug) window.perfDebug.mark('Render Summary');
       console.log('[DEBUG] displaySummary called with:', JSON.stringify(data));
       console.log('[DEBUG] displaySummary data keys:', Object.keys(data || {}));
       console.log('[DEBUG] displaySummary values: totalChests=%s, totalMembers=%s, totalPlayers=%s, totalPoints=%s, lastImportTimestamp=%s',
@@ -1370,6 +1414,7 @@ function filterPlayerTable() {
       document.getElementById('totalPlayers').textContent = data.totalPlayers || '0';
       document.getElementById('totalPoints').textContent = data.totalPoints ? data.totalPoints.toLocaleString() : '0';
       updateLastImportedDisplay(data.lastImportTimestamp || null);
+      if (window.perfDebug) window.perfDebug.measure('Render Summary', 'render');
     }
 
     function getEffectiveRequiredPoints() {
@@ -1447,6 +1492,7 @@ function filterPlayerTable() {
     }
     
     function displayPlayerStats(stats) {
+      if (window.perfDebug) window.perfDebug.mark('Render Player Table');
       const container = document.getElementById('playerList');
       console.log('[DEBUG] displayPlayerStats received:', stats, 'type:', typeof stats, 'isArray:', Array.isArray(stats));
       
@@ -1559,6 +1605,7 @@ function filterPlayerTable() {
       addPlayerTableSortHandlers();
       // After rendering, apply filter if any
       filterPlayerTable();
+      if (window.perfDebug) window.perfDebug.measure('Render Player Table', 'render');
 
 // Add sorting to player table columns
 function addPlayerTableSortHandlers() {

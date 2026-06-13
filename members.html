@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cCc Champions - Members</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
   <script>
@@ -812,6 +813,7 @@
       let currentSort = { column: null, direction: 'asc' };
       let chestPointsData = null;
       let chestPointsLoadedAt = 0;
+      let chestPointsSortByName = null;
 
       function init() {
         loadMembers();
@@ -1124,6 +1126,10 @@
         };
 
         const members = [...membersRaw].sort((a, b) => {
+          if (chestPointsSortByName) {
+            const cmp = String(a.member || '').localeCompare(String(b.member || ''));
+            return chestPointsSortByName === 'desc' ? -cmp : cmp;
+          }
           const aResults = Array.isArray(a.periodResults) ? a.periodResults : [];
           const bResults = Array.isArray(b.periodResults) ? b.periodResults : [];
           const aJoinDate = toYmdMemberJoinDate(a.joinDate);
@@ -1165,7 +1171,17 @@
           return String(a.member || '').localeCompare(String(b.member || ''));
         });
 
-        header.innerHTML = '<th>Member</th>';
+        header.innerHTML = '';
+        const memberTh = document.createElement('th');
+        memberTh.textContent = 'Member';
+        memberTh.className = 'sortable' + (chestPointsSortByName ? ' sorted-' + chestPointsSortByName : '');
+        memberTh.addEventListener('click', () => {
+          if (!chestPointsSortByName) chestPointsSortByName = 'asc';
+          else if (chestPointsSortByName === 'asc') chestPointsSortByName = 'desc';
+          else chestPointsSortByName = null;
+          renderChestPointsTable();
+        });
+        header.appendChild(memberTh);
         periods.forEach(period => {
           const th = document.createElement('th');
           const periodTgt = getPeriodTarget(period.targetPoints);

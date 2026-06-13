@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cCc Champions - Progress</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
   <script src="site-config.js"></script>
   <script src="config.js"></script>
   <script src="portal-shim.js"></script>
@@ -877,7 +878,8 @@
             if (activePeriod) {
               const activeStartStr = activePeriod.startDate;
               for (let i = periodEvents.length - 1; i >= 0; i--) {
-                if (periodEvents[i].endDate < activeStartStr) {
+                // Use <= because events share boundary days (e.g. Jun 1-6 ends on 6, Jun 6-12 starts on 6)
+                if (periodEvents[i] !== activePeriod && periodEvents[i].endDate <= activeStartStr) {
                   previousPeriod = periodEvents[i];
                   break;
                 }
