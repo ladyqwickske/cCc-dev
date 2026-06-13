@@ -1424,7 +1424,7 @@ function filterPlayerTable() {
         const playerTarget = getPlayerTarget(player.player, currentViewingPeriodName, currentPeriodTargetPoints);
         const pointsClass = totalPointsVal >= playerTarget ? 'player-green' : (totalPointsVal >= playerTarget * 0.9 ? 'player-orange' : 'player-red');
         
-        // Check if member joined after the current viewing start date
+        // Check if member joined during or after the current viewing period start
         let isNewMember = false;
         let joinDateLabel = '';
         if (player.joinDate && currentViewingStartDate) {
@@ -1432,7 +1432,7 @@ function filterPlayerTable() {
           const jdStr = String(player.joinDate).substring(0, 10); // extract yyyy-MM-dd
           const joinDate = new Date(jdStr + 'T00:00:00Z');
           const viewStartDate = new Date(currentViewingStartDate + 'T00:00:00Z');
-          isNewMember = joinDate > viewStartDate;
+          isNewMember = joinDate >= viewStartDate;
           if (isNewMember) {
             const now = new Date();
             const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
