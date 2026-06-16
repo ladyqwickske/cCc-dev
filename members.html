@@ -248,7 +248,7 @@
 
     /* Table */
     .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
-    table { width: auto; border-collapse: collapse; background: #232526; }
+    table { width: 100%; border-collapse: collapse; background: #232526; }
     thead { background: #1a1b1c; }
     th { 
       padding: 8px 6px; 
@@ -275,10 +275,10 @@
     th.sorted-asc::after { content: ' ↑'; }
     th.sorted-desc::after { content: ' ↓'; }
     td { 
-      padding: 6px; 
+      padding: 8px 6px; 
       border-bottom: 1px solid #444; 
       color: #e0e0e0;
-      font-size: 12px;
+      font-size: 13px;
     }
     td:first-child {
       position: sticky;
@@ -294,8 +294,6 @@
     .might-value { text-align: right; }
     .date-value { text-align: center; }
 
-    /* Chest points table needs full width (many period columns) */
-    #chestPointsTable { width: 100%; }
     .points-meta { margin: 10px 0; font-size: 12px; color: #b0b0b0; text-align: left; }
     .points-cell { text-align: center; font-weight: 700; border-radius: 4px; padding: 6px 8px; }
     .points-green { background: rgba(76, 175, 80, 0.22); color: #9be7a1; }
