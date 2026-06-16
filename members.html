@@ -51,6 +51,7 @@
   }
   </script>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
       background: linear-gradient(135deg, #232526 0%, #414345 100%);
@@ -247,10 +248,10 @@
 
     /* Table */
     .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
-    table { width: 100%; border-collapse: collapse; background: #232526; }
+    table { width: auto; border-collapse: collapse; background: #232526; }
     thead { background: #1a1b1c; }
     th { 
-      padding: 12px 8px; 
+      padding: 8px 6px; 
       font-weight: 600; 
       font-size: 11px; 
       color: #ffb300; 
@@ -274,10 +275,10 @@
     th.sorted-asc::after { content: ' ↑'; }
     th.sorted-desc::after { content: ' ↓'; }
     td { 
-      padding: 12px 8px; 
+      padding: 6px; 
       border-bottom: 1px solid #444; 
       color: #e0e0e0;
-      font-size: 13px;
+      font-size: 12px;
     }
     td:first-child {
       position: sticky;
@@ -293,6 +294,8 @@
     .might-value { text-align: right; }
     .date-value { text-align: center; }
 
+    /* Chest points table needs full width (many period columns) */
+    #chestPointsTable { width: 100%; }
     .points-meta { margin: 10px 0; font-size: 12px; color: #b0b0b0; text-align: left; }
     .points-cell { text-align: center; font-weight: 700; border-radius: 4px; padding: 6px 8px; }
     .points-green { background: rgba(76, 175, 80, 0.22); color: #9be7a1; }
@@ -303,14 +306,14 @@
     /* Troop Badges — color by LEVEL, consistent across all types */
     /* G/M/S/E: 1-5 red, 6 orange, 7 yellow, 8 green, 9 purple, 10+ pink */
     /* C (crypt): 1-15 red, 16-20 orange, 21-25 yellow, 26-30 green, 31-35 purple, 36+ pink */
-    .troop-badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 0.78em; font-weight: 700; min-width: 22px; text-align: center; }
+    .troop-badge { display: inline-block; padding: 1px 4px; border-radius: 8px; font-size: 0.72em; font-weight: 700; min-width: 16px; text-align: center; line-height: 1.4; }
     .troop-badge.lvl-red    { background: rgba(244, 67, 54, 0.18); color: #ef9a9a; }
     .troop-badge.lvl-orange { background: rgba(255, 152, 0, 0.18); color: #ffb74d; }
     .troop-badge.lvl-yellow { background: rgba(255, 235, 59, 0.18); color: #fff176; }
     .troop-badge.lvl-green  { background: rgba(76, 175, 80, 0.18); color: #81c784; }
     .troop-badge.lvl-purple { background: rgba(156, 39, 176, 0.18); color: #ce93d8; }
     .troop-badge.lvl-pink   { background: rgba(233, 30, 99, 0.18); color: #f48fb1; }
-    .troop-category { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700; text-align: center; min-width: 28px; }
+    .troop-category { display: inline-block; padding: 1px 5px; border-radius: 8px; font-size: 0.7em; font-weight: 700; text-align: center; min-width: 20px; }
     .troop-form-grid { grid-template-columns: repeat(5, 1fr); gap: 10px; }
     @media (max-width: 700px) { .troop-form-grid { grid-template-columns: repeat(2, 1fr); } }
 
@@ -678,6 +681,11 @@
     <div class="header"><h1><img src="members.png" alt="Members" class="tab-icon" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Member Management</h1><p>View and manage clan members</p></div>
     <div class="stats-cards" id="memberStatsCards">
       <div class="stat-card"><h3>Total Members</h3><div class="value" id="memberTotal">-</div></div>
+      <div class="stat-card"><h3>T9</h3><div class="value" id="statT9" style="color:#6a1b9a">-</div></div>
+      <div class="stat-card"><h3>G9</h3><div class="value" id="statG9" style="color:#ab47bc">-</div></div>
+      <div class="stat-card"><h3>T8</h3><div class="value" id="statT8" style="color:#1565c0">-</div></div>
+      <div class="stat-card"><h3>G8</h3><div class="value" id="statG8" style="color:#00838f">-</div></div>
+      <div class="stat-card"><h3>Top Hero</h3><div class="value" id="statTopHero" style="font-size:16px">-</div></div>
     </div>
     <div class="controls"><div class="search-box"><input type="text" id="memberSearchInput" placeholder="🔍 Search by member name..."></div><button class="btn" onclick="MembersTab.loadAllData()">🔄 Refresh</button></div>
 
@@ -1333,6 +1341,32 @@
 
       function updateStats() {
         document.getElementById('memberTotal').textContent = membersData.length.toLocaleString();
+
+        // Count troop categories
+        const catCounts = { T9: 0, G9: 0, T8: 0, G8: 0 };
+        membersData.forEach(m => {
+          const t = troopData[(m.name || '').toLowerCase()] || {};
+          const cat = determineTroopCategory(t.G, t.M, t.S);
+          if (cat && catCounts[cat] !== undefined) catCounts[cat]++;
+        });
+        document.getElementById('statT9').textContent = catCounts.T9;
+        document.getElementById('statG9').textContent = catCounts.G9;
+        document.getElementById('statT8').textContent = catCounts.T8;
+        document.getElementById('statG8').textContent = catCounts.G8;
+
+        // Top hero
+        let topHeroName = '';
+        let topHeroLevel = 0;
+        membersData.forEach(m => {
+          const h = heroData[(m.name || '').toLowerCase()];
+          if (h && h.level != null && h.level > topHeroLevel) {
+            topHeroLevel = h.level;
+            topHeroName = m.name;
+          }
+        });
+        const topEl = document.getElementById('statTopHero');
+        topEl.textContent = topHeroName ? `${topHeroName} (${topHeroLevel})` : '-';
+        topEl.title = topHeroName ? `${topHeroName}: Hero Level ${topHeroLevel}` : '';
       }
 
       function filterMembers(searchTerm) {
@@ -1402,7 +1436,7 @@
       function troopCell(troops) {
         const vals = [troops.G, troops.M, troops.S, troops.E, troops.C];
         if (vals.every(v => v == null)) return '<span style="color:#666">—</span>';
-        const sep = '<span style="color:#555;margin:0 1px">/</span>';
+        const sep = '<span style="color:#555;font-size:0.7em">/</span>';
         return troopBadge('g', troops.G) + sep + troopBadge('m', troops.M) + sep + troopBadge('s', troops.S) + sep + troopBadge('e', troops.E) + sep + troopBadge('c', troops.C);
       }
 
@@ -1466,7 +1500,7 @@
           const hero = heroData[key];
           const row = document.createElement('tr');
           const heroHtml = hero && hero.level != null
-            ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp || '?'}">${hero.level}</span>`
+            ? `<span style="display:inline-block;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp || '?'}">${hero.level}</span>`
             : '<span style="color:#666">—</span>';
           const cat = determineTroopCategory(troops.G, troops.M, troops.S);
           row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroHtml}</td><td class="date-value">${formatDate(member.joinDate)}</td><td style="text-align:center">${categoryBadge(cat)}</td><td style="text-align:center;white-space:nowrap;">${troopCell(troops)}</td>`;
