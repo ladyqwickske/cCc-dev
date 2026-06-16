@@ -536,7 +536,7 @@
         logoutBtn.style.display = 'none';
       }
       // Show/hide restricted tabs
-      const restricted = ['events.html', 'members.html', 'troops.html', 'warnings.html'];
+      const restricted = ['events.html', 'members.html', 'warnings.html'];
       restricted.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => {
           el.style.display = isLoggedIn ? '' : 'none';
@@ -580,10 +580,6 @@
         <a href="members.html" class="tab-btn" title="Members">
           <img src="members.png" alt="Members" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Members</span>
-        </a>
-        <a href="troops.html" class="tab-btn" title="Troops">
-          <img src="troops.png" alt="Troops" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Troops</span>
         </a>
         <a href="warnings.html" class="tab-btn" title="Warnings">
           <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
@@ -669,6 +665,7 @@
     // ── Per-player custom point targets (server-backed with localStorage cache) ──
     const PT_KEY = 'ccc_point_targets';
     let pointTargetsCache = null;
+    let pointTargetsDirty_ = false; // true if user saved targets this session
 
     function loadPointTargets() {
       if (pointTargetsCache) return pointTargetsCache;
@@ -681,6 +678,7 @@
     }
     function savePointTargets(obj) {
       pointTargetsCache = obj;
+      pointTargetsDirty_ = true; // prevent bundle from overwriting until next full reload
       try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
       fetch(window.GAS_WEB_APP_URL, {
         method: 'POST',
@@ -1031,8 +1029,8 @@ function filterPlayerTable() {
             // 1. Apply period display (dates, countdown, name)
             applyPeriodFromBundle_(bundle);
 
-            // 2. Apply point targets from bundle
-            if (bundle.pointTargets) {
+            // 2. Apply point targets from bundle (unless user saved locally this session)
+            if (bundle.pointTargets && !pointTargetsDirty_) {
               pointTargetsCache = { default: bundle.pointTargets.default || 7500, overrides: Array.isArray(bundle.pointTargets.overrides) ? bundle.pointTargets.overrides : [] };
               try { localStorage.setItem(PT_KEY, JSON.stringify(pointTargetsCache)); } catch(e) {}
             }

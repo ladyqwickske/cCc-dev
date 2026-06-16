@@ -501,7 +501,7 @@
       if (userEmail) userEmail.textContent = isLoggedIn ? currentUser : '';
       if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : '';
       if (logoutBtn) logoutBtn.style.display = isLoggedIn ? '' : 'none';
-      const restrictedTabs = ['events.html', 'members.html', 'troops.html', 'warnings.html'];
+      const restrictedTabs = ['events.html', 'members.html', 'warnings.html'];
       restrictedTabs.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(link => {
           link.style.display = isLoggedIn ? '' : 'none';
@@ -928,10 +928,6 @@
         <a href="members.html" class="tab-btn" title="Members">
           <img src="members.png" alt="Members" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Members</span>
-        </a>
-        <a href="troops.html" class="tab-btn" title="Troops">
-          <img src="troops.png" alt="Troops" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Troops</span>
         </a>
         <a href="warnings.html" class="tab-btn" title="Warnings">
           <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
