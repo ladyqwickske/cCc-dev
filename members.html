@@ -16,8 +16,8 @@
     if (str instanceof Date) return str;
     const strTrim = String(str).trim();
     if (!strTrim) return null;
-    // ISO 8601 with Z or offset
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(strTrim)) {
+    // ISO 8601 with Z (with or without milliseconds)
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(strTrim)) {
       const d = new Date(strTrim);
       return isNaN(d.getTime()) ? null : d;
     }
@@ -35,8 +35,9 @@
       const d = new Date(Date.UTC(year, month, day, 0, 0, 0));
       return isNaN(d.getTime()) ? null : d;
     }
-    // Fallback: try direct parsing with Z suffix for UTC
-    const d = new Date(strTrim + 'Z');
+    // Fallback: try direct parsing (append Z only if not already present)
+    const fallback = strTrim.endsWith('Z') ? strTrim : strTrim + 'Z';
+    const d = new Date(fallback);
     return isNaN(d.getTime()) ? null : d;
   }
 
@@ -256,7 +257,7 @@
       text-transform: uppercase; 
       letter-spacing: 0.5px;
       border-bottom: 2px solid #444;
-      text-align: left;
+      text-align: center;
       position: sticky;
       top: 0;
       background: #1a1b1c;
@@ -302,7 +303,7 @@
     /* Troop Badges — color by LEVEL, consistent across all types */
     /* G/M/S/E: 1-5 red, 6 orange, 7 yellow, 8 green, 9 purple, 10+ pink */
     /* C (crypt): 1-15 red, 16-20 orange, 21-25 yellow, 26-30 green, 31-35 purple, 36+ pink */
-    .troop-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; font-weight: 700; min-width: 28px; text-align: center; }
+    .troop-badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 0.78em; font-weight: 700; min-width: 22px; text-align: center; }
     .troop-badge.lvl-red    { background: rgba(244, 67, 54, 0.18); color: #ef9a9a; }
     .troop-badge.lvl-orange { background: rgba(255, 152, 0, 0.18); color: #ffb74d; }
     .troop-badge.lvl-yellow { background: rgba(255, 235, 59, 0.18); color: #fff176; }
@@ -682,14 +683,14 @@
 
     <div class="tabs-container">
       <div class="tabs">
-        <button class="tab active" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
-        <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
-        <button class="tab" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
+        <button class="tab active" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
         <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
         <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
         <button class="tab" onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
+        <button class="tab" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
+        <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
       </div>
-      <div id="troopTab" class="tab-content active">
+      <div id="troopTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Track Troop Levels</h3>
         <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
           <div><label for="troopMemberSelect">Member</label><select id="troopMemberSelect" onchange="MembersTab.loadMemberTroops()"></select></div>
@@ -718,7 +719,7 @@
         <button class="btn" onclick="MembersTab.submitHeroLevelEntry()">💾 Save Hero Level</button>
         <div id="heroLevelStatus" class="status"></div>
       </div>
-      <div id="addMemberTab" class="tab-content">
+      <div id="addMemberTab" class="tab-content active">
         <h3 style="margin:0 0 12px 0;">Add New Member</h3>
         <div class="form-grid add-member-form-grid">
           <div>
@@ -802,11 +803,7 @@
             <th class="sortable" data-column="heroLevel" title="Latest recorded hero level">Hero</th>
             <th class="sortable" data-column="joinDate">Joined</th>
             <th class="sortable" data-column="category" title="Troop Category">Cat</th>
-            <th class="sortable" data-column="G" title="Guardsmen">G</th>
-            <th class="sortable" data-column="M" title="Monsters">M</th>
-            <th class="sortable" data-column="S" title="Specialists">S</th>
-            <th class="sortable" data-column="E" title="Engineer Corps">E</th>
-            <th class="sortable" data-column="C" title="Crypt Level">C</th>
+            <th class="sortable" data-column="troops" title="Guardsmen / Monsters / Specialists / Eng. Corps / Crypt">G/M/S/E/C</th>
           </tr>
         </thead>
         <tbody id="membersTableBody"></tbody>
@@ -1402,6 +1399,13 @@
         return `<span class="troop-badge ${cls}">${level}</span>`;
       }
 
+      function troopCell(troops) {
+        const vals = [troops.G, troops.M, troops.S, troops.E, troops.C];
+        if (vals.every(v => v == null)) return '<span style="color:#666">—</span>';
+        const sep = '<span style="color:#555;margin:0 1px">/</span>';
+        return troopBadge('g', troops.G) + sep + troopBadge('m', troops.M) + sep + troopBadge('s', troops.S) + sep + troopBadge('e', troops.E) + sep + troopBadge('c', troops.C);
+      }
+
       function getHeroBg(lvl) {
         if (lvl > 500) return '#4a148c'; if (lvl > 400) return '#0d47a1';
         if (lvl > 300) return '#1b5e20'; if (lvl > 200) return '#fbc02d';
@@ -1437,8 +1441,10 @@
               aVal = CATEGORY_ORDER.indexOf(determineTroopCategory(tA.G, tA.M, tA.S));
               bVal = CATEGORY_ORDER.indexOf(determineTroopCategory(tB.G, tB.M, tB.S));
               break;
-            case 'G': case 'M': case 'S': case 'E': case 'C':
-              aVal = tA[column] || 0; bVal = tB[column] || 0; break;
+            case 'troops':
+              aVal = (tA.G || 0) + (tA.M || 0) + (tA.S || 0) + (tA.E || 0) + (tA.C || 0);
+              bVal = (tB.G || 0) + (tB.M || 0) + (tB.S || 0) + (tB.E || 0) + (tB.C || 0);
+              break;
             default: aVal = 0; bVal = 0;
           }
           if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
@@ -1463,7 +1469,7 @@
             ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp || '?'}">${hero.level}</span>`
             : '<span style="color:#666">—</span>';
           const cat = determineTroopCategory(troops.G, troops.M, troops.S);
-          row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroHtml}</td><td class="date-value">${formatDate(member.joinDate)}</td><td style="text-align:center">${categoryBadge(cat)}</td><td style="text-align:center">${troopBadge('g', troops.G)}</td><td style="text-align:center">${troopBadge('m', troops.M)}</td><td style="text-align:center">${troopBadge('s', troops.S)}</td><td style="text-align:center">${troopBadge('e', troops.E)}</td><td style="text-align:center">${troopBadge('c', troops.C)}</td>`;
+          row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroHtml}</td><td class="date-value">${formatDate(member.joinDate)}</td><td style="text-align:center">${categoryBadge(cat)}</td><td style="text-align:center;white-space:nowrap;">${troopCell(troops)}</td>`;
           tbody.appendChild(row);
         });
       }
