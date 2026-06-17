@@ -327,6 +327,16 @@
         </table>
       </div>
 
+      <!-- Warnings -->
+      <h2>Warnings</h2>
+      <div class="info-grid" id="warningsInfo"></div>
+      <div class="period-table-container" id="warningsTableContainer" style="display:none;">
+        <table>
+          <thead><tr><th>Date</th><th>Type</th><th>Comment</th><th>Issued By</th></tr></thead>
+          <tbody id="warningsTableBody"></tbody>
+        </table>
+      </div>
+
       <!-- Troops & Hero -->
       <h2>Troops & Hero</h2>
       <div class="info-grid" id="troopHeroInfo"></div>
@@ -439,6 +449,7 @@
       renderTargetCompletion(data.targetCompletion);
       renderPeriodTable(data.periodStats);
       renderEventTable(data.eventHistory);
+      renderWarnings(data.warningsData);
       renderTroopHero(data.troopLevels, data.heroLevel);
       renderMightChart(data.mightHistory);
       document.getElementById('profileContent').style.display = 'block';
@@ -467,10 +478,11 @@
       // Breakdown bars
       const bd = ps.breakdown || {};
       const items = [
-        { label: 'Target Hit Rate (40%)', score: bd.targetHitRate ? bd.targetHitRate.score : 0, color: '#8bc34a' },
-        { label: 'Event Participation (30%)', score: bd.eventParticipation ? bd.eventParticipation.score : 0, color: '#42a5f5' },
-        { label: 'Consistency (20%)', score: bd.consistency ? bd.consistency.score : 0, color: '#ff9800' },
-        { label: 'Growth (10%)', score: bd.growth ? bd.growth.score : 0, color: '#ab47bc' }
+        { label: 'Target Hit Rate (35%)', score: bd.targetHitRate ? bd.targetHitRate.score : 0, color: '#8bc34a' },
+        { label: 'Event Participation (25%)', score: bd.eventParticipation ? bd.eventParticipation.score : 0, color: '#42a5f5' },
+        { label: 'Consistency (15%)', score: bd.consistency ? bd.consistency.score : 0, color: '#ff9800' },
+        { label: 'Growth (10%)', score: bd.growth ? bd.growth.score : 0, color: '#ab47bc' },
+        { label: 'No Warnings (15%)', score: bd.warnings ? bd.warnings.score : 0, color: bd.warnings && bd.warnings.score < 100 ? '#ef5350' : '#4caf50' }
       ];
 
       const container = document.getElementById('scoreBreakdown');
@@ -573,6 +585,37 @@
           <td>${badge}</td>
         </tr>`;
       }).join('');
+    }
+
+    function renderWarnings(wd) {
+      const el = document.getElementById('warningsInfo');
+      const tableContainer = document.getElementById('warningsTableContainer');
+      const tbody = document.getElementById('warningsTableBody');
+
+      if (!wd || wd.total === 0) {
+        el.innerHTML = '<div class="info-card"><div class="card-label">Warnings</div><div class="card-value"><span class="badge badge-green">Clean Record</span></div><div class="card-sub">No warnings issued</div></div>';
+        tableContainer.style.display = 'none';
+        return;
+      }
+
+      const color = wd.total >= 4 ? 'badge-red' : wd.total >= 2 ? 'badge-orange' : 'badge-orange';
+      const cards = [
+        card('Total Warnings', `<span class="badge ${color}">${wd.total}</span>`),
+        card('Latest', wd.latestDate || '—')
+      ];
+      // Show warning type breakdown
+      const typeSummary = Object.entries(wd.types).map(([t, c]) => `${t} (${c})`).join(', ');
+      if (typeSummary) cards.push(card('Types', `<span style="font-size:12px;color:#e0e0e0;">${typeSummary}</span>`));
+      el.innerHTML = cards.join('');
+
+      // Show warning details table
+      tableContainer.style.display = 'block';
+      tbody.innerHTML = wd.warnings.map(w => `<tr>
+        <td style="white-space:nowrap;">${w.date || '—'}</td>
+        <td>${w.type || '—'}</td>
+        <td>${w.comment || '—'}</td>
+        <td>${w.issuedBy || '—'}</td>
+      </tr>`).join('');
     }
 
     function renderTroopHero(troops, hero) {
