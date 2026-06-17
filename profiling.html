@@ -534,7 +534,7 @@
         <div class="ranking-info">
           <div class="ranking-name" onclick="jumpToProfile('${m.member.replace(/'/g, "\\'")}')">${medal}${m.member}</div>
           <div class="ranking-meta">
-            ${m.rating} · ${m.periodsMet}/${m.periodsTotal} targets met · ${m.warnings > 0 ? '⚠️ ' + m.warnings + ' warning' + (m.warnings > 1 ? 's' : '') : '✓ Clean'}
+            ${m.rating} · ${m.periodsMet}/${m.periodsTotal} targets met · ${m.warnings > 0 ? '⚠️ ' + m.warnings + ' warning' + (m.warnings > 1 ? 's' : '') : '✓ Clean'}${m.joinDate ? ' · Joined ' + m.joinDate : ''}
           </div>
           <div class="ranking-bars">
             <div class="ranking-bar" style="background:rgba(139,195,74,0.4);width:${m.targetHitRate * 0.6}px;" title="Target: ${m.targetHitRate}%"></div>
