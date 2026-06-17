@@ -289,13 +289,31 @@
 
     <!-- Sub-tabs -->
     <div class="sub-tabs">
-      <button class="sub-tab active" data-tab="individual" onclick="switchSubTab('individual')">👤 Individual</button>
-      <button class="sub-tab" data-tab="top10" onclick="switchSubTab('top10')">🏆 Top 10</button>
+      <button class="sub-tab active" data-tab="top10" onclick="switchSubTab('top10')">🏆 Top 10</button>
       <button class="sub-tab" data-tab="bottom10" onclick="switchSubTab('bottom10')">⚠️ Bottom 10</button>
+      <button class="sub-tab" data-tab="individual" onclick="switchSubTab('individual')">👤 Individual</button>
+    </div>
+
+    <!-- Top 10 Tab -->
+    <div id="tabTop10">
+      <div id="top10Loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Calculating rankings...</p>
+      </div>
+      <div id="top10Content"></div>
+    </div>
+
+    <!-- Bottom 10 Tab -->
+    <div id="tabBottom10" style="display:none;">
+      <div id="bottom10Loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Calculating rankings...</p>
+      </div>
+      <div id="bottom10Content"></div>
     </div>
 
     <!-- Individual Profile Tab -->
-    <div id="tabIndividual">
+    <div id="tabIndividual" style="display:none;">
       <div class="selector-container">
         <select id="memberSelect" onchange="loadProfile()">
           <option value="">— Select a member —</option>
@@ -379,24 +397,6 @@
       </div>
     </div>
     </div><!-- end tabIndividual -->
-
-    <!-- Top 10 Tab -->
-    <div id="tabTop10" style="display:none;">
-      <div id="top10Loading" class="loading" style="display:none;">
-        <div class="spinner"></div>
-        <p>Calculating rankings...</p>
-      </div>
-      <div id="top10Content"></div>
-    </div>
-
-    <!-- Bottom 10 Tab -->
-    <div id="tabBottom10" style="display:none;">
-      <div id="bottom10Loading" class="loading" style="display:none;">
-        <div class="spinner"></div>
-        <p>Calculating rankings...</p>
-      </div>
-      <div id="bottom10Content"></div>
-    </div>
   </div>
 
   <!-- Hamburger Toggle -->
@@ -436,6 +436,9 @@
           memberNames = data.result;
         }
         populateSelect();
+
+        // Auto-load rankings since Top 10 is the default tab
+        loadRankings();
 
         // Check URL param for pre-selected member
         const params = new URLSearchParams(window.location.search);
@@ -804,12 +807,16 @@
       }
 
       if (troops) {
-        const troopColors = { ground: '#8bc34a', marksmen: '#42a5f5', spells: '#ab47bc', engineers: '#ff9800', cavalry: '#ef5350' };
-        const types = ['ground', 'marksmen', 'spells', 'engineers', 'cavalry'];
-        const badges = types.map(t => {
-          const lvl = troops[t] != null ? troops[t] : '—';
-          const color = troopColors[t] || '#888';
-          return `<span class="troop-badge" style="background:${color}22;color:${color}">${t[0].toUpperCase()} ${lvl}</span>`;
+        const troopMap = [
+          { key: 'G_currentLevel', label: 'G', color: '#8bc34a' },
+          { key: 'M_currentLevel', label: 'M', color: '#42a5f5' },
+          { key: 'S_currentLevel', label: 'S', color: '#ab47bc' },
+          { key: 'E_currentLevel', label: 'E', color: '#ff9800' },
+          { key: 'C_currentLevel', label: 'C', color: '#ef5350' }
+        ];
+        const badges = troopMap.map(t => {
+          const lvl = troops[t.key] != null ? troops[t.key] : '—';
+          return `<span class="troop-badge" style="background:${t.color}22;color:${t.color}">${t.label} ${lvl}</span>`;
         }).join('');
         cards.push(`<div class="info-card" style="grid-column: 1 / -1;"><div class="card-label">Troop Levels</div><div class="troop-badges" style="margin-top:6px;">${badges}</div></div>`);
       }
