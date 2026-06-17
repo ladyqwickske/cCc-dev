@@ -549,12 +549,23 @@
       }
       tbody.innerHTML = periods.map(p => {
         const target = p.targetPoints ? formatNumber(p.targetPoints) : '—';
+        const pct = p.percentComplete != null ? p.percentComplete : null;
         let statusBadge;
-        if (p.metTarget === true) statusBadge = '<span class="badge badge-green">✓ Met</span>';
-        else if (p.metTarget === false) statusBadge = '<span class="badge badge-red">✗ Missed</span>';
-        else statusBadge = '<span class="badge badge-gray">N/A</span>';
+        if (p.isActive) {
+          // Active period — show progress, don't judge as met/missed
+          const pctColor = pct >= 100 ? 'badge-green' : pct >= 70 ? 'badge-blue' : pct >= 40 ? 'badge-orange' : 'badge-gray';
+          statusBadge = `<span class="badge ${pctColor}">⏳ ${pct != null ? pct + '%' : '—'}</span>`;
+        } else if (p.metTarget === true) {
+          statusBadge = '<span class="badge badge-green">✓ Met</span>';
+        } else if (p.metTarget === false) {
+          // Missed — show how much % was reached
+          const missedPct = pct != null ? ` (${pct}%)` : '';
+          statusBadge = `<span class="badge badge-red">✗ Missed${missedPct}</span>`;
+        } else {
+          statusBadge = '<span class="badge badge-gray">N/A</span>';
+        }
         return `<tr>
-          <td>${p.periodName || p.startDate}</td>
+          <td>${p.periodName || p.startDate}${p.isActive ? ' <span style="font-size:10px;color:#ffb300;">(active)</span>' : ''}</td>
           <td>${formatNumber(p.totalPoints)}</td>
           <td>${target}</td>
           <td>${statusBadge}</td>
