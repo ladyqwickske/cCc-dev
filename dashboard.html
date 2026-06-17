@@ -536,7 +536,7 @@
         logoutBtn.style.display = 'none';
       }
       // Show/hide restricted tabs
-      const restricted = ['events.html', 'members.html', 'warnings.html'];
+      const restricted = ['events.html', 'members.html', 'warnings.html', 'profiling.html'];
       restricted.forEach(href => {
         document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => {
           el.style.display = isLoggedIn ? '' : 'none';
@@ -580,6 +580,10 @@
         <a href="members.html" class="tab-btn" title="Members">
           <img src="members.png" alt="Members" class="tab-icon desktop-only">
           <span class="tab-label mobile-only">Members</span>
+        </a>
+        <a href="profiling.html" class="tab-btn" title="Profiling">
+          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Profiling</span>
         </a>
         <a href="warnings.html" class="tab-btn" title="Warnings">
           <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
@@ -1405,7 +1409,17 @@ function filterPlayerTable() {
           });
         }
       });
-      const sortedTypes = Object.entries(typeData).sort((a,b)=>b[1].total-a[1].total).map(([name,data])=>({ name, levels: Array.from(data.levels).map(l=>parseInt(l)).sort((a,b)=>a-b) }));
+      const sortedTypes = Object.entries(typeData).sort((a,b)=>{
+        // Fixed display order: Epic Crypt, Rare Crypt, Common Crypt first, then others alphabetically
+        const CHEST_ORDER = ['Epic Crypt', 'Rare Crypt', 'Common Crypt'];
+        const idxA = CHEST_ORDER.indexOf(a[0]);
+        const idxB = CHEST_ORDER.indexOf(b[0]);
+        const orderA = idxA >= 0 ? idxA : CHEST_ORDER.length;
+        const orderB = idxB >= 0 ? idxB : CHEST_ORDER.length;
+        if (orderA !== orderB) return orderA - orderB;
+        // Both are non-priority types: sort alphabetically
+        return a[0].localeCompare(b[0]);
+      }).map(([name,data])=>({ name, levels: Array.from(data.levels).map(l=>parseInt(l)).sort((a,b)=>a-b) }));
       let headerHtml = '<div class="table-header">';
       // Add sort icons and tooltips to sortable headers
       const sortIcon = (col, dir) => `<span class="sort-icon" style="font-size:13px;vertical-align:middle;user-select:none;">${dir === 'asc' ? '▲' : dir === 'desc' ? '▼' : '▲▼'}</span>`;
