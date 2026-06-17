@@ -443,6 +443,31 @@
     }
 
     function renderProfile(data) {
+      // === DEBUG: Period target completion ===
+      console.group('🔍 PROFILING DEBUG: ' + data.playerName);
+      console.log('Target Completion Summary:', data.targetCompletion.met, 'met /', data.targetCompletion.missed, 'missed /', data.targetCompletion.total, 'total');
+      if (data.targetCompletion.debug) {
+        console.table(data.targetCompletion.debug);
+        const missed = data.targetCompletion.debug.filter(p => p.met === false && !p.isActive);
+        if (missed.length > 0) {
+          console.warn('⚠️ MISSED PERIODS:');
+          missed.forEach(p => console.warn(`  ${p.periodName} (${p.startDate} → ${p.endDate}): ${p.points} / ${p.target} pts (${p.pct}%)`));
+        }
+        const noTarget = data.targetCompletion.debug.filter(p => p.target === null);
+        if (noTarget.length > 0) {
+          console.warn('⚠️ PERIODS WITH NO TARGET (not counted):');
+          noTarget.forEach(p => console.warn(`  ${p.periodName} (${p.startDate} → ${p.endDate}): ${p.points} pts`));
+        }
+        const active = data.targetCompletion.debug.filter(p => p.isActive);
+        if (active.length > 0) {
+          console.log('⏳ ACTIVE PERIODS (not counted):');
+          active.forEach(p => console.log(`  ${p.periodName} (${p.startDate} → ${p.endDate}): ${p.points} / ${p.target} pts (${p.pct}%)`));
+        }
+      }
+      console.log('Period Stats (last 5 for display):', data.periodStats);
+      console.groupEnd();
+      // === END DEBUG ===
+
       renderPerformanceScore(data.performanceScore);
       renderMembership(data.membership);
       renderChestStats(data.chestStats);
