@@ -97,6 +97,28 @@
     .troop-badges { display: flex; gap: 6px; flex-wrap: wrap; }
     .troop-badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
 
+    /* Sub-tabs */
+    .sub-tabs { display: flex; gap: 4px; margin: 16px 0 8px 0; border-bottom: 2px solid #333; }
+    .sub-tab { padding: 10px 18px; background: none; border: none; color: #b0b0b0; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; border-radius: 6px 6px 0 0; }
+    .sub-tab:hover { color: #ffb300; background: rgba(255,179,0,0.05); }
+    .sub-tab.active { color: #ffb300; border-bottom-color: #ffb300; background: rgba(255,179,0,0.08); }
+
+    /* Rankings */
+    .ranking-card { background: #232526; border-radius: 10px; padding: 14px 16px; border: 1px solid #444; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; transition: transform 0.15s, box-shadow 0.15s; }
+    .ranking-card:hover { transform: translateX(4px); box-shadow: 0 2px 12px rgba(255,179,0,0.1); }
+    .ranking-rank { font-size: 22px; font-weight: 700; color: #ffb300; width: 36px; text-align: center; flex-shrink: 0; }
+    .ranking-rank.top1 { color: #ffd700; text-shadow: 0 0 8px #ffd70066; }
+    .ranking-rank.top2 { color: #c0c0c0; }
+    .ranking-rank.top3 { color: #cd7f32; }
+    .ranking-info { flex: 1; min-width: 0; }
+    .ranking-name { font-size: 15px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .ranking-name:hover { color: #ffb300; text-decoration: underline; }
+    .ranking-meta { font-size: 11px; color: #888; margin-top: 2px; }
+    .ranking-score-pill { padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+    .ranking-bars { display: flex; gap: 3px; align-items: center; margin-top: 4px; }
+    .ranking-bar { height: 6px; border-radius: 3px; flex: 1; max-width: 60px; }
+    .ranking-section-title { font-size: 16px; font-weight: 600; color: #ffb300; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
     /* Loading & Empty */
     .loading { text-align: center; padding: 40px; color: #e0e0e0; }
     .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
@@ -265,22 +287,31 @@
   <div class="page-content">
     <h1><img src="profiling.png" alt="" style="height: 48px; vertical-align: middle; margin-right: 8px;"> Member Profile</h1>
 
-    <div class="selector-container">
-      <select id="memberSelect" onchange="loadProfile()">
-        <option value="">— Select a member —</option>
-      </select>
+    <!-- Sub-tabs -->
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-tab="individual" onclick="switchSubTab('individual')">👤 Individual</button>
+      <button class="sub-tab" data-tab="top10" onclick="switchSubTab('top10')">🏆 Top 10</button>
+      <button class="sub-tab" data-tab="bottom10" onclick="switchSubTab('bottom10')">⚠️ Bottom 10</button>
     </div>
 
-    <div id="profileLoading" class="loading" style="display:none;">
-      <div class="spinner"></div>
-      <p>Loading profile...</p>
-    </div>
+    <!-- Individual Profile Tab -->
+    <div id="tabIndividual">
+      <div class="selector-container">
+        <select id="memberSelect" onchange="loadProfile()">
+          <option value="">— Select a member —</option>
+        </select>
+      </div>
 
-    <div id="profileEmpty" class="empty-state">
-      <p>Select a member above to view their profile and performance.</p>
-    </div>
+      <div id="profileLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Loading profile...</p>
+      </div>
 
-    <div id="profileContent" style="display:none;">
+      <div id="profileEmpty" class="empty-state">
+        <p>Select a member above to view their profile and performance.</p>
+      </div>
+
+      <div id="profileContent" style="display:none;">
       <!-- Performance Score -->
       <h2>Performance Score</h2>
       <div class="score-section">
@@ -347,6 +378,25 @@
         <canvas id="mightChart"></canvas>
       </div>
     </div>
+    </div><!-- end tabIndividual -->
+
+    <!-- Top 10 Tab -->
+    <div id="tabTop10" style="display:none;">
+      <div id="top10Loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Calculating rankings...</p>
+      </div>
+      <div id="top10Content"></div>
+    </div>
+
+    <!-- Bottom 10 Tab -->
+    <div id="tabBottom10" style="display:none;">
+      <div id="bottom10Loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Calculating rankings...</p>
+      </div>
+      <div id="bottom10Content"></div>
+    </div>
   </div>
 
   <!-- Hamburger Toggle -->
@@ -369,6 +419,7 @@
   <script>
     let memberNames = [];
     let mightChartInstance = null;
+    let rankingsCache = null; // cache rankings data so we don't re-fetch on tab switch
 
     // Load member names on page load
     document.addEventListener('DOMContentLoaded', async () => {
@@ -407,6 +458,96 @@
         opt.textContent = name;
         select.appendChild(opt);
       });
+    }
+
+    // ─── Sub-tab switching ───
+    function switchSubTab(tab) {
+      document.querySelectorAll('.sub-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      document.getElementById('tabIndividual').style.display = tab === 'individual' ? '' : 'none';
+      document.getElementById('tabTop10').style.display = tab === 'top10' ? '' : 'none';
+      document.getElementById('tabBottom10').style.display = tab === 'bottom10' ? '' : 'none';
+
+      if ((tab === 'top10' || tab === 'bottom10') && !rankingsCache) {
+        loadRankings();
+      }
+    }
+
+    async function loadRankings() {
+      document.getElementById('top10Loading').style.display = 'block';
+      document.getElementById('bottom10Loading').style.display = 'block';
+      document.getElementById('top10Content').innerHTML = '';
+      document.getElementById('bottom10Content').innerHTML = '';
+
+      try {
+        const res = await fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getMemberPerformanceRankings' })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          rankingsCache = data;
+          renderRankings();
+        } else {
+          const msg = '<div class="empty-state"><p>Failed to load rankings: ' + (data.message || 'Unknown error') + '</p></div>';
+          document.getElementById('top10Content').innerHTML = msg;
+          document.getElementById('bottom10Content').innerHTML = msg;
+        }
+      } catch (e) {
+        const msg = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
+        document.getElementById('top10Content').innerHTML = msg;
+        document.getElementById('bottom10Content').innerHTML = msg;
+      } finally {
+        document.getElementById('top10Loading').style.display = 'none';
+        document.getElementById('bottom10Loading').style.display = 'none';
+      }
+    }
+
+    function renderRankings() {
+      if (!rankingsCache) return;
+      if (rankingsCache.empty) {
+        const emptyMsg = '<div class="empty-state"><p>Rankings have not been calculated yet.<br><span style="font-size:12px;color:#888;">They are recalculated daily. Check back soon or view an individual profile to start populating data.</span></p></div>';
+        document.getElementById('top10Content').innerHTML = emptyMsg;
+        document.getElementById('bottom10Content').innerHTML = emptyMsg;
+        return;
+      }
+      const updatedNote = rankingsCache.lastUpdated ? '<span style="font-size:11px;color:#666;font-weight:400;margin-left:8px;">Updated: ' + rankingsCache.lastUpdated + '</span>' : '';
+      document.getElementById('top10Content').innerHTML =
+        '<div class="ranking-section-title">🏆 Top 10 Performers <span style="font-size:12px;color:#888;font-weight:400;">(' + rankingsCache.totalMembers + ' active members)</span>' + updatedNote + '</div>' +
+        rankingsCache.top10.map((m, i) => renderRankingCard(m, i + 1, 'top')).join('');
+      document.getElementById('bottom10Content').innerHTML =
+        '<div class="ranking-section-title">⚠️ Bottom 10 Performers <span style="font-size:12px;color:#888;font-weight:400;">(' + rankingsCache.totalMembers + ' active members)</span>' + updatedNote + '</div>' +
+        rankingsCache.bottom10.map((m, i) => renderRankingCard(m, rankingsCache.totalMembers - i, 'bottom')).join('');
+    }
+
+    function renderRankingCard(m, rank, type) {
+      const scoreColor = m.score >= 90 ? '#8bc34a' : m.score >= 75 ? '#4caf50' : m.score >= 60 ? '#42a5f5' : m.score >= 40 ? '#ff9800' : '#ef5350';
+      const scoreBg = m.score >= 90 ? 'rgba(139,195,74,0.15)' : m.score >= 75 ? 'rgba(76,175,80,0.15)' : m.score >= 60 ? 'rgba(66,165,245,0.15)' : m.score >= 40 ? 'rgba(255,152,0,0.15)' : 'rgba(239,83,80,0.15)';
+      const rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+      const medal = type === 'top' && rank <= 3 ? ['🥇','🥈','🥉'][rank-1] + ' ' : '';
+
+      return `<div class="ranking-card">
+        <div class="ranking-rank ${rankClass}">#${rank}</div>
+        <div class="ranking-info">
+          <div class="ranking-name" onclick="jumpToProfile('${m.member.replace(/'/g, "\\'")}')">${medal}${m.member}</div>
+          <div class="ranking-meta">
+            ${m.rating} · ${m.periodsMet}/${m.periodsCompleted} targets met · ${m.warnings > 0 ? '⚠️ ' + m.warnings + ' warning' + (m.warnings > 1 ? 's' : '') : '✓ Clean'}
+          </div>
+          <div class="ranking-bars">
+            <div class="ranking-bar" style="background:rgba(139,195,74,0.4);width:${m.targetHitRate * 0.6}px;" title="Target: ${m.targetHitRate}%"></div>
+            <div class="ranking-bar" style="background:rgba(66,165,245,0.4);width:${m.eventRate * 0.6}px;" title="Events: ${m.eventRate}%"></div>
+            <div class="ranking-bar" style="background:rgba(255,152,0,0.4);width:${m.consistencyScore * 0.6}px;" title="Consistency: ${m.consistencyScore}%"></div>
+          </div>
+        </div>
+        <div class="ranking-score-pill" style="background:${scoreBg};color:${scoreColor};">${m.score}</div>
+      </div>`;
+    }
+
+    function jumpToProfile(name) {
+      const select = document.getElementById('memberSelect');
+      select.value = name;
+      switchSubTab('individual');
+      if (select.value === name) loadProfile();
     }
 
     async function loadProfile() {
