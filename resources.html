@@ -134,9 +134,8 @@
     .amount-negative { color: #c62828; font-weight: 600; }
     .resource-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
     .resource-badge.dragon-coins { background: rgba(255,243,224,0.15); color: #ffb300; }
-    .resource-badge.magic-seeds { background: rgba(232,245,233,0.15); color: #66bb6a; }
-    .resource-badge.forest-essence { background: rgba(227,242,253,0.15); color: #42a5f5; }
-    .resource-badge.scientific-tractate { background: rgba(243,229,245,0.15); color: #ab47bc; }
+    .resource-badge.olympus-hermes-levels { background: rgba(227,242,253,0.15); color: #42a5f5; }
+    .resource-badge.dark-omen-essence { background: rgba(243,229,245,0.15); color: #ab47bc; }
 
     /* Player Summary */
     .player-summary-section { margin-top: 20px; }
@@ -393,24 +392,19 @@
     <!-- Summary Cards -->
     <div class="summary-cards" id="summaryCards">
       <div class="summary-card">
-        <div class="card-label">🌿 Forest Essence</div>
-        <div class="card-value" id="sumForestEssence">—</div>
-        <div class="card-sub" id="subForestEssence"></div>
-      </div>
-      <div class="summary-card">
         <div class="card-label">🐉 Dragon Coins</div>
         <div class="card-value" id="sumDragonCoins">—</div>
         <div class="card-sub" id="subDragonCoins"></div>
       </div>
       <div class="summary-card">
-        <div class="card-label">🌱 Magic Seeds</div>
-        <div class="card-value" id="sumMagicSeeds">—</div>
-        <div class="card-sub" id="subMagicSeeds"></div>
+        <div class="card-label">🏛️ Olympus Hermes' Levels</div>
+        <div class="card-value" id="sumOlympusHermes">—</div>
+        <div class="card-sub" id="subOlympusHermes"></div>
       </div>
       <div class="summary-card">
-        <div class="card-label">📜 Scientific Tractate</div>
-        <div class="card-value" id="sumScientificTractate">—</div>
-        <div class="card-sub" id="subScientificTractate"></div>
+        <div class="card-label">🌑 Dark Omen Essence</div>
+        <div class="card-value" id="sumDarkOmenEssence">—</div>
+        <div class="card-sub" id="subDarkOmenEssence"></div>
       </div>
     </div>
 
@@ -419,7 +413,6 @@
       <button class="view-tab-btn active" onclick="switchView('transactions', this)">📋 Transactions</button>
       <button class="view-tab-btn" onclick="switchView('playerSummary', this)">👥 By Player</button>
       <button class="view-tab-btn" onclick="switchView('resourceSummary', this)">📦 By Resource</button>
-      <button class="view-tab-btn" onclick="switchView('dailyDonors', this)">🌿 Daily Donors</button>
       <button class="view-tab-btn" onclick="switchView('dragonPayouts', this)">🐉 Dragon Coins</button>
     </div>
 
@@ -475,64 +468,6 @@
             </tr>
           </thead>
           <tbody id="resourceSummaryBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Daily Donors View -->
-    <div id="dailyDonorsView" style="display:none" class="player-summary-section">
-      <div style="margin-bottom:12px;padding:10px 14px;background:rgba(255,243,224,0.1);border:1px solid #555;border-radius:8px;font-size:0.85em;color:#ffb300;">
-        🌿 Shows players who donated <strong>less than 4,000 Forest Essence</strong> on any day with recorded activity. Players with no Forest Essence donations at all on a given day are highlighted in red.
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
-        <div class="filter-group" style="min-width:140px;">
-          <label>Date</label>
-          <select id="ddDateFilter" onchange="renderDailyDonors()"><option value="">All Dates</option></select>
-        </div>
-        <div class="filter-group" style="min-width:140px;">
-          <label>Show</label>
-          <select id="ddShowFilter" onchange="renderDailyDonors()">
-            <option value="below">Below target only</option>
-            <option value="all">All players</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Worst Performers Card -->
-      <div id="worstPerformersCard" style="margin-bottom:16px;background:#232526;border:1px solid #444;border-radius:10px;padding:14px 16px;">
-        <h3 style="margin:0 0 10px;color:#c62828;font-size:1em;">🏚️ Bottom 10 — Lowest Forest Essence Contributors</h3>
-        <p style="font-size:0.78em;color:#b0b0b0;margin-bottom:10px;">Average daily donation across all recorded days. Members with zero donations are listed first.</p>
-        <div id="worstPerformersContent" style="font-size:0.88em;">Loading...</div>
-      </div>
-
-      <!-- Top Performers Card -->
-      <div id="topPerformersCard" style="margin-bottom:16px;background:#232526;border:1px solid #444;border-radius:10px;padding:14px 16px;">
-        <h3 style="margin:0 0 10px;color:#27ae60;font-size:1em;">🏆 Top 10 — Highest Forest Essence Contributors</h3>
-        <p style="font-size:0.78em;color:#b0b0b0;margin-bottom:10px;">Average daily donation across all recorded days.</p>
-        <div id="topPerformersContent" style="font-size:0.88em;">Loading...</div>
-      </div>
-
-      <!-- Unmatched Resource Names -->
-      <div id="unmatchedNamesCard" style="display:none;margin-bottom:16px;background:#232526;border:1px solid #c62828;border-radius:10px;padding:14px 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="document.getElementById('unmatchedNamesBody').style.display=document.getElementById('unmatchedNamesBody').style.display==='none'?'block':'none';">
-          <h3 style="margin:0;color:#c62828;font-size:1em;">⚠️ Unmatched Resource Names</h3>
-          <span style="font-size:0.8em;color:#b0b0b0;">click to expand ▾</span>
-        </div>
-        <p style="font-size:0.78em;color:#b0b0b0;margin-top:4px;">These names appear in the Resource Contributions sheet but don't match any current member.</p>
-        <div id="unmatchedNamesBody" style="display:none;margin-top:10px;"></div>
-      </div>
-
-      <div class="table-container">
-        <table class="player-summary-table">
-          <thead>
-            <tr>
-              <th onclick="sortSummary('daily','member')">Member</th>
-              <th onclick="sortSummary('daily','date')">Date</th>
-              <th onclick="sortSummary('daily','donated')">Forest Essence Donated</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="dailyDonorsBody"></tbody>
         </table>
       </div>
     </div>
@@ -606,8 +541,8 @@
     let currentPage = 1;
     const PAGE_SIZE = 50;
     let currentView = 'transactions';
-    let summarySortField = { player: 'net', resource: 'contributed', daily: 'date', dragon: 'balance' };
-    let summarySortAsc = { player: false, resource: false, daily: false, dragon: false };
+    let summarySortField = { player: 'net', resource: 'contributed', dragon: 'balance' };
+    let summarySortAsc = { player: false, resource: false, dragon: false };
     let membersList = [];
     let membersJoinDates = {};
     let formerMembersList = [];
@@ -636,7 +571,6 @@
           }
           formerMembersList = Array.isArray(result.formerMembers) ? result.formerMembers : [];
           populateFilters(result.resources || [], result.members || []);
-          populateDailyDonorsDates();
           const cutoff = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate() - DEFAULT_DAYS));
           document.getElementById('filterDateFrom').value = cutoff.toISOString().split('T')[0];
           applyFilters();
@@ -649,13 +583,6 @@
         console.error(err);
         document.getElementById('loadingDiv').innerHTML = '<span style="color:#c62828">Failed to load resource data: ' + escapeHtml(err.message) + '</span>';
       }
-    }
-
-    function populateDailyDonorsDates() {
-      const dates = [...new Set(allData.filter(r => r.resource === 'Forest Essence' && r.amount > 0).map(r => r.date))].sort().reverse();
-      const sel = document.getElementById('ddDateFilter');
-      sel.innerHTML = '<option value="">All Dates</option>';
-      dates.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o); });
     }
 
     function populateFilters(resources, members) {
@@ -754,7 +681,7 @@
           topByRes[key][r.member] = (topByRes[key][r.member] || 0) + r.amount;
         }
       });
-      const ids = { 'Forest Essence':'ForestEssence', 'Dragon Coins':'DragonCoins', 'Magic Seeds':'MagicSeeds', 'Scientific Tractate':'ScientificTractate' };
+      const ids = { 'Dragon Coins':'DragonCoins', "Olympus Hermes' Levels":'OlympusHermes', 'Dark Omen Essence':'DarkOmenEssence' };
       Object.entries(ids).forEach(([res, id]) => {
         const d = resMap[res] || {in:0,out:0,n:0};
         const el = document.getElementById('sum' + id);
@@ -784,7 +711,6 @@
       document.getElementById('transactionsView').style.display = view === 'transactions' ? 'block' : 'none';
       document.getElementById('playerSummaryView').style.display = view === 'playerSummary' ? 'block' : 'none';
       document.getElementById('resourceSummaryView').style.display = view === 'resourceSummary' ? 'block' : 'none';
-      document.getElementById('dailyDonorsView').style.display = view === 'dailyDonors' ? 'block' : 'none';
       document.getElementById('dragonPayoutsView').style.display = view === 'dragonPayouts' ? 'block' : 'none';
       renderCurrentView();
     }
@@ -794,7 +720,6 @@
         case 'transactions': renderTransactionsTable(); break;
         case 'playerSummary': renderPlayerSummary(); break;
         case 'resourceSummary': renderResourceSummary(); break;
-        case 'dailyDonors': renderDailyDonors(); break;
         case 'dragonPayouts': renderDragonPayouts(); break;
       }
     }
@@ -918,146 +843,6 @@
     }
 
     // ===========================
-    // DAILY DONORS VIEW
-    // ===========================
-    function renderDailyDonors() {
-      const TARGET = 4000;
-      const dateFilter = document.getElementById('ddDateFilter').value;
-      const showFilter = document.getElementById('ddShowFilter').value;
-
-      const feRows = allData.filter(r => r.resource === 'Forest Essence' && r.amount > 0);
-      let dates = [...new Set(feRows.map(r => r.date))].sort();
-      if (dateFilter) dates = dates.filter(d => d === dateFilter);
-
-      const playerDateMap = {};
-      feRows.forEach(r => {
-        if (dateFilter && r.date !== dateFilter) return;
-        if (!playerDateMap[r.member]) playerDateMap[r.member] = {};
-        playerDateMap[r.member][r.date] = (playerDateMap[r.member][r.date] || 0) + r.amount;
-      });
-
-      const membersLower = new Set(membersList.map(m => m.toLowerCase()));
-      const currentMembers = membersList.length > 0
-        ? [...membersList].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-        : [...new Set(Object.keys(playerDateMap))].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
-      const resourceNames = [...new Set(allData.map(r => r.member))];
-      const formerLower = new Set(formerMembersList.map(m => m.toLowerCase()));
-      const unmatchedNames = membersList.length > 0
-        ? resourceNames.filter(n => !membersLower.has(n.toLowerCase()) && !formerLower.has(n.toLowerCase())).sort()
-        : [];
-      renderUnmatchedNames(unmatchedNames);
-      renderWorstPerformers(currentMembers, playerDateMap, dates, TARGET);
-      renderTopPerformers(currentMembers, playerDateMap, dates, TARGET);
-
-      let rows = [];
-      dates.forEach(date => { currentMembers.forEach(member => { const donated = (playerDateMap[member] && playerDateMap[member][date]) || 0; rows.push({ member, date, donated }); }); });
-      if (showFilter === 'below') { rows = rows.filter(r => r.donated < TARGET); }
-
-      const field = summarySortField.daily;
-      const asc = summarySortAsc.daily;
-      rows.sort((a, b) => {
-        let va, vb;
-        switch (field) { case 'member': va = a.member.toLowerCase(); vb = b.member.toLowerCase(); break; case 'date': va = a.date; vb = b.date; break; case 'donated': va = a.donated; vb = b.donated; break; default: va = a.donated; vb = b.donated; }
-        if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
-        return asc ? va - vb : vb - va;
-      });
-
-      const tbody = document.getElementById('dailyDonorsBody');
-      if (rows.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#b0b0b0;">All players met the 4,000 Forest Essence target! 🎉</td></tr>'; return; }
-      tbody.innerHTML = rows.map(r => {
-        const pct = Math.round((r.donated / TARGET) * 100);
-        let statusHtml, rowStyle;
-        if (r.donated === 0) { statusHtml = '<span style="color:#c62828;font-weight:700;">❌ No donation</span>'; rowStyle = 'background:rgba(198,40,40,0.08);'; }
-        else if (r.donated < TARGET) { statusHtml = `<span style="color:#ffb300;font-weight:600;">⚠️ ${pct}% of target</span>`; rowStyle = 'background:rgba(255,179,0,0.04);'; }
-        else { statusHtml = '<span style="color:#27ae60;font-weight:600;">✅ Met target</span>'; rowStyle = ''; }
-        return `<tr style="${rowStyle}"><td><strong>${escapeHtml(r.member)}</strong>${newMemberBadge(r.member)}</td><td>${escapeHtml(r.date)}</td><td class="${r.donated >= TARGET ? 'amount-positive' : r.donated > 0 ? 'amount-negative' : ''}" style="${r.donated === 0 ? 'color:#c62828;font-weight:600;' : ''}">${formatNumber(r.donated)}</td><td>${statusHtml}</td></tr>`;
-      }).join('');
-    }
-
-    // ===========================
-    // UNMATCHED NAMES
-    // ===========================
-    function renderUnmatchedNames(unmatched) {
-      const card = document.getElementById('unmatchedNamesCard');
-      const body = document.getElementById('unmatchedNamesBody');
-      if (!card || !body) return;
-      if (unmatched.length === 0) { card.style.display = 'none'; return; }
-      card.style.display = 'block';
-      card.querySelector('h3').textContent = `⚠️ Unmatched Resource Names (${unmatched.length})`;
-      const stats = unmatched.map(name => {
-        const rows = allData.filter(r => r.member === name);
-        let sent = 0, received = 0;
-        rows.forEach(r => { if (r.amount > 0) sent += r.amount; else received += Math.abs(r.amount); });
-        const resources = [...new Set(rows.map(r => r.resource))].join(', ');
-        return { name, sent, received, count: rows.length, resources };
-      });
-      stats.sort((a, b) => b.count - a.count);
-      let html = '<table style="width:100%;border-collapse:collapse;font-size:0.85em;">';
-      html += '<tr style="border-bottom:2px solid #444;"><th style="text-align:left;padding:5px 8px;color:#ffb300;">Name</th><th style="text-align:left;padding:5px 8px;color:#ffb300;">Resources</th><th style="text-align:right;padding:5px 8px;color:#ffb300;">Sent</th><th style="text-align:right;padding:5px 8px;color:#ffb300;">Received</th><th style="text-align:center;padding:5px 8px;color:#ffb300;">Records</th></tr>';
-      stats.forEach(s => {
-        html += `<tr style="border-bottom:1px solid #444;"><td style="padding:4px 8px;font-weight:600;color:#c62828;">${escapeHtml(s.name)}</td><td style="padding:4px 8px;color:#b0b0b0;font-size:0.9em;">${escapeHtml(s.resources)}</td><td style="padding:4px 8px;text-align:right;" class="amount-positive">+${formatNumber(s.sent)}</td><td style="padding:4px 8px;text-align:right;" class="amount-negative">-${formatNumber(s.received)}</td><td style="padding:4px 8px;text-align:center;">${s.count}</td></tr>`;
-      });
-      html += '</table>';
-      body.innerHTML = html;
-    }
-
-    // ===========================
-    // WORST PERFORMERS
-    // ===========================
-    function renderWorstPerformers(allMembers, playerDateMap, allDates, target) {
-      const container = document.getElementById('worstPerformersContent');
-      if (!container || allDates.length === 0) { if (container) container.innerHTML = '<span style="color:#b0b0b0;">No Forest Essence data available.</span>'; return; }
-      const totalDays = allDates.length;
-      const stats = allMembers.map(member => {
-        let totalDonated = 0, daysDonated = 0, daysMissed = 0;
-        allDates.forEach(date => { const amt = (playerDateMap[member] && playerDateMap[member][date]) || 0; totalDonated += amt; if (amt >= target) daysDonated++; else daysMissed++; });
-        return { member, totalDonated, avgPerDay: Math.round(totalDonated / totalDays), daysMissed, daysDonated, totalDays };
-      });
-      stats.sort((a, b) => a.avgPerDay - b.avgPerDay || b.daysMissed - a.daysMissed);
-      const bottom10 = stats.slice(0, 10);
-      let html = '<table style="width:100%;border-collapse:collapse;">';
-      html += '<tr style="border-bottom:2px solid #ffb300;"><th style="text-align:left;padding:6px 8px;font-size:0.8em;color:#ffb300;">#</th><th style="text-align:left;padding:6px 8px;font-size:0.8em;color:#ffb300;">Member</th><th style="text-align:right;padding:6px 8px;font-size:0.8em;color:#ffb300;">Total</th><th style="text-align:right;padding:6px 8px;font-size:0.8em;color:#ffb300;">Avg/Day</th><th style="text-align:center;padding:6px 8px;font-size:0.8em;color:#ffb300;">Below</th><th style="text-align:center;padding:6px 8px;font-size:0.8em;color:#ffb300;">Met</th></tr>';
-      bottom10.forEach((s, i) => {
-        const avgColor = s.avgPerDay === 0 ? '#c62828' : s.avgPerDay < target ? '#ffb300' : '#27ae60';
-        const missedPct = Math.round((s.daysMissed / s.totalDays) * 100);
-        const rowBg = s.totalDonated === 0 ? 'rgba(198,40,40,0.08)' : i % 2 === 0 ? '#2a2b2c' : '#232526';
-        html += `<tr style="background:${rowBg};border-bottom:1px solid #444;"><td style="padding:5px 8px;font-weight:700;color:#b0b0b0;">${i+1}</td><td style="padding:5px 8px;font-weight:600;">${escapeHtml(s.member)}${newMemberBadge(s.member)}${s.totalDonated === 0 ? ' <span style="color:#c62828;font-size:0.75em;">⛔ ZERO</span>' : ''}</td><td style="padding:5px 8px;text-align:right;font-weight:600;color:${s.totalDonated === 0 ? '#c62828' : '#e0e0e0'};">${formatNumber(s.totalDonated)}</td><td style="padding:5px 8px;text-align:right;font-weight:700;color:${avgColor};">${formatNumber(s.avgPerDay)}</td><td style="padding:5px 8px;text-align:center;color:${s.daysMissed > 0 ? '#c62828' : '#27ae60'};">${s.daysMissed}/${s.totalDays} (${missedPct}%)</td><td style="padding:5px 8px;text-align:center;color:#27ae60;">${s.daysDonated}</td></tr>`;
-      });
-      html += '</table>';
-      html += `<p style="font-size:0.75em;color:#b0b0b0;margin-top:8px;">Based on ${totalDays} day(s): ${allDates[0]} → ${allDates[allDates.length-1]}</p>`;
-      container.innerHTML = html;
-    }
-
-    // ===========================
-    // TOP PERFORMERS
-    // ===========================
-    function renderTopPerformers(allMembers, playerDateMap, allDates, target) {
-      const container = document.getElementById('topPerformersContent');
-      if (!container || allDates.length === 0) { if (container) container.innerHTML = '<span style="color:#b0b0b0;">No Forest Essence data available.</span>'; return; }
-      const totalDays = allDates.length;
-      const stats = allMembers.map(member => {
-        let totalDonated = 0, daysDonated = 0;
-        allDates.forEach(date => { const amt = (playerDateMap[member] && playerDateMap[member][date]) || 0; totalDonated += amt; if (amt >= target) daysDonated++; });
-        return { member, totalDonated, avgPerDay: Math.round(totalDonated / totalDays), daysDonated, totalDays };
-      });
-      stats.sort((a, b) => b.avgPerDay - a.avgPerDay || b.daysDonated - a.daysDonated);
-      const top10 = stats.slice(0, 10);
-      let html = '<table style="width:100%;border-collapse:collapse;">';
-      html += '<tr style="border-bottom:2px solid #ffb300;"><th style="text-align:left;padding:6px 8px;font-size:0.8em;color:#ffb300;">#</th><th style="text-align:left;padding:6px 8px;font-size:0.8em;color:#ffb300;">Member</th><th style="text-align:right;padding:6px 8px;font-size:0.8em;color:#ffb300;">Total</th><th style="text-align:right;padding:6px 8px;font-size:0.8em;color:#ffb300;">Avg/Day</th><th style="text-align:center;padding:6px 8px;font-size:0.8em;color:#ffb300;">Days Met</th></tr>';
-      const medals = ['🥇', '🥈', '🥉'];
-      top10.forEach((s, i) => {
-        const metPct = Math.round((s.daysDonated / s.totalDays) * 100);
-        const rowBg = i % 2 === 0 ? '#2a2b2c' : '#232526';
-        const medal = medals[i] || '';
-        html += `<tr style="background:${rowBg};border-bottom:1px solid #444;"><td style="padding:5px 8px;font-weight:700;color:#b0b0b0;">${medal || (i+1)}</td><td style="padding:5px 8px;font-weight:600;">${escapeHtml(s.member)}${newMemberBadge(s.member)}</td><td style="padding:5px 8px;text-align:right;font-weight:600;color:#27ae60;">${formatNumber(s.totalDonated)}</td><td style="padding:5px 8px;text-align:right;font-weight:700;color:#27ae60;">${formatNumber(s.avgPerDay)}</td><td style="padding:5px 8px;text-align:center;color:#27ae60;">${s.daysDonated}/${s.totalDays} (${metPct}%)</td></tr>`;
-      });
-      html += '</table>';
-      html += `<p style="font-size:0.75em;color:#b0b0b0;margin-top:8px;">Based on ${totalDays} day(s): ${allDates[0]} → ${allDates[allDates.length-1]}</p>`;
-      container.innerHTML = html;
-    }
-
-    // ===========================
     // DRAGON COINS PAYOUTS
     // ===========================
     function renderDragonPayouts() {
@@ -1131,7 +916,7 @@
     }
 
     function resourceBadge(name) {
-      const cls = name.toLowerCase().replace(/\s+/g, '-');
+      const cls = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
       return `<span class="resource-badge ${cls}">${escapeHtml(name)}</span>`;
     }
 
